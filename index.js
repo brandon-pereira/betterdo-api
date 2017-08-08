@@ -16,4 +16,6 @@ app.get('/', function (req, res) {
   res.send('hello world')
 });
 
+require('./lib/routes/lists.js')(app);
+
 app.listen(8080);
