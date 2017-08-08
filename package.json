@@ -1,0 +1,22 @@
+{
+  "name": "betterdo-api",
+  "version": "1.0.0",
+  "description": "Backend for BetterDo v4",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./index.js",
+    "dev": "./node_modules/.bin/nodemon ./index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "eslint": "^4.4.1",
+    "express": "^4.15.4",
+    "mongoose": "^4.11.6"
+  },
+  "devDependencies": {
+    "babel-eslint": "^7.2.3",
+    "nodemon": "^1.11.0"
+  }
+}
