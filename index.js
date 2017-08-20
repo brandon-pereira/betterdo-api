@@ -3,11 +3,7 @@ require('dotenv').config();
 const app = require('./lib/app');
 
 app.get('/', (req, res) => {
-  if(req.user) {
-    res.send("Hello "  + req.user.firstName);
-  } else {
-   res.send("<a href='/auth/google'>Login</a>");
-  }
+  res.json(Object.assign({hello: 'world'}, req.user));
 });
 
-// require('./lib/routes/lists.js')(app);
+require('./lib/routes/lists.js')(app);
