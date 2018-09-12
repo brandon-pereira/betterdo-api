@@ -1,14 +1,27 @@
 require('dotenv').config();
 
-const app = require('./lib/app');
-const express = require('express');
+/**
+ * Instantiate the server (using express)
+ */
+const app = require('./lib/express');
 
-app.use('/', (req, res, next) => {
-  if(req.user) {
-    res.redirect('/app');
-  } else {
-    next();
-  }
-}, express.static('./node_modules/betterdo-ui/dist'))
+/**
+ * Get a reference to the database
+ */
+const db = require('./lib/database');
 
-require('./lib/routes/lists.js')(app);
+/**
+ * Passport authentication middleware
+ */
+require('./lib/passport')(app, db);
+
+/**
+ * Initialize Routes
+ */
+require('./lib/routes/api')(app);
+// require('./routes/app')(app);
+// require('./routes/index')(app);
+
+app.listen(process.env.SERVER_PORT || 8080, () => {
+  console.info("Server started on port", process.env.SERVER_PORT || 8080)
+});
