@@ -18,9 +18,9 @@ require('./lib/passport')(app, db);
 /**
  * Initialize Routes
  */
+require('./lib/routes/app')(app);
 require('./lib/routes/api')(app);
-// require('./routes/app')(app);
-// require('./routes/index')(app);
+require('./lib/routes/root')(app);
 
 app.listen(process.env.SERVER_PORT || 8080, () => {
   console.info("Server started on port", process.env.SERVER_PORT || 8080)
