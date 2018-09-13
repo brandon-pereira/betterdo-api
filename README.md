@@ -55,3 +55,25 @@ fetch('/api/tasks', {
     })
 })
 ```
+
+### INIT
+
+- [ ] `get` api/init: user info and high level of lists
+
+### Tasks
+
+- [ ] `get` api/tasks/:listid get tasks in list
+- [ ] `post` api/tasks/:taskid update task in list
+- [ ] `put` api/tasks add task to list
+- [ ] `delete` api/tasks/:taskid delete task
+
+### Lists
+
+- [ ] `get` api/lists get user lists
+- [X] `get` api/lists/:listid get user list by id
+- [ ] `post` api/lists/:listid update list
+- [ ] `put` api/lists add new list
+- [ ] `delete` api/lists/:listid delete list
+
+post api/lists/:listid update list
+
