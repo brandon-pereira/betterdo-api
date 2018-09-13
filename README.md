@@ -40,3 +40,18 @@ The API for BetterDo.
             })
         })
         ```
+
+
+```javascript
+fetch('/api/tasks', {
+    method: 'PUT',
+    headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        title: "Test",
+        list: "5b99d4d74a6df02dbddf9097"
+    })
+})
+```
