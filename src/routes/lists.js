@@ -1,68 +1,73 @@
 const database = require('../database');
 
 module.exports = (app) => {
-
-	// GET method route
+	// TODO: Move routes to router files, move this to controllers
+	
+	// Get all users lists or a specific list
 	app.get(['/lists', '/lists/:listId'], async function (req, res) {
 		try {
-			const userQueryData = ['_id', 'firstName', 'lastName'];
-			const lists = await database.Lists.getLists(req.user._id, req.params.listId, { userQueryData})
+			// TODO: Ensure valid permissions
+			// Get lists based on query data
+			const lists = await database.Lists.getLists(req.user._id, req.params.listId, {
+				userQueryData: ['_id', 'firstName', 'lastName']
+			})
+			// If the user is querying a specific list, return it
 			if(req.params.listId) {
 				if(Array.isArray(lists) && lists.length) {
-					res.json({
+					return res.json({
 						list: lists[0]
 					})
-					return;
 				}
-				res.status(404).json({error: "Invalid list id."});
-				return;
+				return res.status(404).json({error: "Invalid listId."});
 			}
+			// Else, return all found lists
 			res.json({lists})
 		} catch(err) {
 			console.log("GET `/api/lists` received an unexpected error.", err)
-			res.status(500).json({error: "Unexpected Error"});
+			res.status(500).json({error: "Error getting user lists"});
 		}
 	});
 	
-	// POST method route
+	// Create a new list
 	app.put('/lists', async function (req, res) {
 		try {
+			// TODO: Ensure valid permissions
+			// Attempt to create the list
 			const list = await database.Lists.create({
-				title: req.body.title,
-				owner: req.user._id,
+				...req.body, // merge the two arrays.. assuming validator will catch any errors
+				owner: req.user._id, // TODO: Ensure this is higher priority than the merge
 				members: [
-					req.user._id
+					req.user._id// TODO: Ensure this is higher priority than the merge
 				]
 			});
-			res.json(Object.assign({
-				"success": true
-			}, list))
+			// Return new list to front-end
+			res.json(list)
 		} catch(err) {
+			// TODO: Generic error handler method
 			console.log(err);
-			res.status(500).json({error: "Invalid"})
+			res.status(500).json({error: "Error creating the new list"})
 		}
 	});
 	
+	// Update an existing list
 	app.post('/lists/:listId', async function (req, res) {
 		if(!req.params.listId) {
-			res.status(404).json({
-				error: "Missing listId parameter"
-			})
+			return res.status(404).json({error: "Missing listId parameter"})
 		}
-
 		try {
+			// TODO: Ensure valid permissions
+			// Get list by the ID passed
 			const list = await database.Lists.findById(req.params.listId);
 			if(!list) {
-				res.status(404).json({
-					error: "Invalid list Id"
-				})
-				return;
+				return res.status(404).json({error: "Invalid listId parameter"})
 			}
+			// Merge the lists.. we need to be cautious here.
+			// Currently assuming the validation on the model will handle errors
 			Object.assign(list, req.body);
+			// Save the model
 			await list.save();
-			res.json(Object.assign({
-				"success": true
-			}, list))
+			// Return list to front-end
+			res.json(list)
 		} catch(err) {
 			console.log("POST /api/lists failed", err)
 			let errors = [];
