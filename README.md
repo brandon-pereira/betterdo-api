@@ -15,7 +15,7 @@ The API for BetterDo.
     - `PUT` add list
         ```javascript
         fetch('/api/lists', {
-            method: 'POST',
+            method: 'PUT',
             headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
@@ -64,7 +64,7 @@ fetch('/api/tasks', {
 
 - [ ] `get` api/tasks/:listid get tasks in list
 - [ ] `post` api/tasks/:taskid update task in list
-- [ ] `put` api/tasks add task to list
+- [X] `put` api/tasks add task to list
 - [ ] `delete` api/tasks/:taskid delete task
 
 ### Lists
