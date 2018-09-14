@@ -35,14 +35,16 @@ module.exports = (mongoose) => {
 	}) {
 		let lists = [];
 		try {
-			lists = await this.find({
+			lists = this.find({
 				...list_id ? {_id: list_id} : {},
 				members: user_id
 			})
 				.populate('members', userQueryData)
 				.populate('owner', userQueryData)
-				.populate('tasks')
-				.exec();
+			if(list_id) {
+				lists = lists.populate('tasks')
+			}
+			lists = await lists.exec();
 		} catch(err) {
 			console.log("getLists returned error", err.message)
 			return [];
