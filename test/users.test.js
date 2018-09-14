@@ -19,7 +19,11 @@ test('Creates a user', async () => {
     expect(foundUser.firstName).toBe(_userData.firstName);
 });
 
-// test('Throws error if missing required fields', async() => {
-//     expect.assertions(1);
-//     expect(() => Users.findOrCreate('1', {})).toThrowError();
-// })
+test('Throws error if missing required fields', async() => {
+    expect.assertions(1);
+    try {
+        await  Users.findOrCreate('1', {})
+    } catch(err) {
+        expect(err.message).toBe('User validation failed: firstName: Path `firstName` is required.');
+    }
+})
