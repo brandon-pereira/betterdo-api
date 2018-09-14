@@ -3,24 +3,24 @@ require('dotenv').config();
 /**
  * Instantiate the server (using express)
  */
-const app = require('./lib/express');
+const app = require('./src/express');
 
 /**
  * Get a reference to the database
  */
-const db = require('./lib/database');
+const db = require('./src/database');
 
 /**
  * Passport authentication middleware
  */
-require('./lib/passport')(app, db);
+require('./src/passport')(app, db);
 
 /**
  * Initialize Routes
  */
-require('./lib/routes/app')(app);
-require('./lib/routes/api')(app);
-require('./lib/routes/root')(app);
+require('./src/routes/app')(app);
+require('./src/routes/api')(app);
+require('./src/routes/root')(app);
 
 app.listen(process.env.SERVER_PORT || 8080, () => {
   console.info("Server started on port", process.env.SERVER_PORT || 8080)
