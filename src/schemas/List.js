@@ -1,10 +1,12 @@
 const { Schema } = require('mongoose');
 
 module.exports = (mongoose) => {
-	const schema = mongoose.model('List', {
+	const schema = new Schema({
 		title: {
 			type: String,
-			required: true
+			required: true,
+			maxlength: 100,
+			minlength: 1
 		},
 		owner: {
 			type: Schema.Types.ObjectId,
@@ -17,7 +19,11 @@ module.exports = (mongoose) => {
 				ref: "User"
 			}
 		],
+		type: {
 		type: String,
+			default: 'default',
+			enum: ['inbox', 'default'],
+		},
 		tasks: [
 			{
 				type: Schema.Types.ObjectId,
@@ -26,11 +32,33 @@ module.exports = (mongoose) => {
 		],
 		color: {
 			type: String,
-			default: '#EEEEEE'
+			default: '#EEEEEE',
+			validate: {
+				validator: function(v) {
+					return /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(v);
+				},
+				message: props => `${props.value} is not a hex color code!`
+			},
 		}
 	});
 
-	schema.getLists = async function(user_id, list_id, {
+
+	const model = mongoose.model('List', schema);
+
+	model._create = model.create;
+
+	model.create = async function(doc) {
+		try {
+			if(doc.owner) {
+				doc.members = [doc.owner];
+			}
+			return await this._create(doc);
+		} catch(err) {
+			throw err;
+		}
+	}
+
+	model.getLists = async function(user_id, list_id, {
 		userQueryData = undefined
 	}) {
 		let lists = [];
@@ -52,7 +80,7 @@ module.exports = (mongoose) => {
 		return lists;
 	}
 
-	schema.addTaskToList = async function(task_id, list_id) {
+	model.addTaskToList = async function(task_id, list_id) {
 		const list = await this.findOne({_id: list_id });
 		// Try adding show
 		list.tasks.addToSet(task_id);
@@ -61,5 +89,5 @@ module.exports = (mongoose) => {
 		return list;
 	}
 	
-	return schema;
+	return model;
 }
