@@ -43,20 +43,40 @@ module.exports = (app) => {
 		}
 	});
 	
-	// app.post('/lists', async function (req, res) {
-	// 	console.log(req.body);
-	// 	try {
-	// 		const list = await database.Lists.create({
-	// 			title: req.body.title,
-	// 			owner: req.body.owner
-	// 		});
-	// 		res.json(Object.assign({
-	// 			"success": true
-	// 		}, list))
-	// 	} catch(err) {
-	// 		console.log(err);
-	// 		res.status(500).json({error: "Invalid"})
-	// 	}
-	// })
+	app.post('/lists/:listId', async function (req, res) {
+		if(!req.params.listId) {
+			res.status(404).json({
+				error: "Missing listId parameter"
+			})
+		}
+
+		try {
+			const list = await database.Lists.findById(req.params.listId);
+			if(!list) {
+				res.status(404).json({
+					error: "Invalid list Id"
+				})
+				return;
+			}
+			Object.assign(list, req.body);
+			await list.save();
+			res.json(Object.assign({
+				"success": true
+			}, list))
+		} catch(err) {
+			console.log("POST /api/lists failed", err)
+			let errors = [];
+			if(err.errors) {
+				errors = Object.values(err.errors).map(err => ({
+					key: err.path,
+					error: err.message
+				}));
+			}
+			res.status(500).json({
+				error: "Error updating list",
+				errors: errors
+			})
+		}
+	})
 	
 }
