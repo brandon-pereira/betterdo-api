@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "babel-eslint": "^9.0.0",
+    "eslint-plugin-jest": "^21.22.0",
     "jest": "^23.6.0",
     "nodemon": "^1.11.0"
   }

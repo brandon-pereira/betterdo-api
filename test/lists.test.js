@@ -1,16 +1,25 @@
-const { createDatabase, destroyDatabase } = require('./setup');
+const { setup, teardown, Users } = require('./setup');
 
-beforeAll(async () => {
-    console.log("BEFORE");
-    await createDatabase();
-})
+let userCache = null;
 
-afterAll(async () => {
-    console.log("AFTER");
-    await destroyDatabase();
+beforeAll(setup);
+
+afterAll(teardown);
+
+test('Creates a user', async () => {
+    expect.assertions(4);
+    const _userData = {
+        firstName: 'unitTest'
+    }
+    userCache = await Users.findOrCreate('1', _userData)
+    expect(userCache.firstName).toBe(_userData.firstName);
+    expect(userCache.isBeta).toBeFalsy();
+    expect(userCache.lastName).toBeUndefined();
+    const foundUser = await Users.findById(userCache._id);
+    expect(foundUser.firstName).toBe(_userData.firstName);
 });
 
-test('adds 1 + 2 to equal 3', async () => {
-    expect(1 + 1).toBe(2);
-    return;
-});
+// test('Throws error if missing required fields', async() => {
+//     expect.assertions(1);
+//     expect(() => Users.findOrCreate('1', {})).toThrowError();
+// })

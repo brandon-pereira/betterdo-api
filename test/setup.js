@@ -1,17 +1,17 @@
-process.env.DATABASE_NAME = 'test';
-const { app, db } = require('../index');
+process.env.DATABASE_NAME = 'betterdo-unittests';
+const database = require('../src/database');
 
-async function createDatabase() {
-    // console.log(`create`, app, db);
+async function setup() {
+
 }
 
-async function destroyDatabase() {
-    // console.log(`destroy`, app, db);
+async function teardown() {
+    await database.connection.dropDatabase();
+    await database.connection.close()
 }
 
 module.exports = {
-    createDatabase,
-    destroyDatabase,
-    app,
-    db
+    setup,
+    teardown,
+    ...database
 }
