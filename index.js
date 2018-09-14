@@ -25,3 +25,8 @@ require('./src/routes/root')(app);
 app.listen(process.env.SERVER_PORT || 8080, () => {
   console.info("Server started on port", process.env.SERVER_PORT || 8080)
 });
+
+module.exports = {
+  app,
+  db
+};
