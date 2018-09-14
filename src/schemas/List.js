@@ -20,7 +20,7 @@ module.exports = (mongoose) => {
 			}
 		],
 		type: {
-		type: String,
+			type: String,
 			default: 'default',
 			enum: ['inbox', 'default'],
 		},
@@ -42,6 +42,14 @@ module.exports = (mongoose) => {
 		}
 	});
 
+	schema.pre('validate', function() {
+		const nonEditableFields = ['owner'];
+		nonEditableFields.forEach((field) => {
+			if(!this.isNew && this.isModified(field)) {
+				this.invalidate(field, `Not permitted to modify ${field}!`);
+			}
+		})
+	});
 
 	const model = mongoose.model('List', schema);
 
