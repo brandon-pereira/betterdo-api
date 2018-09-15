@@ -1,5 +1,5 @@
 const express = require('express');
-const { getLists, createList, updateList } = require('../controllers/lists');
+const { getLists, createList, updateList, deleteList } = require('../controllers/lists');
 const { getTask, createTask } = require('../controllers/tasks');
 
 module.exports = (app, database) => {
@@ -19,6 +19,7 @@ module.exports = (app, database) => {
     api.get(['/lists', '/lists/:listId'], (req, res) => getLists({ req, res, database }));
     api.put('/lists', (req, res) => createList({ req, res, database }));
     api.post('/lists/:listId', (req, res) => updateList({ req, res, database }));
+    api.delete('/lists/:listId', (req, res) => deleteList({ req, res, database }));
 
     /**
      * Tasks

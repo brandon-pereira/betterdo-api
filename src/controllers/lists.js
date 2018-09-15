@@ -57,8 +57,27 @@ async function updateList({req, res, database}) {
 }
 
 
+async function deleteList({req, res, database}) {
+    const listId = req.params.listId;
+    const userId = req.user._id;
+    try {
+        // Ensure list id is passed
+        if(!listId) throwError("Invalid List ID");
+        // Get list
+        const status = await database.Lists.deleteOne({ _id: listId, members: userId });
+        if(status && status.n > 0) {
+            return res.json({success: true})
+        }
+        throwError("Invalid List ID");
+    } catch(err) {
+        handleUncaughtError('updating list', res, err)
+    }
+}
+
+
 module.exports = {
     getLists,
     createList,
-    updateList
+    updateList,
+    deleteList
 };
