@@ -12,12 +12,23 @@ function handleUncaughtError(taskName, res, err) {
             error: `Error while ${taskName}`,
             details: err.message
         });
+    } else if(err.code === 'AccessError') {
+      res.status(404).json({
+        error: err.message
+    });
     } else {
         console.log('Unexpected Error:', taskName, err);
-        res.status(500).json({error: `Unexpected error while ${taskName}`})
+        throwError({error: `Unexpected error while ${taskName}`}, res)
     }
 }
 
+function throwError(msg, code = 'AccessError') {
+    const error = new Error(msg);
+    error.code = code;
+    throw error;
+}
+
 module.exports = {
-    handleUncaughtError
+    handleUncaughtError,
+    throwError
 }
