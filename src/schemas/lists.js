@@ -42,6 +42,10 @@ module.exports = (mongoose) => {
 		}
 	});
 
+	schema.pre('save', function() {
+		this.members = [this.owner];
+	});
+
 	schema.pre('validate', function() {
 		const nonEditableFields = ['owner'];
 		nonEditableFields.forEach((field) => {
@@ -52,19 +56,6 @@ module.exports = (mongoose) => {
 	});
 
 	const model = mongoose.model('List', schema);
-
-	model._create = model.create;
-
-	model.create = async function(doc) {
-		try {
-			if(doc.owner) {
-				doc.members = [doc.owner];
-			}
-			return await this._create(doc);
-		} catch(err) {
-			throw err;
-		}
-	}
 
 	model.getLists = async function(user_id, list_id) {
 		const userQueryData = ['_id', 'firstName', 'lastName']
