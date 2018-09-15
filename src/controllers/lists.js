@@ -8,7 +8,7 @@ async function getLists({ req, res, database }) {
         if(listId && Array.isArray(lists) && lists.length) { // specific list
             res.json({list: lists[0]})
         } else if(listId) { // specific list but no results
-            res.status(404).json({error: "Invalid listId."});
+            res.status(404).json({error: "Invalid List ID"});
         } else { // all lists for user
             res.json({lists})
         }

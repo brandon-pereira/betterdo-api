@@ -67,7 +67,6 @@ module.exports = (mongoose) => {
 	}
 
 	model.getLists = async function(user_id, list_id) {
-		// TODO: Ensure valid permissions
 		const userQueryData = ['_id', 'firstName', 'lastName']
 		let lists = [];
 		try {
