@@ -8,7 +8,7 @@ mongoose.connect(`mongodb://localhost/${process.env.DATABASE_NAME || 'betterdo'}
 
 module.exports = {
   connection: mongoose.connection,
-  Lists: require('./schemas/list')(mongoose),
-  Tasks: require('./schemas/task')(mongoose),
-  Users: require('./schemas/user')(mongoose)
+  Lists: require('./schemas/lists')(mongoose),
+  Tasks: require('./schemas/tasks')(mongoose),
+  Users: require('./schemas/users')(mongoose)
 };
