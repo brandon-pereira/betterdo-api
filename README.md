@@ -72,7 +72,4 @@ fetch('/api/tasks', {
 - [X] `get` api/lists/:listid get user list by id
 - [X] `post` api/lists/:listid update list
 - [X] `put` api/lists add new list
-- [ ] `delete` api/lists/:listid delete list
-
-post api/lists/:listid update list
-
+- [X] `delete` api/lists/:listid delete list
