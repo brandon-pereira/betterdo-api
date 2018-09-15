@@ -1,21 +1,17 @@
 async function getLists({ req, res, database }) {
+    const userId = req.user._id;
+    const listId = req.params.listId;
     try {
-        // TODO: Ensure valid permissions
         // Get lists based on query data
-        const lists = await database.Lists.getLists(req.user._id, req.params.listId, {
-            userQueryData: ['_id', 'firstName', 'lastName']
-        })
-        // If the user is querying a specific list, return it
-        if(req.params.listId) {
-            if(Array.isArray(lists) && lists.length) {
-                return res.json({
-                    list: lists[0]
-                })
-            }
-            return res.status(404).json({error: "Invalid listId."});
+        const lists = await database.Lists.getLists(userId, listId)
+        // return appropriate results
+        if(listId && Array.isArray(lists) && lists.length) { // specific list
+            res.json({list: lists[0]})
+        } else if(listId) { // specific list but no results
+            res.status(404).json({error: "Invalid listId."});
+        } else { // all lists for user
+            res.json({lists})
         }
-        // Else, return all found lists
-        res.json({lists})
     } catch(err) {
         console.log("GET `/api/lists` received an unexpected error.", err)
         res.status(500).json({error: "Error getting user lists"});
