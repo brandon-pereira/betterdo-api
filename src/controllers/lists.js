@@ -1,3 +1,5 @@
+const { handleUncaughtError } = require('./helpers');
+
 async function getLists({ req, res, database }) {
     const userId = req.user._id;
     const listId = req.params.listId;
@@ -13,28 +15,23 @@ async function getLists({ req, res, database }) {
             res.json({lists})
         }
     } catch(err) {
-        console.log("GET `/api/lists` received an unexpected error.", err)
-        res.status(500).json({error: "Error getting user lists"});
+        handleUncaughtError('getting lists', res, err)
     }
 }
 
 async function createList({req, res, database}) {
+    const owner = req.user._id;
     try {
-        // TODO: Ensure valid permissions
+        // Remove potentially harmful properties
+        delete req.body.owner;
+        delete req.body.members;
+        delete req.body.type;
         // Attempt to create the list
-        const list = await database.Lists.create({
-            ...req.body, // merge the two arrays.. assuming validator will catch any errors
-            owner: req.user._id, // TODO: Ensure this is higher priority than the merge
-            members: [
-                req.user._id// TODO: Ensure this is higher priority than the merge
-            ]
-        });
+        const list = await database.Lists.create({...req.body, owner});
         // Return new list to front-end
-        res.json(list)
+        res.json({ list })
     } catch(err) {
-        // TODO: Generic error handler method
-        console.log(err);
-        res.status(500).json({error: "Error creating the new list"})
+        handleUncaughtError('creating list', res, err)
     }
 }
 
