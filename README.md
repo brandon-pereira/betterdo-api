@@ -61,7 +61,6 @@ fetch('/api/tasks', {
 
 ### Tasks
 
-- [ ] `get` api/tasks/:listid get tasks in list
 - [ ] `post` api/tasks/:taskid update task in list
 - [X] `put` api/tasks add task to list
 - [ ] `delete` api/tasks/:taskid delete task

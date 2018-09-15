@@ -24,9 +24,9 @@ module.exports = (app, database) => {
     /**
      * Tasks
      */
-    api.get('/tasks/:taskId', (req, res) => getTask({ req, res, database }));
     api.put('/tasks', (req, res) => createTask({ req, res, database }));
-    // api.post('/tasks', (req, res) => updateTask({ req, res, database }));
+    // api.post('/tasks/:taskId', (req, res) => updateTask({ req, res, database }));
+    // api.delete('/tasks:taskId', (req, res) => deleteTask({ req, res, database }));
 
     /* Bind the api to the main server */
     app.use('/api', api);

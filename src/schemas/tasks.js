@@ -1,7 +1,7 @@
 const { Schema } = require('mongoose');
 
 module.exports = (mongoose) => {
-	const schema = mongoose.model('Task', {
+	const schema = new Schema({
 		title: {
 			type: String,
 			required: true
@@ -21,10 +21,7 @@ module.exports = (mongoose) => {
 			default: false
 		},
 		dueDate: Date,
-		notes: {
-			type: String,
-			default: ""
-		},
+		notes: String,
 		subtasks: [
 			{
 				title: String,
@@ -32,8 +29,9 @@ module.exports = (mongoose) => {
 			}
 		],
 		priority: {
-			type: Number,
-			default: 1
+			type: String,
+			default: 'normal',
+			enum: ['low', 'normal', 'high'],
 		},
 		creationDate: {
 			type: Date,
@@ -41,14 +39,20 @@ module.exports = (mongoose) => {
 		}
 	});
 
-	// TODO: bind? schema._create =
-	schema.createTask = async function(doc, list_id, creator) {
-		return this.create({
-			...doc,
-			list: list_id,
-			createdBy: creator
-		});
-	}
+	schema.pre('validate', function() {
+		const nonEditableFields = ['creationDate', 'createdBy'];
+		nonEditableFields.forEach((field) => {
+			if(!this.isNew && this.isModified(field)) {
+				this.invalidate(field, `Not permitted to modify ${field}!`);
+			}
+		})
+	});
 
-	return schema;
+	const model = mongoose.model('Task', schema);
+
+	// model.blah = async function() {
+
+	// }
+
+	return model;
 }
