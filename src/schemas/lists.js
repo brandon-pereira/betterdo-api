@@ -47,7 +47,7 @@ module.exports = (mongoose) => {
 	});
 
 	schema.pre('validate', function() {
-		const nonEditableFields = ['owner'];
+		const nonEditableFields = ['owner', 'type'];
 		nonEditableFields.forEach((field) => {
 			if(!this.isNew && this.isModified(field)) {
 				this.invalidate(field, `Not permitted to modify ${field}!`);

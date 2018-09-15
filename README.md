@@ -28,15 +28,14 @@ The API for BetterDo.
     - `POST` update list
 
         ```javascript
-        fetch('/api/lists', {
+        fetch('/api/lists/5b9bf1b62b505fcf6501c82b', {
             method: 'POST',
             headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                id: '1234',
-                title: "Hello"
+                title: "Hello!"
             })
         })
         ```
