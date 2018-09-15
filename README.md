@@ -50,25 +50,15 @@ fetch('/api/tasks', {
     },
     body: JSON.stringify({
         title: "Test",
-        list: "5b99d4d74a6df02dbddf9097"
+        list: "5b9d4a3d1a4c9e3dd0c14c60"
     })
 })
 ```
 
-### INIT
+### TODO
 
 - [ ] `get` api/init: user info and high level of lists
-
-### Tasks
-
-- [ ] `post` api/tasks/:taskid update task in list
-- [X] `put` api/tasks add task to list
-- [ ] `delete` api/tasks/:taskid delete task
-
-### Lists
-
-- [X] `get` api/lists get user lists
-- [X] `get` api/lists/:listid get user list by id
-- [X] `post` api/lists/:listid update list
-- [X] `put` api/lists add new list
-- [X] `delete` api/lists/:listid delete list
+- [ ] Update user tasks on update/delete of tasks
+- [ ] Merge subtasks between server/front-end (or should it blindly trust?)
+- [ ] Unit tests for tasks
+- [ ] Update user data? (maybe this is v2?)

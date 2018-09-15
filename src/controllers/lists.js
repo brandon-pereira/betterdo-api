@@ -70,7 +70,7 @@ async function deleteList({req, res, database}) {
         }
         throwError("Invalid List ID");
     } catch(err) {
-        handleUncaughtError('updating list', res, err)
+        handleUncaughtError('deleting list', res, err)
     }
 }
 

@@ -13,9 +13,13 @@ function handleUncaughtError(taskName, res, err) {
             details: err.message
         });
     } else if(err.code === 'AccessError') {
-      res.status(404).json({
-        error: err.message
-    });
+        res.status(404).json({
+            error: err.message
+        });
+    } else if(err.code === 'PermissionError') {
+        res.status(501).json({
+            error: err.message
+        });
     } else {
         console.log('Unexpected Error:', taskName, err);
         throwError({error: `Unexpected error while ${taskName}`}, res)
