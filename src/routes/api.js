@@ -6,17 +6,21 @@ module.exports = (app, database) => {
     /* Initialize a router, anything behind `/api` requires authentication. */
     const api = express.Router();
     api.use((req, res, next) => {
-      if(req.user) {
-        next();
-      } else {
-        res.redirect('/');
-      }
+        if (req.user) {
+            next();
+        } else {
+            res.redirect('/');
+        }
     });
 
     /**
      * Lists
      */
-    api.get(['/lists', '/lists/:listId'], (req, res) => getLists({ req, res, database }));
+    api.get(['/lists', '/lists/:listId'], (req, res) =>
+        routeHandler('getting lists', { req, res, database }, config =>
+            getLists(req.params.listId, req.user._id, config)
+        )
+    );
     api.put('/lists', (req, res) => createList({ req, res, database }));
     api.post('/lists/:listId', (req, res) => updateList({ req, res, database }));
     api.delete('/lists/:listId', (req, res) => deleteList({ req, res, database }));
@@ -30,4 +34,4 @@ module.exports = (app, database) => {
 
     /* Bind the api to the main server */
     app.use('/api', api);
-}
+};
