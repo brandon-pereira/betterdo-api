@@ -6,6 +6,7 @@ const {
     deleteList
 } = require('../controllers/lists');
 const { createTask, updateTask, deleteTask } = require('../controllers/tasks');
+const routeHandler = require('../helpers/routeHandler');
 
 module.exports = (app, database) => {
     /* Initialize a router, anything behind `/api` requires authentication. */

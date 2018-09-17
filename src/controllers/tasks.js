@@ -1,4 +1,4 @@
-const { handleUncaughtError, throwError } = require('./helpers');
+const { handleUncaughtError, throwError } = require('../helpers/errorHandler');
 
 async function createTask({ req, res, database }) {
     const userId = req.user._id;

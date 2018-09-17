@@ -1,4 +1,4 @@
-const { handleUncaughtError, throwError } = require('./helpers');
+const { handleUncaughtError, throwError } = require('../helpers/errorHandler');
 
 async function getLists(listId, userId, { database }) {
     // TODO: What about 'inbox', 'high-priority', 'today', 'tomorrow', etc.
