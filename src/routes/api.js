@@ -46,12 +46,20 @@ module.exports = (app, database) => {
     /**
      * Tasks
      */
-    api.put('/tasks', (req, res) => createTask({ req, res, database }));
+    api.put('/tasks', (req, res) =>
+        routeHandler('adding task', { req, res, database }, config =>
+            createTask(req.body.listId, req.body, config)
+        )
+    );
     api.post('/tasks/:taskId', (req, res) =>
-        updateTask({ req, res, database })
+        routeHandler('updating task', { req, res, database }, config =>
+            updateTask(req.params.taskId, req.body, config)
+        )
     );
     api.delete('/tasks/:taskId', (req, res) =>
-        deleteTask({ req, res, database })
+        routeHandler('deleting task', { req, res, database }, config =>
+            deleteTask(req.params.taskId, config)
+        )
     );
 
     /* Bind the api to the main server */

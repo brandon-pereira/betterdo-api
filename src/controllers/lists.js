@@ -7,7 +7,7 @@ async function getLists(listId, { database, user }) {
     // return appropriate results
     if (listId && Array.isArray(lists) && lists.length) {
         // specific list
-        return { list: lists[0] };
+        return lists[0];
     } else if (listId) {
         // specific list but no results
         throwError('Invalid List ID');
@@ -28,7 +28,7 @@ async function createList(listObj = {}, { database, user }) {
         owner: user._id
     });
     // Return new list to front-end
-    return { list };
+    return list;
 }
 
 async function updateList(listId, updatedList = {}, { database, user }) {
