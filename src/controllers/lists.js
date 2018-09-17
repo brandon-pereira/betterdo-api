@@ -2,7 +2,6 @@ const { throwError } = require('../helpers/errorHandler');
 
 async function getLists(listId, { database, user }) {
     // TODO: What about 'inbox', 'high-priority', 'today', 'tomorrow', etc.
-    // TODO: Unit tests for this stuff?
     // Get lists based on query data
     const lists = await database.Lists.getLists(user._id, listId);
     // return appropriate results
