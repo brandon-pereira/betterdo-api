@@ -7,22 +7,22 @@
  */
 function handleUncaughtError(taskName, res, err) {
     // ValidationError comes from Mongoose
-    if(err.name === 'ValidationError') {
+    if (err.name === 'ValidationError') {
         res.status(500).json({
             error: `Error while ${taskName}`,
             details: err.message
         });
-    } else if(err.code === 'AccessError') {
+    } else if (err.code === 'AccessError') {
         res.status(404).json({
             error: err.message
         });
-    } else if(err.code === 'PermissionError') {
+    } else if (err.code === 'PermissionError') {
         res.status(501).json({
             error: err.message
         });
     } else {
         console.log('Unexpected Error:', taskName, err);
-        throwError({error: `Unexpected error while ${taskName}`}, res)
+        throwError({ error: `Unexpected error while ${taskName}` }, res);
     }
 }
 
@@ -35,4 +35,4 @@ function throwError(msg, code = 'AccessError') {
 module.exports = {
     handleUncaughtError,
     throwError
-}
+};
