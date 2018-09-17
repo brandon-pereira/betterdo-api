@@ -8,10 +8,7 @@ describe('Lists API', () => {
     test('Can be created with valid data', async () => {
         expect.assertions(2);
         const user = await createUser();
-        const { list } = await createList(
-            { title: 'Test' },
-            { database, user }
-        );
+        const list = await createList({ title: 'Test' }, { database, user });
         expect(list.title).toBe('Test');
         expect(list.members[0]._id).toBe(user._id);
     });
@@ -32,7 +29,7 @@ describe('Lists API', () => {
     test('Protects sensitive fields', async () => {
         expect.assertions(1);
         const user = await createUser();
-        const { list } = await createList(
+        const list = await createList(
             { title: 'Evil Task', type: 'inbox' },
             { database, user }
         );
