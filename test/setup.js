@@ -1,16 +1,15 @@
 process.env.DATABASE_NAME = 'betterdo-unittests';
 const database = require('../src/database');
-const createUser = () => database.Users.create({
+const createUser = () =>
+    database.Users.create({
         firstName: 'unitTest'
     });
 
-async function setup() {
-        
-}
+async function setup() {}
 
 async function teardown() {
     await database.connection.dropDatabase();
-    await database.connection.close()
+    await database.connection.close();
 }
 
 module.exports = {
@@ -18,4 +17,4 @@ module.exports = {
     teardown,
     database,
     createUser
-}
+};

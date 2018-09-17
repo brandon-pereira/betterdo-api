@@ -11,8 +11,8 @@ test('Creates a user', async () => {
     expect.assertions(4);
     const _userData = {
         firstName: 'unitTest'
-    }
-    userCache = await Users.findOrCreate('1', _userData)
+    };
+    userCache = await Users.findOrCreate('1', _userData);
     expect(userCache.firstName).toBe(_userData.firstName);
     expect(userCache.isBeta).toBeFalsy();
     expect(userCache.lastName).toBeUndefined();
@@ -20,11 +20,13 @@ test('Creates a user', async () => {
     expect(foundUser.firstName).toBe(_userData.firstName);
 });
 
-test('Throws error if missing required fields', async() => {
+test('Throws error if missing required fields', async () => {
     expect.assertions(1);
     try {
-        await  Users.findOrCreate('1', {})
-    } catch(err) {
-        expect(err.message).toBe('User validation failed: firstName: Path `firstName` is required.');
+        await Users.findOrCreate('1', {});
+    } catch (err) {
+        expect(err.message).toBe(
+            'User validation failed: firstName: Path `firstName` is required.'
+        );
     }
-})
+});
