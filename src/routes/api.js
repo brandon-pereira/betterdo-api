@@ -1,5 +1,10 @@
 const express = require('express');
-const { getLists, createList, updateList, deleteList } = require('../controllers/lists');
+const {
+    getLists,
+    createList,
+    updateList,
+    deleteList
+} = require('../controllers/lists');
 const { createTask, updateTask, deleteTask } = require('../controllers/tasks');
 
 module.exports = (app, database) => {
@@ -22,15 +27,23 @@ module.exports = (app, database) => {
         )
     );
     api.put('/lists', (req, res) => createList({ req, res, database }));
-    api.post('/lists/:listId', (req, res) => updateList({ req, res, database }));
-    api.delete('/lists/:listId', (req, res) => deleteList({ req, res, database }));
+    api.post('/lists/:listId', (req, res) =>
+        updateList({ req, res, database })
+    );
+    api.delete('/lists/:listId', (req, res) =>
+        deleteList({ req, res, database })
+    );
 
     /**
      * Tasks
      */
     api.put('/tasks', (req, res) => createTask({ req, res, database }));
-    api.post('/tasks/:taskId', (req, res) => updateTask({ req, res, database }));
-    api.delete('/tasks/:taskId', (req, res) => deleteTask({ req, res, database }));
+    api.post('/tasks/:taskId', (req, res) =>
+        updateTask({ req, res, database })
+    );
+    api.delete('/tasks/:taskId', (req, res) =>
+        deleteTask({ req, res, database })
+    );
 
     /* Bind the api to the main server */
     app.use('/api', api);
