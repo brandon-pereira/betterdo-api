@@ -24,15 +24,23 @@ module.exports = (app, database) => {
      */
     api.get(['/lists', '/lists/:listId'], (req, res) =>
         routeHandler('getting lists', { req, res, database }, config =>
-            getLists(req.params.listId, req.user._id, config)
+            getLists(req.params.listId, config)
         )
     );
-    api.put('/lists', (req, res) => createList({ req, res, database }));
+    api.put('/lists', (req, res) =>
+        routeHandler('create list', { req, res, database }, config =>
+            createList(req.body, config)
+        )
+    );
     api.post('/lists/:listId', (req, res) =>
-        updateList({ req, res, database })
+        routeHandler('update list', { req, res, database }, config =>
+            updateList(req.params.listId, req.body, config)
+        )
     );
     api.delete('/lists/:listId', (req, res) =>
-        deleteList({ req, res, database })
+        routeHandler('delete list', { req, res, database }, config =>
+            deleteList(req.params.listId, config)
+        )
     );
 
     /**
