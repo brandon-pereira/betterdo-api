@@ -1,6 +1,10 @@
 const { setup, teardown, database, createUser } = require('./setup');
 const ListSchema = database.Lists;
-const { createList } = require('../src/controllers/lists');
+const {
+    createList,
+    updateList,
+    deleteList
+} = require('../src/controllers/lists');
 beforeAll(setup);
 afterAll(teardown);
 
@@ -35,6 +39,65 @@ describe('Lists API', () => {
         );
         expect(list.type).toBe('default');
     });
+
+    test('Protects against non-member modification', async () => {
+        expect.assertions(2);
+        const user1 = await createUser();
+        const user2 = await createUser();
+        const list = await createList(
+            { title: 'Good List' },
+            { database, user: user1 }
+        );
+        try {
+            await updateList(
+                list._id,
+                { title: 'Malicious List' },
+                { database, user: user2 }
+            );
+        } catch (err) {
+            expect(err.code).toBe('AccessError');
+            expect(err.message).toBe('Invalid List ID');
+        }
+    });
+
+    test('Protects against non-member deletion', async () => {
+        expect.assertions(2);
+        const user1 = await createUser();
+        const user2 = await createUser();
+        const list = await createList(
+            { title: 'Good List' },
+            { database, user: user1 }
+        );
+        try {
+            await deleteList(list._id, { database, user: user2 });
+        } catch (err) {
+            expect(err.code).toBe('AccessError');
+            expect(err.message).toBe('Invalid List ID');
+        }
+    });
+
+    test('Requires that the colour be a valid hex code', async () => {
+        expect.assertions(6);
+        const user = await createUser();
+        const props = { database, user };
+        const badColors = ['red', '#SSSSSS'];
+        const goodColors = ['#FFF', '#FF00AA'];
+        await Promise.all(
+            goodColors.map(color =>
+                createList({ title: 'test', color }, props).then(list =>
+                    expect(list.color).toBe(color)
+                )
+            )
+        );
+        await Promise.all(
+            badColors.map(color =>
+                createList({ title: 'test', color }, props).catch(err => {
+                    expect(err.name).toBe('ValidationError');
+                    expect(err.message).toContain('hex');
+                })
+            )
+        );
+    });
 });
 
 describe('Lists Schema', () => {
@@ -50,59 +113,6 @@ describe('Lists Schema', () => {
                 'List validation failed: owner: Cast to ObjectID failed'
             );
         }
-    });
-
-    test('Requires the title to be valid length', async () => {
-        expect.assertions(1);
-        const tempUser = await createUser();
-        try {
-            await ListSchema.create({
-                title: '',
-                owner: tempUser._id
-            });
-        } catch (err) {
-            expect(err.message).toBe(
-                'List validation failed: title: Path `title` is required.'
-            );
-        }
-    });
-
-    test('Requires that the colour be a valid hex code', async () => {
-        expect.assertions(4);
-        const tempUser = await createUser();
-        try {
-            await ListSchema.create({
-                title: 'test',
-                owner: tempUser._id,
-                color: 'red' // invalid.. must be hex
-            });
-        } catch (err) {
-            expect(err.message).toBe(
-                'List validation failed: color: red is not a hex color code!'
-            );
-        }
-        try {
-            await ListSchema.create({
-                title: 'test',
-                owner: tempUser._id,
-                color: '#SSSSSS' // invalid.. must be valid hex
-            });
-        } catch (err) {
-            expect(err.message).toBe(
-                'List validation failed: color: #SSSSSS is not a hex color code!'
-            );
-        }
-        const validColours = ['#FFF', '#FF00AA'];
-        await Promise.all(
-            validColours.map(async color => {
-                const list = await ListSchema.create({
-                    title: 'test',
-                    owner: tempUser._id,
-                    color
-                });
-                expect(list.color).toBe(color);
-            })
-        );
     });
 
     test(`Doesn't allow modification of the 'owners' property`, async () => {
