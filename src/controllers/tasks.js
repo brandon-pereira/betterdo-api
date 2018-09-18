@@ -20,11 +20,11 @@ async function createTask(listId, taskObj = {}, { database, user }) {
         createdBy: user._id,
         list: listId
     });
-    // Add task to list
-    list.tasks.addToSet(task._id);
-    await list.save();
+    // TODO: Add task to list
+    // list.tasks.addToSet(task._id);
+    // await list.save();
     // Return new list to front-end
-    return { task };
+    return task;
 }
 
 async function updateTask(taskId, updatedTask = {}, { database, user }) {
@@ -35,7 +35,7 @@ async function updateTask(taskId, updatedTask = {}, { database, user }) {
     // If no results, throw error
     if (!task) throwError('Invalid Task ID');
     // Ensure valid permissions
-    if (await database.Lists.findOne({ _id: task._id, members: user._id })) {
+    if (await database.Lists.findOne({ _id: task.list, members: user._id })) {
         throwError('User is not authorized to access task', 'PermissionsError');
     }
     // TODO: What if they change task.list? We need to update list
