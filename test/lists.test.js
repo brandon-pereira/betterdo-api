@@ -1,11 +1,11 @@
-const { setup, teardown, database, createUser } = require('./setup');
+const { teardown, database, createUser } = require('./setup');
 const ListSchema = database.Lists;
 const {
     createList,
     updateList,
     deleteList
 } = require('../src/controllers/lists');
-beforeAll(setup);
+
 afterAll(teardown);
 
 describe('Lists API', () => {

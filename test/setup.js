@@ -5,15 +5,12 @@ const createUser = () =>
         firstName: 'unitTest'
     });
 
-async function setup() {}
-
 async function teardown() {
     await database.connection.dropDatabase();
     await database.connection.close();
 }
 
 module.exports = {
-    setup,
     teardown,
     database,
     createUser

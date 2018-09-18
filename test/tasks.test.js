@@ -1,35 +1,37 @@
-const { setup, teardown, database, createUser } = require('./setup');
-const TaskSchema = database.Tasks;
+const { teardown, database, createUser } = require('./setup');
+// const TaskSchema = database.Tasks;
 const {
     createTask,
     updateTask,
     deleteTask
 } = require('../src/controllers/tasks');
 const { createList } = require('../src/controllers/lists');
-beforeAll(setup);
+
+let user;
+let validList;
+beforeAll(async () => {
+    user = await createUser();
+    validList = await createList({ title: 'Valid List' }, { database, user });
+});
 afterAll(teardown);
 
 describe('Tasks API', () => {
     test('Can be created with valid data', async () => {
         expect.assertions(2);
-        const user = await createUser();
-        const list = await createList({ title: 'Test' }, { database, user });
         const task = await createTask(
-            list._id,
+            validList._id,
             { title: 'Test' },
             { database, user }
         );
-        expect(task.list).toBe(list._id);
+        expect(task.list).toBe(validList._id);
         expect(task.title).toBe('Test');
     });
 
     test('Provides clear error messages when invalid data provided', async () => {
         expect.assertions(2);
-        const user = await createUser();
-        const list = await createList({ title: 'Test' }, { database, user });
         try {
             await createTask(
-                list._id,
+                validList._id,
                 { title: 'Hello', priority: 'super-high' },
                 { database, user }
             );
@@ -41,51 +43,58 @@ describe('Tasks API', () => {
         }
     });
 
-    // test('Protects sensitive fields', async () => {
-    //     expect.assertions(1);
-    //     const user = await createUser();
-    //     const list = await createList(
-    //         { title: 'Evil Task', type: 'inbox' },
-    //         { database, user }
-    //     );
-    //     expect(list.type).toBe('default');
-    // });
+    test('Protects sensitive fields', async () => {
+        expect.assertions(2);
+        const task = await createTask(
+            validList._id,
+            { title: 'Test', createdBy: 'bad-user' },
+            { database, user }
+        );
+        expect(task.title).toBe('Test');
+        expect(task.createdBy).toBe(user._id);
+    });
 
-    // test('Protects against non-member modification', async () => {
-    //     expect.assertions(2);
-    //     const user1 = await createUser();
-    //     const user2 = await createUser();
-    //     const list = await createList(
-    //         { title: 'Good List' },
-    //         { database, user: user1 }
-    //     );
-    //     try {
-    //         await updateList(
-    //             list._id,
-    //             { title: 'Malicious List' },
-    //             { database, user: user2 }
-    //         );
-    //     } catch (err) {
-    //         expect(err.code).toBe('AccessError');
-    //         expect(err.message).toBe('Invalid List ID');
-    //     }
-    // });
+    test('Protects against non-member modification', async () => {
+        expect.assertions(3);
+        const badGuy = await createUser();
+        let task = await createTask(
+            validList._id,
+            { title: 'Good Task' },
+            { database, user }
+        );
+        task = await updateTask(
+            task._id,
+            { title: 'Good Update' },
+            { database, user }
+        );
+        try {
+            task = await updateTask(
+                task._id,
+                { title: 'Bad Update' },
+                { database, user: badGuy }
+            );
+        } catch (err) {
+            expect(err.code).toBe('PermissionsError');
+            expect(err.message).toBe('User is not authorized to access task');
+            expect(task.title).toBe('Good Update');
+        }
+    });
 
-    // test('Protects against non-member deletion', async () => {
-    //     expect.assertions(2);
-    //     const user1 = await createUser();
-    //     const user2 = await createUser();
-    //     const list = await createList(
-    //         { title: 'Good List' },
-    //         { database, user: user1 }
-    //     );
-    //     try {
-    //         await deleteList(list._id, { database, user: user2 });
-    //     } catch (err) {
-    //         expect(err.code).toBe('AccessError');
-    //         expect(err.message).toBe('Invalid List ID');
-    //     }
-    // });
+    test('Protects against non-member deletion', async () => {
+        expect.assertions(2);
+        const badGuy = await createUser();
+        const task = await createTask(
+            validList._id,
+            { title: 'Good Task' },
+            { database, user }
+        );
+        try {
+            await deleteTask(task._id, { database, user: badGuy });
+        } catch (err) {
+            expect(err.code).toBe('PermissionsError');
+            expect(err.message).toBe('User is not authorized to access task');
+        }
+    });
 
     // test('Requires that the colour be a valid hex code', async () => {
     //     expect.assertions(6);

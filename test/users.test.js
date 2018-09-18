@@ -1,9 +1,7 @@
-const { setup, teardown, database } = require('./setup');
+const { teardown, database } = require('./setup');
 const { Users } = database;
 
 let userCache = null;
-
-beforeAll(setup);
 
 afterAll(teardown);
 
