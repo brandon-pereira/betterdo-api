@@ -34,8 +34,13 @@ async function updateTask(taskId, updatedTask = {}, { database, user }) {
     const task = await database.Tasks.findOne({ _id: taskId });
     // If no results, throw error
     if (!task) throwError('Invalid Task ID');
+    // Get List
+    const list = await database.Lists.findOne({
+        _id: task.list,
+        members: user._id
+    });
     // Ensure valid permissions
-    if (await database.Lists.findOne({ _id: task.list, members: user._id })) {
+    if (!list) {
         throwError('User is not authorized to access task', 'PermissionsError');
     }
     // TODO: What if they change task.list? We need to update list
