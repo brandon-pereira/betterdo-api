@@ -20,12 +20,17 @@ describe('Tasks API', () => {
         expect(task.title).toBe('Test');
     });
 
-    test('Adds tasks to list object on creation', async () => {
-        expect.assertions(1);
-        const task = await createTask(validList._id, { title: 'Test' }, { database, user });
-        const list = await ListSchema.findById(validList._id);
-        console.log(list);
+    test('Adds/removes tasks to list object on relevant task', async () => {
+        expect.assertions(3);
+        let list = await createList({ title: 'New List' }, { database, user });
+        const task = await createTask(list._id, { title: 'Test' }, { database, user });
+        await ListSchema.addTaskToList(task._id, list._id); // ensure no duplicates
+        list = await ListSchema.findById(list._id);
         expect(list.tasks).toContain(task._id);
+        expect(list.tasks).toHaveLength(1); // if 2, not deduping
+        await deleteTask(task._id, { database, user });
+        list = await ListSchema.findById(list._id);
+        expect(list.tasks).toHaveLength(0);
     });
 
     test('Provides clear error messages when invalid data provided', async () => {

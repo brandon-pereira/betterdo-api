@@ -67,7 +67,7 @@ async function deleteTask(taskId, { database, user }) {
     // Ensure valid permissions
     if (!list) throwError('User is not authorized to access task', 'PermissionsError');
     // Remove task from list
-    // TODO: Remove from list
+    await database.Lists.removeTaskToList(taskId, task.list);
     // Delete task
     const status = await database.Tasks.deleteOne({ _id: task._id });
     // Check results
