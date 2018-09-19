@@ -41,21 +41,14 @@ module.exports = (app, db) => {
     );
     app.use(passport.initialize());
     app.use(passport.session());
-    app.get(
-        '/auth/google',
-        passport.authenticate('google', { scope: ['profile'] })
-    );
-    app.get(
-        '/auth/google/callback',
-        passport.authenticate('google'),
-        (req, res) => {
-            if (req.header('referrer')) {
-                res.redirect(req.header('referrer'));
-            } else {
-                res.redirect('/');
-            }
+    app.get('/auth/google', passport.authenticate('google', { scope: ['profile'] }));
+    app.get('/auth/google/callback', passport.authenticate('google'), (req, res) => {
+        if (req.header('referrer')) {
+            res.redirect(req.header('referrer'));
+        } else {
+            res.redirect('/');
         }
-    );
+    });
     app.get('/auth/logout', (req, res) => {
         req.logout();
         if (req.header('referrer')) {

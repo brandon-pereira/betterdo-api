@@ -1,10 +1,6 @@
 const { teardown, database, createUser } = require('./setup');
 const ListSchema = database.Lists;
-const {
-    createList,
-    updateList,
-    deleteList
-} = require('../src/controllers/lists');
+const { createList, updateList, deleteList } = require('../src/controllers/lists');
 
 afterAll(teardown);
 
@@ -24,19 +20,14 @@ describe('Lists API', () => {
             await createList({ title: '' }, { database, user });
         } catch (err) {
             expect(err.name).toBe('ValidationError');
-            expect(err.message).toBe(
-                'List validation failed: title: Path `title` is required.'
-            );
+            expect(err.message).toBe('List validation failed: title: Path `title` is required.');
         }
     });
 
     test('Protects sensitive fields', async () => {
         expect.assertions(1);
         const user = await createUser();
-        const list = await createList(
-            { title: 'Evil Task', type: 'inbox' },
-            { database, user }
-        );
+        const list = await createList({ title: 'Evil Task', type: 'inbox' }, { database, user });
         expect(list.type).toBe('default');
     });
 
@@ -44,16 +35,9 @@ describe('Lists API', () => {
         expect.assertions(2);
         const user1 = await createUser();
         const user2 = await createUser();
-        const list = await createList(
-            { title: 'Good List' },
-            { database, user: user1 }
-        );
+        const list = await createList({ title: 'Good List' }, { database, user: user1 });
         try {
-            await updateList(
-                list._id,
-                { title: 'Malicious List' },
-                { database, user: user2 }
-            );
+            await updateList(list._id, { title: 'Malicious List' }, { database, user: user2 });
         } catch (err) {
             expect(err.code).toBe('AccessError');
             expect(err.message).toBe('Invalid List ID');
@@ -64,10 +48,7 @@ describe('Lists API', () => {
         expect.assertions(2);
         const user1 = await createUser();
         const user2 = await createUser();
-        const list = await createList(
-            { title: 'Good List' },
-            { database, user: user1 }
-        );
+        const list = await createList({ title: 'Good List' }, { database, user: user1 });
         try {
             await deleteList(list._id, { database, user: user2 });
         } catch (err) {
@@ -109,9 +90,7 @@ describe('Lists Schema', () => {
                 owner: 'invalid_id'
             });
         } catch (err) {
-            expect(err.message).toContain(
-                'List validation failed: owner: Cast to ObjectID failed'
-            );
+            expect(err.message).toContain('List validation failed: owner: Cast to ObjectID failed');
         }
     });
 

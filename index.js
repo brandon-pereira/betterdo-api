@@ -23,10 +23,10 @@ require('./src/routes/api')(app, db);
 require('./src/routes/root')(app, db);
 
 app.listen(process.env.SERVER_PORT || 8080, () => {
-  console.info("Server started on port", process.env.SERVER_PORT || 8080)
+    console.info('Server started on port', process.env.SERVER_PORT || 8080);
 });
 
 module.exports = {
-  app,
-  db
+    app,
+    db
 };

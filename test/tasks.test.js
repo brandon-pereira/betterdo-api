@@ -1,10 +1,6 @@
 const { teardown, database, createUser } = require('./setup');
 // const TaskSchema = database.Tasks;
-const {
-    createTask,
-    updateTask,
-    deleteTask
-} = require('../src/controllers/tasks');
+const { createTask, updateTask, deleteTask } = require('../src/controllers/tasks');
 const { createList } = require('../src/controllers/lists');
 
 let user;
@@ -18,11 +14,7 @@ afterAll(teardown);
 describe('Tasks API', () => {
     test('Can be created with valid data', async () => {
         expect.assertions(2);
-        const task = await createTask(
-            validList._id,
-            { title: 'Test' },
-            { database, user }
-        );
+        const task = await createTask(validList._id, { title: 'Test' }, { database, user });
         expect(task.list).toBe(validList._id);
         expect(task.title).toBe('Test');
     });
@@ -57,22 +49,10 @@ describe('Tasks API', () => {
     test('Protects against non-member modification', async () => {
         expect.assertions(3);
         const badGuy = await createUser();
-        let task = await createTask(
-            validList._id,
-            { title: 'Good Task' },
-            { database, user }
-        );
-        task = await updateTask(
-            task._id,
-            { title: 'Good Update' },
-            { database, user }
-        );
+        let task = await createTask(validList._id, { title: 'Good Task' }, { database, user });
+        task = await updateTask(task._id, { title: 'Good Update' }, { database, user });
         try {
-            task = await updateTask(
-                task._id,
-                { title: 'Bad Update' },
-                { database, user: badGuy }
-            );
+            task = await updateTask(task._id, { title: 'Bad Update' }, { database, user: badGuy });
         } catch (err) {
             expect(err.code).toBe('PermissionsError');
             expect(err.message).toBe('User is not authorized to access task');
@@ -83,11 +63,7 @@ describe('Tasks API', () => {
     test('Protects against non-member deletion', async () => {
         expect.assertions(2);
         const badGuy = await createUser();
-        const task = await createTask(
-            validList._id,
-            { title: 'Good Task' },
-            { database, user }
-        );
+        const task = await createTask(validList._id, { title: 'Good Task' }, { database, user });
         try {
             await deleteTask(task._id, { database, user: badGuy });
         } catch (err) {
@@ -95,56 +71,4 @@ describe('Tasks API', () => {
             expect(err.message).toBe('User is not authorized to access task');
         }
     });
-
-    // test('Requires that the colour be a valid hex code', async () => {
-    //     expect.assertions(6);
-    //     const user = await createUser();
-    //     const props = { database, user };
-    //     const badColors = ['red', '#SSSSSS'];
-    //     const goodColors = ['#FFF', '#FF00AA'];
-    //     await Promise.all(
-    //         goodColors.map(color =>
-    //             createList({ title: 'test', color }, props).then(list =>
-    //                 expect(list.color).toBe(color)
-    //             )
-    //         )
-    //     );
-    //     await Promise.all(
-    //         badColors.map(color =>
-    //             createList({ title: 'test', color }, props).catch(err => {
-    //                 expect(err.name).toBe('ValidationError');
-    //                 expect(err.message).toContain('hex');
-    //             })
-    //         )
-    //     );
-    // });
 });
-
-// describe('Tasks Schema', () => {
-//     test('Requires the `owner` property to be set', async () => {
-//         expect.assertions(1);
-//         try {
-//             await ListSchema.create({
-//                 title: 'Test',
-//                 owner: 'invalid_id'
-//             });
-//         } catch (err) {
-//             expect(err.message).toContain(
-//                 'List validation failed: owner: Cast to ObjectID failed'
-//             );
-//         }
-//     });
-
-//     test(`Doesn't allow modification of the 'owners' property`, async () => {
-//         expect.assertions(1);
-//         try {
-//             const list = await ListSchema.findOne({});
-//             list.owner = '5b99d4d74a6df02dbddf9097'; // random valid id
-//             await list.save();
-//         } catch (err) {
-//             expect(err.message).toContain(
-//                 'List validation failed: owner: Not permitted to modify owner!'
-//             );
-//         }
-//     });
-// });

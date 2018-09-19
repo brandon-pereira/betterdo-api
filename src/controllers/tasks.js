@@ -66,8 +66,7 @@ async function deleteTask(taskId, { database, user }) {
         members: user._id
     });
     // Ensure valid permissions
-    if (!list)
-        throwError('User is not authorized to access task', 'PermissionsError');
+    if (!list) throwError('User is not authorized to access task', 'PermissionsError');
     // Remove task from list
     // TODO: Remove from list
     // Delete task
