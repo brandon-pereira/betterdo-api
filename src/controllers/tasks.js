@@ -20,9 +20,8 @@ async function createTask(listId, taskObj = {}, { database, user }) {
         createdBy: user._id,
         list: listId
     });
-    // TODO: Add task to list
-    // list.tasks.addToSet(task._id);
-    // await list.save();
+    // Add task to list
+    await database.Lists.addTaskToList(task._id, listId);
     // Return new list to front-end
     return task;
 }

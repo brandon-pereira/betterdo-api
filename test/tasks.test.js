@@ -1,5 +1,6 @@
 const { teardown, database, createUser } = require('./setup');
 // const TaskSchema = database.Tasks;
+const ListSchema = database.Lists;
 const { createTask, updateTask, deleteTask } = require('../src/controllers/tasks');
 const { createList } = require('../src/controllers/lists');
 
@@ -17,6 +18,14 @@ describe('Tasks API', () => {
         const task = await createTask(validList._id, { title: 'Test' }, { database, user });
         expect(task.list).toBe(validList._id);
         expect(task.title).toBe('Test');
+    });
+
+    test('Adds tasks to list object on creation', async () => {
+        expect.assertions(1);
+        const task = await createTask(validList._id, { title: 'Test' }, { database, user });
+        const list = await ListSchema.findById(validList._id);
+        console.log(list);
+        expect(list.tasks).toContain(task._id);
     });
 
     test('Provides clear error messages when invalid data provided', async () => {
