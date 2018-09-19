@@ -42,7 +42,22 @@ async function updateTask(taskId, updatedTask = {}, { database, user }) {
     if (!list) {
         throwError('User is not authorized to access task', 'PermissionsError');
     }
-    // TODO: What if they change task.list? We need to update list
+    // Code for handling change of list
+    if (updatedTask.list && task.list !== updatedTask.list) {
+        // Get new list
+        const newList = await database.Lists.findOne({
+            _id: updatedTask.list,
+            members: user._id
+        });
+        // Verify updatedTask.list is valid list
+        if (!newList) {
+            throwError('User is not authorized to access list', 'PermissionsError');
+        }
+        // Remove from this list
+        await database.Lists.removeTaskFromList(taskId, list._id);
+        // Add to new list
+        await database.Lists.addTaskToList(taskId, newList._id);
+    }
     // TODO: Merge tasks.subtasks with req.body.subtasks
     // Merge the tasks.. validation on the model will handle errors
     Object.assign(task, updatedTask);

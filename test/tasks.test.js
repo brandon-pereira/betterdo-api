@@ -33,6 +33,18 @@ describe('Tasks API', () => {
         expect(list.tasks).toHaveLength(0);
     });
 
+    test('Allows list to be changed via the updateTask method', async () => {
+        expect.assertions(2);
+        let list1 = await createList({ title: 'New List 1' }, { database, user });
+        let list2 = await createList({ title: 'New List 2' }, { database, user });
+        const task = await createTask(list1._id, { title: 'Test' }, { database, user });
+        await updateTask(task._id, { list: list2._id }, { database, user });
+        list1 = await ListSchema.findById(list1._id);
+        list2 = await ListSchema.findById(list2._id);
+        expect(list1.tasks).not.toContain(task._id);
+        expect(list2.tasks).toContain(task._id);
+    });
+
     test('Provides clear error messages when invalid data provided', async () => {
         expect.assertions(2);
         try {
