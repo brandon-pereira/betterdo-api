@@ -87,7 +87,7 @@ module.exports = mongoose => {
         return list;
     };
 
-    model.removeTaskToList = async function(task_id, list_id) {
+    model.removeTaskFromList = async function(task_id, list_id) {
         const list = await this.findOne({ _id: list_id });
         // Try adding show
         list.tasks = list.tasks.filter(id => id.str !== task_id.str);
