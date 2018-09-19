@@ -58,8 +58,7 @@ fetch('/api/tasks', {
 ### TODO
 
 -   [ ] `get` api/init: user info and high level of lists
--   [ ] Update user tasks on update/delete of tasks
 -   [ ] Support for custom lists ('inbox', 'high-priority', 'today', 'tomorrow', etc.)
 -   [ ] Merge subtasks between server/front-end (or should it blindly trust?)
--   [ ] Unit tests for tasks
--   [ ] Update user data? (maybe this is v2?)
+-   [ ] Recurring tasks (maybe this is v2?)
+-   [ ] Update user data (maybe this is v2?)
