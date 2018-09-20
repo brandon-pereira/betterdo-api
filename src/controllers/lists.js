@@ -5,9 +5,9 @@ async function getLists(listId, { database, user }) {
     // Get lists based on query data
     const lists = await database.Lists.getLists(user._id, listId);
     // return appropriate results
-    if (listId && Array.isArray(lists) && lists.length) {
+    if (listId && lists) {
         // specific list
-        return lists[0];
+        return lists;
     } else if (listId) {
         // specific list but no results
         throwError('Invalid List ID');
