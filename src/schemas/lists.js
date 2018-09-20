@@ -59,7 +59,9 @@ module.exports = mongoose => {
 
     model.getLists = async function(user_id, list_id) {
         let lists = [];
-        if (list_id) {
+        if (list_id === 'inbox') {
+            lists = this.getUserInbox(user_id);
+        } else if (list_id) {
             lists = this.getUserListById(user_id, list_id);
         } else if (user_id) {
             lists = this.getUserLists(user_id);
@@ -70,12 +72,16 @@ module.exports = mongoose => {
     };
 
     model.getUserLists = async function(user_id) {
-        const userQueryData = ['_id', 'firstName', 'lastName'];
+        return await this.find({
+            members: user_id
+        });
+    };
+
+    model.getUserInbox = async function(user_id) {
         return await this.find({
             members: user_id
         })
-            .populate('members', userQueryData)
-            .populate('owner', userQueryData)
+            .populate('tasks')
             .exec();
     };
 
