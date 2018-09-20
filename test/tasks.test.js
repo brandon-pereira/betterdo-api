@@ -14,14 +14,12 @@ afterAll(teardown);
 
 describe('Tasks API', () => {
     test('Can be created with valid data', async () => {
-        expect.assertions(2);
         const task = await createTask(validList._id, { title: 'Test' }, { database, user });
         expect(task.list).toBe(validList._id);
         expect(task.title).toBe('Test');
     });
 
     test('Adds/removes tasks to list object on relevant task', async () => {
-        expect.assertions(3);
         let list = await createList({ title: 'New List' }, { database, user });
         const task = await createTask(list._id, { title: 'Test' }, { database, user });
         await ListSchema.addTaskToList(task._id, list._id); // ensure no duplicates
@@ -34,7 +32,6 @@ describe('Tasks API', () => {
     });
 
     test('Allows list to be changed via the updateTask method', async () => {
-        expect.assertions(2);
         let list1 = await createList({ title: 'New List 1' }, { database, user });
         let list2 = await createList({ title: 'New List 2' }, { database, user });
         const task = await createTask(list1._id, { title: 'Test' }, { database, user });
@@ -46,7 +43,6 @@ describe('Tasks API', () => {
     });
 
     test('Provides clear error messages when invalid data provided', async () => {
-        expect.assertions(2);
         try {
             await createTask(
                 validList._id,
@@ -62,7 +58,6 @@ describe('Tasks API', () => {
     });
 
     test('Protects sensitive fields', async () => {
-        expect.assertions(2);
         const task = await createTask(
             validList._id,
             { title: 'Test', createdBy: 'bad-user' },
@@ -73,7 +68,6 @@ describe('Tasks API', () => {
     });
 
     test('Protects against non-member modification', async () => {
-        expect.assertions(3);
         const badGuy = await createUser();
         let task = await createTask(validList._id, { title: 'Good Task' }, { database, user });
         task = await updateTask(task._id, { title: 'Good Update' }, { database, user });
@@ -87,7 +81,6 @@ describe('Tasks API', () => {
     });
 
     test('Protects against non-member deletion', async () => {
-        expect.assertions(2);
         const badGuy = await createUser();
         const task = await createTask(validList._id, { title: 'Good Task' }, { database, user });
         try {

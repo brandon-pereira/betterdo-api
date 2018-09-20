@@ -4,10 +4,7 @@ async function createTask(listId, taskObj = {}, { database, user }) {
     // Ensure list id is passed
     if (!listId) throwError('Invalid List ID');
     // Ensure list exists and user has permissions
-    const list = await database.Lists.findOne({
-        _id: listId,
-        members: user._id
-    });
+    const list = await database.Lists.getUserListById(user._id, listId);
     // If no results, throw error
     if (!list) throwError('Invalid List ID');
     // Remove potentially harmful properties
@@ -34,10 +31,7 @@ async function updateTask(taskId, updatedTask = {}, { database, user }) {
     // If no results, throw error
     if (!task) throwError('Invalid Task ID');
     // Get List
-    const list = await database.Lists.findOne({
-        _id: task.list,
-        members: user._id
-    });
+    const list = await database.Lists.getUserListById(user._id, task.list);
     // Ensure valid permissions
     if (!list) {
         throwError('User is not authorized to access task', 'PermissionsError');
@@ -45,10 +39,7 @@ async function updateTask(taskId, updatedTask = {}, { database, user }) {
     // Code for handling change of list
     if (updatedTask.list && task.list !== updatedTask.list) {
         // Get new list
-        const newList = await database.Lists.findOne({
-            _id: updatedTask.list,
-            members: user._id
-        });
+        const newList = await database.Lists.getUserListById(user._id, updatedTask.list);
         // Verify updatedTask.list is valid list
         if (!newList) {
             throwError('User is not authorized to access list', 'PermissionsError');
@@ -75,10 +66,7 @@ async function deleteTask(taskId, { database, user }) {
     // Ensure task id is valid
     if (!task) throwError('Invalid Task ID');
     // Get parent list
-    const list = await database.Lists.findOne({
-        _id: task.list,
-        members: user._id
-    });
+    const list = await database.Lists.getUserListById(user._id, task.list);
     // Ensure valid permissions
     if (!list) throwError('User is not authorized to access task', 'PermissionsError');
     // Remove task from list

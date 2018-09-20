@@ -35,10 +35,7 @@ async function updateList(listId, updatedList = {}, { database, user }) {
     // Ensure list id is passed
     if (!listId) throwError('Invalid List ID');
     // Get list
-    const list = await database.Lists.findOne({
-        _id: listId,
-        members: user._id
-    });
+    const list = await database.Lists.getUserListById(user._id, listId);
     // If no results, throw error
     if (!list) throwError('Invalid List ID');
     // Merge the lists.. validation on the model will handle errors

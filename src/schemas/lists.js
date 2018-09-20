@@ -58,42 +58,59 @@ module.exports = mongoose => {
     const model = mongoose.model('List', schema);
 
     model.getLists = async function(user_id, list_id) {
-        const userQueryData = ['_id', 'firstName', 'lastName'];
         let lists = [];
-        try {
-            lists = this.find({
-                ...(list_id ? { _id: list_id } : {}),
-                members: user_id
-            })
-                .populate('members', userQueryData)
-                .populate('owner', userQueryData);
-            if (list_id) {
-                lists = lists.populate('tasks');
-            }
-            lists = await lists.exec();
-        } catch (err) {
-            console.log('getLists returned error', err.message);
-            return [];
+        if (list_id) {
+            lists = this.getUserListById(user_id, list_id);
+        } else if (user_id) {
+            lists = this.getUserLists(user_id);
+        } else {
+            throw new Error('No user_id or list_id passed');
         }
         return lists;
+    };
+
+    model.getUserLists = async function(user_id) {
+        const userQueryData = ['_id', 'firstName', 'lastName'];
+        return await this.find({
+            members: user_id
+        })
+            .populate('members', userQueryData)
+            .populate('owner', userQueryData)
+            .exec();
+    };
+
+    model.getUserListById = async function(user_id, list_id) {
+        const userQueryData = ['_id', 'firstName', 'lastName'];
+        return await this.findOne({
+            _id: list_id,
+            members: user_id
+        })
+            .populate('members', userQueryData)
+            .populate('owner', userQueryData)
+            .populate('tasks')
+            .exec();
     };
 
     model.addTaskToList = async function(task_id, list_id) {
         const list = await this.findOne({ _id: list_id });
         // Try adding show
-        list.tasks.addToSet(task_id);
-        // Save/return
-        await list.save();
-        return list;
+        if (list) {
+            list.tasks.addToSet(task_id);
+            // Save/return
+            await list.save();
+            return list;
+        }
     };
 
     model.removeTaskFromList = async function(task_id, list_id) {
         const list = await this.findOne({ _id: list_id });
-        // Try adding show
-        list.tasks = list.tasks.filter(id => id.str !== task_id.str);
-        // Save/return
-        await list.save();
-        return list;
+        // Try removing show
+        if (list) {
+            list.tasks = list.tasks.filter(id => id.str !== task_id.str);
+            // Save/return
+            await list.save();
+            return list;
+        }
     };
 
     return model;
