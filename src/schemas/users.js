@@ -22,15 +22,5 @@ module.exports = mongoose => {
         }
     });
 
-    // TODO: base this off internal ids (if possible?)
-    schema.findOrCreate = async function(id, doc) {
-        const result = await this.findOne({ google_id: id });
-        if (result) {
-            return result;
-        } else {
-            return await this.create(doc);
-        }
-    };
-
     return schema;
 };

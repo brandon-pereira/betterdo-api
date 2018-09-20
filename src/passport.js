@@ -12,11 +12,19 @@ module.exports = (app, db) => {
                 callbackURL: process.env.SERVER_URL + '/auth/google/callback'
             },
             async (accessToken, refreshToken, profile, cb) => {
-                const user = await db.Users.findOrCreate(profile.id, {
-                    google_id: profile.id,
-                    firstName: profile.name.givenName,
-                    lastName: profile.name.familyName
-                });
+                let user = await db.Users.findOne({ google_id: profile.id });
+                if (!user) {
+                    user = await db.Users.create({
+                        google_id: profile.id,
+                        firstName: profile.name.givenName,
+                        lastName: profile.name.familyName
+                    });
+                    await db.Lists.create({
+                        title: 'Inbox',
+                        type: 'inbox',
+                        owner: user._id
+                    });
+                }
                 cb(null, user);
             }
         )
