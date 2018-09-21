@@ -74,7 +74,7 @@ describe('Tasks API', () => {
         try {
             task = await updateTask(task._id, { title: 'Bad Update' }, { database, user: badGuy });
         } catch (err) {
-            expect(err.code).toBe('PermissionsError');
+            expect(err.name).toBe('PermissionsError');
             expect(err.message).toBe('User is not authorized to access task');
             expect(task.title).toBe('Good Update');
         }
@@ -86,7 +86,7 @@ describe('Tasks API', () => {
         try {
             await deleteTask(task._id, { database, user: badGuy });
         } catch (err) {
-            expect(err.code).toBe('PermissionsError');
+            expect(err.name).toBe('PermissionsError');
             expect(err.message).toBe('User is not authorized to access task');
         }
     });

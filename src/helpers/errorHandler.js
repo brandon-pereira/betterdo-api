@@ -12,11 +12,11 @@ function handleUncaughtError(taskName, res, err) {
             error: `Error while ${taskName}`,
             details: err.message
         });
-    } else if (err.code === 'AccessError') {
+    } else if (err.name === 'AccessError') {
         res.status(404).json({
             error: err.message
         });
-    } else if (err.code === 'PermissionError') {
+    } else if (err.name === 'PermissionError') {
         res.status(501).json({
             error: err.message
         });
@@ -30,7 +30,7 @@ function handleUncaughtError(taskName, res, err) {
 
 function throwError(msg, code = 'AccessError') {
     const error = new Error(msg);
-    error.code = code;
+    error.name = code;
     throw error;
 }
 

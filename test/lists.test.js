@@ -39,7 +39,7 @@ describe('Lists API', () => {
         try {
             await updateList(list._id, { title: 'Malicious List' }, { database, user: user2 });
         } catch (err) {
-            expect(err.code).toBe('AccessError');
+            expect(err.name).toBe('AccessError');
             expect(err.message).toBe('Invalid List ID');
         }
     });
@@ -52,7 +52,7 @@ describe('Lists API', () => {
         try {
             await deleteList(list._id, { database, user: user2 });
         } catch (err) {
-            expect(err.code).toBe('AccessError');
+            expect(err.name).toBe('AccessError');
             expect(err.message).toBe('Invalid List ID');
         }
     });
