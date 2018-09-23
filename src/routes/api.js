@@ -1,10 +1,6 @@
 const express = require('express');
-const {
-    getLists,
-    createList,
-    updateList,
-    deleteList
-} = require('../controllers/lists');
+const init = require('../controllers/init');
+const { getLists, createList, updateList, deleteList } = require('../controllers/lists');
 const { createTask, updateTask, deleteTask } = require('../controllers/tasks');
 const routeHandler = require('../helpers/routeHandler');
 
@@ -20,6 +16,13 @@ module.exports = (app, database) => {
     });
 
     /**
+     * Init
+     */
+    api.get('/init', (req, res) =>
+        routeHandler('getting initial payload', { req, res, database }, config => init(config))
+    );
+
+    /**
      * Lists
      */
     api.get(['/lists', '/lists/:listId'], (req, res) =>
@@ -28,9 +31,7 @@ module.exports = (app, database) => {
         )
     );
     api.put('/lists', (req, res) =>
-        routeHandler('create list', { req, res, database }, config =>
-            createList(req.body, config)
-        )
+        routeHandler('create list', { req, res, database }, config => createList(req.body, config))
     );
     api.post('/lists/:listId', (req, res) =>
         routeHandler('update list', { req, res, database }, config =>
