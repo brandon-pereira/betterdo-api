@@ -1,4 +1,4 @@
-process.env.DATABASE_NAME = 'betterdo-unittests';
+process.env.DATABASE_NAME = 'betterdo-unitTests';
 const database = require('../src/database');
 const createUser = () =>
     database.Users.create({
