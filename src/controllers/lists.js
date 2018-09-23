@@ -1,9 +1,14 @@
 const { throwError } = require('../helpers/errorHandler');
-
+const { highPriority } = require('../helpers/customLists');
 async function getLists(listId, { database, user }) {
     // TODO: What about 'inbox', 'high-priority', 'today', 'tomorrow', etc.
     // Get lists based on query data
-    const lists = await database.Lists.getLists(user._id, listId);
+    let lists = [];
+    if (listId === 'high-priority') {
+        lists = await highPriority({ database, user });
+    } else {
+        lists = await database.Lists.getLists(user._id, listId);
+    }
     // return appropriate results
     if (listId && lists) {
         // specific list
