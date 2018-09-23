@@ -1,11 +1,14 @@
 const { throwError } = require('../helpers/errorHandler');
-const { highPriority } = require('../helpers/customLists');
+const { fetchHighPriority, fetchToday, fetchTomorrow } = require('../helpers/customLists');
 async function getLists(listId, { database, user }) {
-    // TODO: What about 'inbox', 'high-priority', 'today', 'tomorrow', etc.
     // Get lists based on query data
     let lists = [];
     if (listId === 'high-priority') {
-        lists = await highPriority({ database, user });
+        lists = await fetchHighPriority({ database, user });
+    } else if (listId === 'today') {
+        lists = await fetchToday({ user, database });
+    } else if (listId === 'tomorrow') {
+        lists = await fetchTomorrow({ user, database });
     } else {
         lists = await database.Lists.getLists(user._id, listId);
     }
