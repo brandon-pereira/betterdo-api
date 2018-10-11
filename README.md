@@ -50,7 +50,7 @@ fetch('/api/tasks', {
     },
     body: JSON.stringify({
         title: 'Test',
-        list: '5b9d4a3d1a4c9e3dd0c14c60'
+        listId: '5b9d4a3d1a4c9e3dd0c14c60'
     })
 });
 ```
