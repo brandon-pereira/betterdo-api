@@ -18,8 +18,8 @@ require('./src/passport')(app, db);
 /**
  * Initialize Routes
  */
-// require('./src/routes/app')(routedApp, db);
-// require('./src/routes/api')(routedApp, db);
+require('./src/routes/app')(app, db);
+require('./src/routes/api')(app, db);
 require('./src/routes/root')(app, db);
 
 app.listen(process.env.SERVER_PORT || 8080, () => {

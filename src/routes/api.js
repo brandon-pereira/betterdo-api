@@ -11,7 +11,7 @@ module.exports = (app, database) => {
         if (req.user) {
             next();
         } else {
-            res.redirect(process.env.BASE_FOLDER);
+            res.redirect('../');
         }
     });
 

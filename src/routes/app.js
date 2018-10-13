@@ -9,14 +9,12 @@ module.exports = app => {
             console.log("NEXT");
             next();
         } else {
-            res.redirect(process.env.BASE_FOLDER);
+            res.redirect('../');
         }
     });
 
     /* Initialize the routes and attach them to the api */
-    _app.use('/', express.static(process.env.APP_FOLDER, {
-        fallthrough: false
-    }));
+    _app.get('/', express.static(process.env.APP_FOLDER));
 
     /* Bind the api to the main server */
     app.use('/app', _app);
