@@ -37,7 +37,7 @@ async function updateTask(taskId, updatedTask = {}, { database, user }) {
         throwError('User is not authorized to access task', 'PermissionsError');
     }
     // Code for handling change of list
-    if (updatedTask.list && task.list !== updatedTask.list) {
+    if (updatedTask.list && task.list.toString() !== updatedTask.list) {
         // Get new list
         const newList = await database.Lists.getUserListById(user._id, updatedTask.list);
         // Verify updatedTask.list is valid list
