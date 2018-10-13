@@ -18,12 +18,9 @@ require('./src/passport')(app, db);
 /**
  * Initialize Routes
  */
-const routedApp = express.Router();
-app.use('/', routedApp);
-
 // require('./src/routes/app')(routedApp, db);
 // require('./src/routes/api')(routedApp, db);
-require('./src/routes/root')(routedApp, db);
+require('./src/routes/root')(app, db);
 
 app.listen(process.env.SERVER_PORT || 8080, () => {
     console.info('Server started on port', process.env.SERVER_PORT || 8080);
