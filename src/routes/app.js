@@ -17,5 +17,5 @@ module.exports = app => {
     _app.use('/', express.static(process.env.APP_FOLDER));
 
     /* Bind the api to the main server */
-    app.use('/app', _app);
+    app.use(process.env.BASE_FOLDER + '/app', _app);
 };
