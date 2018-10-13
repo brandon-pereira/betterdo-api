@@ -1,5 +1,5 @@
 require('dotenv').config();
-const express = require('express')
+
 /**
  * Instantiate the server (using express)
  */
