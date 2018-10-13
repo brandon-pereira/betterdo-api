@@ -8,9 +8,4 @@ app.use(require('cookie-parser')());
 app.use(require('body-parser').json({}));
 app.use(require('body-parser').urlencoded({ extended: true }));
 
-const routedApp = express.Router();
-// routedApp.use('/b', user);
-
-app.use('/betterdo', routedApp);
-
-module.exports = routedApp;
+module.exports = app;
