@@ -14,7 +14,7 @@ module.exports = app => {
     });
 
     /* Initialize the routes and attach them to the api */
-    _app.use(express.static(process.env.APP_FOLDER, {
+    _app.use(express.static(__dirname + '/' + process.env.APP_FOLDER, {
         // fallthrough: false,
         // redirect: false
     }));
