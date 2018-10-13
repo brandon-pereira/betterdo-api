@@ -10,7 +10,7 @@ module.exports = app => {
         }
     });
 
-    app.use('/', express.static('public',  {
+    app.use(express.static('public',  {
         fallthrough: false
     }));
 };
