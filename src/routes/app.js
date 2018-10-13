@@ -14,7 +14,9 @@ module.exports = app => {
     });
 
     /* Initialize the routes and attach them to the api */
-    _app.get('/', express.static(process.env.APP_FOLDER));
+    _app.use('/', express.static(process.env.APP_FOLDER, {
+        fallthrough: false
+    }));
 
     /* Bind the api to the main server */
     app.use('/app', _app);
