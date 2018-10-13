@@ -5,8 +5,7 @@ module.exports = app => {
     app.use('/', (req, res, next) => {
         console.log("root", req.user);
         if (req.user) {
-            console.log("redirect", process.env.BASE_FOLDER + '/app');
-            res.redirect(process.env.BASE_FOLDER + '/app');
+            res.redirect('app');
         } else {
             next();
         }
