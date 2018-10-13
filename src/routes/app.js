@@ -4,11 +4,11 @@ module.exports = app => {
     /* Initialize a router, anything behind `/api` requires authentication. */
     const _app = express.Router();
     _app.use((req, res, next) => {
-        console.log("app", req.user);
-        if (!req.user) {
-            res.redirect(process.env.BASE_FOLDER);
-        } else {
+        if (req.user) {
+            console.log("NEXT");
             next();
+        } else {
+            res.redirect(process.env.BASE_FOLDER);
         }
     });
 
