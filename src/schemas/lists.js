@@ -32,7 +32,7 @@ module.exports = mongoose => {
         ],
         color: {
             type: String,
-            default: '#EEEEEE',
+            default: '#666666',
             validate: {
                 validator: function(v) {
                     return /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(v);
