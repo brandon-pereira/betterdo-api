@@ -21,8 +21,8 @@ require('./src/passport')(app, db);
 const routedApp = express.Router();
 app.use('/', routedApp);
 
-require('./src/routes/app')(routedApp, db);
-require('./src/routes/api')(routedApp, db);
+// require('./src/routes/app')(routedApp, db);
+// require('./src/routes/api')(routedApp, db);
 require('./src/routes/root')(routedApp, db);
 
 app.listen(process.env.SERVER_PORT || 8080, () => {
