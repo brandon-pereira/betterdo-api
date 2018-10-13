@@ -19,7 +19,7 @@ require('./src/passport')(app, db);
  * Initialize Routes
  */
 const routedApp = express.Router();
-app.use('/betterdo', routedApp);
+app.use('/', routedApp);
 
 require('./src/routes/app')(routedApp, db);
 require('./src/routes/api')(routedApp, db);

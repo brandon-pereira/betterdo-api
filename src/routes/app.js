@@ -5,7 +5,7 @@ module.exports = app => {
     const _app = express.Router();
     _app.use('/', (req, res, next) => {
         if (!req.user) {
-            res.redirect('/');
+            res.redirect(req.baseUrl);
         } else {
             next();
         }
