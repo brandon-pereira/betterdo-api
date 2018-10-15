@@ -7,7 +7,7 @@ const routeHandler = require('../helpers/routeHandler');
 module.exports = (app, database) => {
     /* Initialize a router, anything behind `/api` requires authentication. */
     const api = express.Router();
-    api.get('/', (req, res, next) => {
+    api.use('/', (req, res, next) => {
         if (req.user) {
             next();
         } else {
