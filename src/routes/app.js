@@ -3,7 +3,7 @@ const express = require('express');
 module.exports = app => {
     /* Initialize a router, anything behind `/api` requires authentication. */
     // const _app = express.Router();
-    app.get('/app', (req, res, next) => {
+    app.use('/app', (req, res, next) => {
         console.log("app", req.user);
         if (req.user) {
             next();
