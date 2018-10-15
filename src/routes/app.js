@@ -2,11 +2,10 @@ const express = require('express');
 
 module.exports = app => {
     /* Initialize a router, anything behind `/api` requires authentication. */
-    const _app = express.Router();
-    _app.get('/', (req, res, next) => {
+    // const _app = express.Router();
+    app.get('/app', (req, res, next) => {
         console.log("app", req.user);
         if (req.user) {
-            console.log("NEXT");
             next();
         } else {
             res.redirect('../');
@@ -14,11 +13,11 @@ module.exports = app => {
     });
 
     /* Initialize the routes and attach them to the api */
-    _app.use('/', express.static(process.env.APP_FOLDER, {
+    app.use('/app', express.static(process.env.APP_FOLDER, {
         // fallthrough: false,
         // redirect: false
     }));
 
     /* Bind the api to the main server */
-    app.use('/app', _app);
+    // app.use('/app', _app);
 };
