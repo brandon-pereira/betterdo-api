@@ -46,6 +46,8 @@ async function updateList(listId, updatedList = {}, { database, user }) {
     const list = await database.Lists.getUserListById(user._id, listId);
     // If no results, throw error
     if (!list) throwError('Invalid List ID');
+    // If inbox, don't allow editing
+    if (list.type === 'inbox') throwError(`Unable to modify inbox.`);
     // Merge the lists.. validation on the model will handle errors
     Object.assign(list, updatedList);
     // Save the model
