@@ -62,7 +62,8 @@ async function deleteList(listId, { database, user }) {
     // Get list
     const status = await database.Lists.deleteOne({
         _id: listId,
-        members: user._id
+        members: user._id,
+        type: 'default'
     });
     if (status && status.n > 0) {
         return { success: true };
