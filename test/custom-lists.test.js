@@ -37,6 +37,31 @@ describe('Custom Lists API', () => {
             expect(err.name).toBe('AccessError');
         }
     });
+    test('Today list should only return valid tasks', async () => {
+        let today = await getLists('today', { database, user: user1 });
+        expect(today).toHaveLength(0);
+        await createTask(
+            validList1._id,
+            { title: 'Todo today!', dueDate: new Date() },
+            { database, user: user1 }
+        );
+        today = await getLists('today', { database, user: user1 });
+        expect(today).toHaveLength(1);
+    });
+    test('Tomorrow list should only return valid tasks', async () => {
+        let today = await getLists('tomorrow', { database, user: user1 });
+        expect(today).toHaveLength(0);
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(12, 30, 0, 0);
+        await createTask(
+            validList1._id,
+            { title: 'Todo tomorrow!', dueDate: tomorrow },
+            { database, user: user1 }
+        );
+        today = await getLists('tomorrow', { database, user: user1 });
+        expect(today).toHaveLength(1);
+    });
     test('High priority list should only return valid tasks', async () => {
         await createTask(
             validList1._id,
