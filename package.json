@@ -28,5 +28,15 @@
         "eslint-plugin-jest": "^21.26.1",
         "jest": "^23.6.0",
         "nodemon": "^1.11.0"
+    },
+    "jest": {
+        "collectCoverageFrom": [
+            "src/**/*.{js}",
+            "!src/helpers/errorHandler.js",
+            "!src/helpers/routeHandler.js",
+            "!src/express.js",
+            "!src/passport.js",
+            "!src/routes/*"
+        ]
     }
 }
