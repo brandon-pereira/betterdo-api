@@ -1,6 +1,6 @@
 const { teardown, database, createUser } = require('./setup');
 const ListSchema = database.Lists;
-const { createList, updateList, deleteList } = require('../src/controllers/lists');
+const { getLists, createList, updateList, deleteList } = require('../src/controllers/lists');
 
 afterAll(teardown);
 
@@ -38,6 +38,27 @@ describe('Lists API', () => {
         const list = await createList({ title: 'Good List' }, { database, user: user1 });
         try {
             await updateList(list._id, { title: 'Malicious List' }, { database, user: user2 });
+        } catch (err) {
+            expect(err.name).toBe('AccessError');
+            expect(err.message).toBe('Invalid List ID');
+        }
+    });
+
+    test('Allows list to be modified', async () => {
+        expect.assertions(1);
+        const user = await createUser();
+        const list = await createList({ title: 'OK List' }, { database, user });
+        const updatedList = await updateList(list._id, { title: 'Good List' }, { database, user });
+        expect(updatedList.title).toBe('Good List');
+    });
+
+    test('Protects against fetching list non-member list', async () => {
+        expect.assertions(2);
+        const user1 = await createUser();
+        const user2 = await createUser();
+        const list = await createList({ title: 'Good List' }, { database, user: user1 });
+        try {
+            await getLists(list._id, { database, user: user2 });
         } catch (err) {
             expect(err.name).toBe('AccessError');
             expect(err.message).toBe('Invalid List ID');
