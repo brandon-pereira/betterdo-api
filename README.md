@@ -58,5 +58,8 @@ fetch('/api/tasks', {
 ### TODO
 
 -   [ ] Merge subtasks between server/front-end (or should it blindly trust?)
+-   [ ] Allow updating list order (and validate)
+-   [ ] Get to 100% test coverage (so close!!)
+-   [ ] Update these docs
 -   [ ] Recurring tasks (maybe this is v2?)
 -   [ ] Update user data (maybe this is v2?)

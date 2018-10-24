@@ -49,7 +49,7 @@ async function updateList(listId, updatedList = {}, { database, user }) {
     // If inbox, don't allow editing
     if (list.type === 'inbox') throwError(`Unable to modify inbox.`);
     // Merge the lists.. validation on the model will handle errors
-    // if (list.tasks) {
+    // if (updatedList.tasks) {
     //     TODO: Validate that no new tasks being referenced
     //     delete updatedList.tasks;
     // }
