@@ -2,22 +2,42 @@ const { teardown, database, createUser } = require('./setup');
 // const TaskSchema = database.Tasks;
 // const ListSchema = database.Lists;
 const { createTask } = require('../src/controllers/tasks');
-const { createList, getLists } = require('../src/controllers/lists');
+const { createList, updateList, getLists, deleteList } = require('../src/controllers/lists');
 
 let user1;
 let user2;
+let inbox;
 let validList1;
 let validList2;
 beforeAll(async () => {
-    user1 = await createUser();
+    user1 = await createUser({ createInbox: true });
     user2 = await createUser();
+    inbox = await getLists('inbox', { user: user1, database });
     validList1 = await createList({ title: 'Valid List' }, { database, user: user1 });
     validList2 = await createList({ title: 'Valid List' }, { database, user: user2 });
 });
 afterAll(teardown);
 
 describe('Custom Lists API', () => {
-    test('Custom Lists', async () => {
+    test("Inbox shouldn't allow modification", async () => {
+        expect.assertions(2);
+        try {
+            await updateList(inbox._id, { title: 'Malicious' }, { database, user: user1 });
+        } catch (err) {
+            expect(err.message).toBe('Unable to modify inbox.');
+            expect(err.name).toBe('AccessError');
+        }
+    });
+    test("Inbox shouldn't allow deletion", async () => {
+        expect.assertions(2);
+        try {
+            await deleteList(inbox._id, { database, user: user1 });
+        } catch (err) {
+            expect(err.message).toBe('Invalid List ID');
+            expect(err.name).toBe('AccessError');
+        }
+    });
+    test('High priority list should only return valid tasks', async () => {
         await createTask(
             validList1._id,
             { title: 'Invalid because not high-priority' },
