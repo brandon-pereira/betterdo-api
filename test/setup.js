@@ -5,10 +5,7 @@ const createUser = () =>
         firstName: 'unitTest'
     });
 
-async function teardown() {
-    await database.connection.dropDatabase();
-    await database.connection.close();
-}
+async function teardown() {}
 
 module.exports = {
     teardown,
