@@ -65,8 +65,6 @@ module.exports = mongoose => {
             lists = this.getUserListById(user_id, list_id);
         } else if (user_id) {
             lists = this.getUserLists(user_id);
-        } else {
-            throw new Error('No user_id or list_id passed');
         }
         return lists;
     };
@@ -101,23 +99,19 @@ module.exports = mongoose => {
     model.addTaskToList = async function(task_id, list_id) {
         const list = await this.findOne({ _id: list_id });
         // Try adding show
-        if (list) {
-            list.tasks.addToSet(task_id);
-            // Save/return
-            await list.save();
-            return list;
-        }
+        list.tasks.addToSet(task_id);
+        // Save/return
+        await list.save();
+        return list;
     };
 
     model.removeTaskFromList = async function(task_id, list_id) {
         const list = await this.findOne({ _id: list_id });
         // Try removing show
-        if (list) {
-            list.tasks = list.tasks.filter(id => id.str !== task_id.str);
-            // Save/return
-            await list.save();
-            return list;
-        }
+        list.tasks = list.tasks.filter(id => id.str !== task_id.str);
+        // Save/return
+        await list.save();
+        return list;
     };
 
     return model;

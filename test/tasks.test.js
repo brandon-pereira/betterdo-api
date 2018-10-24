@@ -67,16 +67,39 @@ describe('Tasks API', () => {
         expect(task.createdBy).toBe(user._id);
     });
 
+    test('Protects against modifying protected fields', async () => {
+        expect.assertions(2);
+        const task = await createTask(validList._id, { title: 'Test' }, { database, user });
+        try {
+            await updateTask(task._id, { creationDate: new Date() }, { database, user });
+        } catch (err) {
+            expect(err.name).toBe('ValidationError');
+            expect(err.message).toBe(
+                'Task validation failed: creationDate: Not permitted to modify creationDate!'
+            );
+        }
+    });
+
     test('Protects against non-member modification', async () => {
         const badGuy = await createUser();
         let task = await createTask(validList._id, { title: 'Good Task' }, { database, user });
         task = await updateTask(task._id, { title: 'Good Update' }, { database, user });
         try {
-            task = await updateTask(task._id, { title: 'Bad Update' }, { database, user: badGuy });
+            await updateTask(task._id, { title: 'Bad Update' }, { database, user: badGuy });
         } catch (err) {
             expect(err.name).toBe('PermissionsError');
             expect(err.message).toBe('User is not authorized to access task');
             expect(task.title).toBe('Good Update');
+        }
+        const badGuysList = await createList(
+            { title: 'Bad Guys List' },
+            { database, user: badGuy }
+        );
+        try {
+            await updateTask(task._id, { list: badGuysList._id }, { database, user });
+        } catch (err) {
+            expect(err.name).toBe('PermissionsError');
+            expect(err.message).toBe('User is not authorized to access list');
         }
     });
 

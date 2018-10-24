@@ -72,12 +72,8 @@ async function deleteTask(taskId, { database, user }) {
     // Remove task from list
     await database.Lists.removeTaskFromList(taskId, task.list);
     // Delete task
-    const status = await database.Tasks.deleteOne({ _id: task._id });
-    // Check results
-    if (status && status.n > 0) {
-        return { success: true };
-    }
-    throwError('Invalid Task ID');
+    await database.Tasks.deleteOne({ _id: task._id });
+    return { success: true };
 }
 
 module.exports = {

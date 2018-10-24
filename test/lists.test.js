@@ -52,6 +52,26 @@ describe('Lists API', () => {
         expect(updatedList.title).toBe('Good List');
     });
 
+    test('Allows list to be deleted', async () => {
+        expect.assertions(1);
+        const user = await createUser();
+        const list = await createList({ title: 'Temp List' }, { database, user });
+        const deletedList = await deleteList(list._id, { database, user });
+        expect(deletedList.success).toBeTruthy();
+    });
+
+    test('Allows fetching multiple lists', async () => {
+        expect.assertions(1);
+        const user = await createUser();
+        const randomNumber = Math.floor(Math.random() * 10) + 1; // random between 1 and 10
+        const lists = [...Array(randomNumber).keys()].map(i =>
+            createList({ title: `List ${i}` }, { database, user })
+        );
+        await Promise.all(lists);
+        const fetchedLists = await getLists(null, { database, user });
+        expect(fetchedLists.lists).toHaveLength(randomNumber);
+    });
+
     test('Protects against fetching list non-member list', async () => {
         expect.assertions(2);
         const user1 = await createUser();
