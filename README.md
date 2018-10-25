@@ -1,65 +1,46 @@
 # betterdo-api
 
-The API for BetterDo.
+The API for BetterDo. This repository controls the UI routing and enables a REST API.
+
+It's recommended you run this with the UI. See [betterdo-ui](https://github.com/brandon-pereira/betterdo-ui/).
+
+**NOTE**: This is still a WIP. See below for a full list of todos. Also see below for a list of things I'd like to add.
+
+## Features
+
+-   Simple usable REST API 🤖
+-   Elegant application structure for easy adaption 🤓
+-   100% end-to-end test coverage ✅
+-   Ability to authenticate with Google (and ability to add others) 🛤
 
 ## Endpoints
 
+-   `/` - The landing page
+-   `/app` - The application (requires authentication)
 -   `/auth/google` - Authenticate with Google Endpoint
 -   `/auth/google/callback` - Google authentication callback
 -   `/auth/logout` - Logout endpoint
--   `/api/lists`
+-   `/init` - Initialization payload. Returns user info, inbox info, and list of lists.
+-   `/api/lists` - Methods around updating lists
 
     -   `GET`: get lists
-        ```javascript
-        fetch('/api/lists');
-        ```
     -   `PUT` add list
-        ```javascript
-        fetch('/api/lists', {
-            method: 'PUT',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                title: 'Header'
-            })
-        });
-        ```
     -   `POST` update list
+    -   `DELETE` delete list
 
-        ```javascript
-        fetch('/api/lists/5b9bf1b62b505fcf6501c82b', {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                title: 'Hello!'
-            })
-        });
-        ```
+-   `/api/tasks` - Methods around updating tasks
 
-```javascript
-fetch('/api/tasks', {
-    method: 'PUT',
-    headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-        title: 'Test',
-        listId: '5b9d4a3d1a4c9e3dd0c14c60'
-    })
-});
-```
+    -   `GET`: get task
+    -   `PUT` add task
+    -   `POST` update task
+    -   `DELETE` deleteTask
 
 ### TODO
 
 -   [ ] Merge subtasks between server/front-end (or should it blindly trust?)
 -   [ ] Allow updating list order (and validate)
--   [ ] Get to 100% test coverage (so close!!)
--   [ ] Update these docs
--   [ ] Recurring tasks (maybe this is v2?)
--   [ ] Update user data (maybe this is v2?)
+
+### Future Feature Ideas
+
+-   [ ] Recurring tasks
+-   [ ] Update user data
