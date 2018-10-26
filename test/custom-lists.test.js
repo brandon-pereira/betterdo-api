@@ -20,13 +20,9 @@ afterAll(teardown);
 
 describe('Custom Lists API', () => {
     test("Inbox shouldn't allow modification", async () => {
-        expect.assertions(2);
-        try {
-            await updateList(inbox._id, { title: 'Malicious' }, { database, user: user1 });
-        } catch (err) {
-            expect(err.message).toBe('Unable to modify inbox.');
-            expect(err.name).toBe('AccessError');
-        }
+        await updateList(inbox._id, { title: 'Malicious' }, { database, user: user1 });
+        const result = await getLists(inbox._id, { database, user: user1 });
+        expect(result.title).toBe('Inbox');
     });
     test("Inbox shouldn't allow deletion", async () => {
         expect.assertions(2);

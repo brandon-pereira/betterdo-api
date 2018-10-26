@@ -46,13 +46,22 @@ async function updateList(listId, updatedList = {}, { database, user }) {
     const list = await database.Lists.getUserListById(user._id, listId);
     // If no results, throw error
     if (!list) throwError('Invalid List ID');
-    // If inbox, don't allow editing
-    if (list.type === 'inbox') throwError(`Unable to modify inbox.`);
+    // If inbox, don't allow editing some fields
+    if (list.type === 'inbox') {
+        updatedList = { tasks: updatedList.tasks };
+    }
+    if (
+        updatedList.tasks &&
+        (!Array.isArray(updatedList.tasks) ||
+            updatedList.tasks.length !== list.tasks.length ||
+            updatedList.tasks.find(
+                _id => !list.tasks.map(task => task._id.toString()).includes(_id)
+            ))
+    ) {
+        delete updatedList.tasks;
+    }
     // Merge the lists.. validation on the model will handle errors
-    // if (updatedList.tasks) {
-    //     TODO: Validate that no new tasks being referenced
-    //     delete updatedList.tasks;
-    // }
+
     Object.assign(list, updatedList);
     // Save the model
     await list.save();

@@ -1,6 +1,7 @@
 const { teardown, database, createUser } = require('./setup');
 const ListSchema = database.Lists;
 const { getLists, createList, updateList, deleteList } = require('../src/controllers/lists');
+const { createTask } = require('../src/controllers/tasks');
 
 afterAll(teardown);
 
@@ -96,6 +97,59 @@ describe('Lists API', () => {
             expect(err.name).toBe('AccessError');
             expect(err.message).toBe('Invalid List ID');
         }
+    });
+
+    test('Allows lists tasks to be reordered', async () => {
+        const user = await createUser();
+        let list = await createList({ title: 'Test' }, { database, user });
+        const task1 = await createTask(list._id, { title: 'Test 1' }, { database, user });
+        const task2 = await createTask(list._id, { title: 'Test 2' }, { database, user });
+        const task3 = await createTask(list._id, { title: 'Test 3' }, { database, user });
+        list = await getLists(list._id, { database, user });
+        const sanitizeId = task => task._id.toString();
+        expect(list.tasks.map(sanitizeId)).toMatchObject([task1, task2, task3].map(sanitizeId));
+        list = await updateList(
+            list._id,
+            {
+                tasks: [task3, task2, task1].map(sanitizeId)
+            },
+            { database, user }
+        );
+        list = await getLists(list._id, { database, user });
+        expect(list.tasks.map(sanitizeId)).toMatchObject([task3, task2, task1].map(sanitizeId));
+    });
+
+    test('Prevents tasks from being injected during reorder', async () => {
+        const user = await createUser();
+        let list = await createList({ title: 'Test' }, { database, user });
+        const task1 = await createTask(list._id, { title: 'Good Task' }, { database, user });
+        const task2 = await createTask(list._id, { title: 'Good Task' }, { database, user });
+        const badTask = await createTask(
+            (await createList({ title: 'Test' }, { database, user }))._id,
+            { title: 'Bad Task' },
+            { database, user }
+        );
+        list = await updateList(
+            list._id,
+            { tasks: [badTask._id.toString(), task1._id.toString()] },
+            { database, user }
+        );
+        list = await getLists(list._id, { database, user });
+        expect(list.tasks).toHaveLength(2);
+        expect(list.tasks[0]._id.toString()).toBe(task1._id.toString());
+        expect(list.tasks[1]._id.toString()).toBe(task2._id.toString());
+    });
+
+    test('Prevents tasks from being removed during reorder', async () => {
+        const user = await createUser();
+        let list = await createList({ title: 'Test' }, { database, user });
+        const task1 = (await createTask(list._id, { title: 'Good Task' }, { database, user }))._id;
+        const task2 = (await createTask(list._id, { title: 'Good Task' }, { database, user }))._id;
+        list = await updateList(list._id, { tasks: [task2] }, { database, user });
+        list = await getLists(list._id, { database, user });
+        expect(list.tasks).toHaveLength(2);
+        expect(list.tasks[0]._id.toString()).toBe(task1._id.toString());
+        expect(list.tasks[1]._id.toString()).toBe(task2._id.toString());
     });
 
     test('Requires that the colour be a valid hex code', async () => {
