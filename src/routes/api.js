@@ -18,8 +18,10 @@ module.exports = (app, database) => {
     /**
      * Init
      */
-    api.get('/init', (req, res) =>
-        routeHandler('getting initial payload', { req, res, database }, config => init(config))
+    api.get(['/init', '/init/:listId'], (req, res) =>
+        routeHandler('getting initial payload', { req, res, database }, config =>
+            init(req.params.listId, config)
+        )
     );
 
     /**

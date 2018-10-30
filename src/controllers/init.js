@@ -1,10 +1,10 @@
-async function init({ database, user }) {
-    let inbox = database.Lists.getLists(user._id, 'inbox');
+async function init(listId = 'inbox', { database, user }) {
+    let currentList = database.Lists.getLists(user._id, listId);
     let lists = database.Lists.getLists(user._id);
-    [inbox, lists] = await Promise.all([inbox, lists]);
+    [currentList, lists] = await Promise.all([currentList, lists]);
     return {
         user,
-        inbox,
+        currentList,
         lists
     };
 }

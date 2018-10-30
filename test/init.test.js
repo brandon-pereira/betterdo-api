@@ -22,23 +22,23 @@ afterAll(teardown);
 
 describe('Initialization', () => {
     test('Should return user information', async () => {
-        const response = await init({ database, user: user });
+        const response = await init(undefined, { database, user: user });
         expect(typeof response.user).toBe('object');
         expect(response.user).toMatchObject(user);
     });
 
     test('Should return inbox and its tasks', async () => {
-        const response = await init({ database, user: user });
-        expect(typeof response.inbox).toBe('object');
-        expect(response.inbox._id.toString()).toBe(inbox._id.toString());
-        expect(response.inbox.type).toBe('inbox');
-        expect(response.inbox.tasks).toHaveLength(1);
-        expect(typeof response.inbox.tasks[0]).toBe('object');
-        expect(response.inbox.tasks[0].title).toBe(validTask.title);
+        const response = await init(undefined, { database, user: user });
+        expect(typeof response.currentList).toBe('object');
+        expect(response.currentList._id.toString()).toBe(inbox._id.toString());
+        expect(response.currentList.type).toBe('inbox');
+        expect(response.currentList.tasks).toHaveLength(1);
+        expect(typeof response.currentList.tasks[0]).toBe('object');
+        expect(response.currentList.tasks[0].title).toBe(validTask.title);
     });
 
     test('Should return lists', async () => {
-        const response = await init({ database, user: user });
+        const response = await init(undefined, { database, user: user });
         expect(Array.isArray(response.lists)).toBeTruthy();
         expect(response.lists).toHaveLength(2); // inbox + second list
         expect(response.lists[0].title).toBe('Inbox');
@@ -46,7 +46,7 @@ describe('Initialization', () => {
     });
 
     test("Shouldn't expose tasks in the lists array", async () => {
-        const response = await init({ database, user: user });
+        const response = await init(undefined, { database, user: user });
         expect(Array.isArray(response.lists[1].tasks)).toBeTruthy();
         expect(response.lists[1].tasks).toHaveLength(1);
         expect(typeof response.lists[1].tasks[0].toString()).toBe('string');
