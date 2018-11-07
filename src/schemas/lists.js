@@ -98,19 +98,30 @@ module.exports = mongoose => {
 
     model.addTaskToList = async function(task_id, list_id) {
         const list = await this.findOne({ _id: list_id });
-        // Try adding show
-        list.tasks.addToSet(task_id);
-        // Save/return
-        await list.save();
+        // See if show is in list
+        if (!list.tasks.find(id => task_id.equals(id))) {
+            // If it isn't add it
+            list.tasks.push(task_id);
+            // Save/return
+            await list.save();
+            return list;
+        }
         return list;
     };
 
     model.removeTaskFromList = async function(task_id, list_id) {
+        // Mongoose ID to string
         const list = await this.findOne({ _id: list_id });
         // Try removing show
-        list.tasks = list.tasks.filter(id => id.str !== task_id.str);
-        // Save/return
-        await list.save();
+        const index = list.tasks.findIndex(id => task_id.equals(id));
+        // console.log(index, list.tasks);
+        if (index >= 0) {
+            // Remove Index
+            list.tasks.splice(index, 1);
+            // Save/return
+            await list.save();
+            return list;
+        }
         return list;
     };
 

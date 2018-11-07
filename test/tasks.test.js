@@ -15,7 +15,7 @@ afterAll(teardown);
 describe('Tasks API', () => {
     test('Can be created with valid data', async () => {
         const task = await createTask(validList._id, { title: 'Test' }, { database, user });
-        expect(task.list).toBe(validList._id);
+        expect(task.list).toEqual(validList._id);
         expect(task.title).toBe('Test');
     });
 

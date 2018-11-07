@@ -15,10 +15,10 @@ async function createTask(listId, taskObj = {}, { database, user }) {
     const task = await database.Tasks.create({
         ...taskObj,
         createdBy: user._id,
-        list: listId
+        list: list._id
     });
     // Add task to list
-    await database.Lists.addTaskToList(task._id, listId);
+    await database.Lists.addTaskToList(task._id, list._id);
     // Return new list to front-end
     return task;
 }
@@ -45,9 +45,9 @@ async function updateTask(taskId, updatedTask = {}, { database, user }) {
             throwError('User is not authorized to access list', 'PermissionsError');
         }
         // Remove from this list
-        await database.Lists.removeTaskFromList(taskId, list._id);
+        await database.Lists.removeTaskFromList(task._id, list._id);
         // Add to new list
-        await database.Lists.addTaskToList(taskId, newList._id);
+        await database.Lists.addTaskToList(task._id, newList._id);
     }
     // TODO: Merge tasks.subtasks with req.body.subtasks
     // Merge the tasks.. validation on the model will handle errors
@@ -70,7 +70,7 @@ async function deleteTask(taskId, { database, user }) {
     // Ensure valid permissions
     if (!list) throwError('User is not authorized to access task', 'PermissionsError');
     // Remove task from list
-    await database.Lists.removeTaskFromList(taskId, task.list);
+    await database.Lists.removeTaskFromList(task._id, task.list);
     // Delete task
     await database.Tasks.deleteOne({ _id: task._id });
     return { success: true };
