@@ -85,15 +85,19 @@ module.exports = mongoose => {
     };
 
     model.getUserListById = async function(user_id, list_id) {
-        const userQueryData = ['_id', 'firstName', 'lastName'];
-        return await this.findOne({
-            _id: list_id,
-            members: user_id
-        })
-            .populate('members', userQueryData)
-            .populate('owner', userQueryData)
-            .populate('tasks')
-            .exec();
+        try {
+            const userQueryData = ['_id', 'firstName', 'lastName'];
+            return await this.findOne({
+                _id: list_id,
+                members: user_id
+            })
+                .populate('members', userQueryData)
+                .populate('owner', userQueryData)
+                .populate('tasks')
+                .exec();
+        } catch (err) {
+            return null;
+        }
     };
 
     model.addTaskToList = async function(task_id, list_id) {
