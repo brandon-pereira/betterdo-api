@@ -30,6 +30,7 @@
         "nodemon": "^1.18.6"
     },
     "jest": {
+        "testEnvironment": "node",
         "collectCoverageFrom": [
             "src/**/*.{js}",
             "!src/helpers/errorHandler.js",
