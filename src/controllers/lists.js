@@ -66,18 +66,17 @@ async function updateList(listId, updatedList = {}, { database, user }) {
     if (list.type === 'inbox') {
         updatedList = { tasks: updatedList.tasks };
     }
-    // const isShowingCompleted = true;
-    // const invalidIds = updatedList.tasks.find(
-    //     _id => !list.tasks.map(task => task._id.toString()).includes(_id)
-    // );
-    // if (
-    //     updatedList.tasks &&
-    //     (!Array.isArray(updatedList.tasks) ||
-    //     (updatedList.tasks.length !== list.tasks.length || ) ||
-    //     invalidIds
-    // ) {
-    throwError('Invalid modification of tasks');
-    // }
+    // Ensure tasks length matches and no new tasks injected
+    if (
+        updatedList.tasks &&
+        (!Array.isArray(updatedList.tasks) ||
+            updatedList.tasks.length !== list.tasks.length ||
+            updatedList.tasks.find(
+                _id => !list.tasks.map(task => task._id.toString()).includes(_id)
+            ))
+    ) {
+        throwError('Invalid modification of tasks');
+    }
     // Merge the lists.. validation on the model will handle errors
     Object.assign(list, updatedList);
     // Save the model
