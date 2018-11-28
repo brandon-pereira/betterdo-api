@@ -35,18 +35,18 @@ describe('Custom Lists API', () => {
     });
     test('Today list should only return valid tasks', async () => {
         let today = await getLists('today', { database, user: user1 });
-        expect(today).toHaveLength(0);
+        expect(today.tasks).toHaveLength(0);
         await createTask(
             validList1._id,
             { title: 'Todo today!', dueDate: new Date() },
             { database, user: user1 }
         );
         today = await getLists('today', { database, user: user1 });
-        expect(today).toHaveLength(1);
+        expect(today.tasks).toHaveLength(1);
     });
     test('Tomorrow list should only return valid tasks', async () => {
         let today = await getLists('tomorrow', { database, user: user1 });
-        expect(today).toHaveLength(0);
+        expect(today.tasks).toHaveLength(0);
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         tomorrow.setHours(12, 30, 0, 0);
@@ -56,7 +56,7 @@ describe('Custom Lists API', () => {
             { database, user: user1 }
         );
         today = await getLists('tomorrow', { database, user: user1 });
-        expect(today).toHaveLength(1);
+        expect(today.tasks).toHaveLength(1);
     });
     test('High priority list should only return valid tasks', async () => {
         await createTask(
@@ -75,6 +75,6 @@ describe('Custom Lists API', () => {
             { database, user: user1 }
         );
         const user1lists = await getLists('high-priority', { database, user: user1 });
-        expect(user1lists).toHaveLength(1);
+        expect(user1lists.tasks).toHaveLength(1);
     });
 });

@@ -1,4 +1,35 @@
 async function fetchHighPriority({ database, user }) {
+    return new database.Lists({
+        _id: 'high-priority',
+        title: 'High Priority',
+        type: 'high-priority',
+        tasks: await fetchHighPriorityTasks({ database, user }),
+        members: [user._id],
+        owner: user._id
+    });
+}
+async function fetchTomorrow({ database, user }) {
+    return new database.Lists({
+        _id: 'high-priority',
+        title: 'High Priority',
+        type: 'high-priority',
+        tasks: await fetchTomorrowTasks({ database, user }),
+        members: [user._id],
+        owner: user._id
+    });
+}
+async function fetchToday({ database, user }) {
+    return new database.Lists({
+        _id: 'high-priority',
+        title: 'High Priority',
+        type: 'high-priority',
+        tasks: await fetchTodayTasks({ database, user }),
+        members: [user._id],
+        owner: user._id
+    });
+}
+
+async function fetchHighPriorityTasks({ database, user }) {
     const tasks = await database.Tasks.find({
         priority: 'high'
     })
@@ -27,7 +58,7 @@ async function fetchTasksWithinDates(lowest, highest, { user, database }) {
     return tasks.filter(tasks => tasks.list);
 }
 
-async function fetchTomorrow({ user, database }) {
+async function fetchTomorrowTasks({ user, database }) {
     const start = new Date();
     start.setDate(start.getDate() + 1);
     start.setHours(0, 0, 0, 0);
@@ -37,7 +68,7 @@ async function fetchTomorrow({ user, database }) {
     return fetchTasksWithinDates(start, end, { user, database });
 }
 
-function fetchToday({ user, database }) {
+function fetchTodayTasks({ user, database }) {
     const start = new Date();
     start.setHours(0, 0, 0, 0);
     const end = new Date();
