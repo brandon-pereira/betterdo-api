@@ -8,9 +8,9 @@ async function init(listId = 'inbox', { database, user }) {
         // user passed in invalid list
         currentList = await database.Lists.getLists(user._id, 'inbox');
     }
-    const { completeTasks, incompleteTasks } = countTasks(currentList.tasks);
+    const { completedTasks, incompleteTasks } = countTasks(currentList.tasks);
     currentList.tasks = incompleteTasks;
-    currentList.completedTasks = completeTasks.length;
+    currentList.additionalTasks = completedTasks.length;
     return {
         user,
         currentList,

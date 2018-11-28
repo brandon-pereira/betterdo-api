@@ -59,9 +59,5 @@ module.exports = mongoose => {
 
     const model = mongoose.model('Task', schema);
 
-    // model.blah = async function() {
-
-    // }
-
     return model;
 };

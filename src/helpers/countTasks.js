@@ -2,7 +2,7 @@ module.exports = (tasks = []) =>
     tasks.reduce(
         (acc, task) => {
             if (task.isCompleted) {
-                acc.completeTasks.push(task);
+                acc.completedTasks.push(task);
             } else {
                 acc.incompleteTasks.push(task);
             }
@@ -10,6 +10,6 @@ module.exports = (tasks = []) =>
         },
         {
             incompleteTasks: [],
-            completeTasks: []
+            completedTasks: []
         }
     );

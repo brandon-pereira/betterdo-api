@@ -27,9 +27,9 @@ async function getLists(listId, { database, user, includeCompleted }) {
     if (listId && lists) {
         if (!includeCompleted) {
             // counted completed tasks
-            const { incompleteTasks, completeTasks } = countTasks(lists.tasks);
+            const { incompleteTasks, completedTasks } = countTasks(lists.tasks);
             lists.tasks = incompleteTasks;
-            lists.completedTasks = completeTasks.length;
+            lists.additionalTasks = completedTasks.length;
         }
         return lists;
     } else if (listId) {

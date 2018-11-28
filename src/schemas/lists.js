@@ -40,7 +40,7 @@ module.exports = mongoose => {
                 message: props => `${props.value} is not a hex color code!`
             }
         },
-        completedTasks: {
+        additionalTasks: {
             type: Number,
             default: 0
         }
