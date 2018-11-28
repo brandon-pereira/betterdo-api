@@ -72,10 +72,10 @@ async function updateList(listId, updatedList = {}, { database, user }) {
                 _id => !list.tasks.map(task => task._id.toString()).includes(_id)
             ))
     ) {
+        throwError('Invalid modification of tasks');
         delete updatedList.tasks;
     }
     // Merge the lists.. validation on the model will handle errors
-
     Object.assign(list, updatedList);
     // Save the model
     await list.save();
