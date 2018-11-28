@@ -124,7 +124,6 @@ module.exports = mongoose => {
             list.tasks.splice(index, 1);
             // Save/return
             await list.save();
-            return list;
         }
         return list;
     };
