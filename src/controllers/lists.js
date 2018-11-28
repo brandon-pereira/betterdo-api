@@ -4,11 +4,20 @@ async function getLists(listId, { database, user }) {
     // Get lists based on query data
     let lists = [];
     if (listId === 'high-priority') {
-        lists = await fetchHighPriority({ database, user });
+        lists = await fetchHighPriority({
+            database,
+            user
+        });
     } else if (listId === 'today') {
-        lists = await fetchToday({ user, database });
+        lists = await fetchToday({
+            user,
+            database
+        });
     } else if (listId === 'tomorrow') {
-        lists = await fetchTomorrow({ user, database });
+        lists = await fetchTomorrow({
+            user,
+            database
+        });
     } else {
         lists = await database.Lists.getLists(user._id, listId);
     }
