@@ -158,14 +158,14 @@ describe('Lists API', () => {
         const props = { database, user };
         const badColors = ['red', '#SSSSSS'];
         const goodColors = ['#FFF', '#FF00AA'];
-        await Promise.all(
+        const goodColorsPromise = Promise.all(
             goodColors.map(color =>
                 createList({ title: 'test', color }, props).then(list =>
                     expect(list.color).toBe(color)
                 )
             )
         );
-        await Promise.all(
+        const badColorsPromise = Promise.all(
             badColors.map(color =>
                 createList({ title: 'test', color }, props).catch(err => {
                     expect(err.name).toBe('ValidationError');
@@ -173,6 +173,7 @@ describe('Lists API', () => {
                 })
             )
         );
+        return Promise.all([goodColorsPromise, badColorsPromise]);
     });
 });
 
