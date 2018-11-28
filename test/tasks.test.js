@@ -2,7 +2,7 @@ const { teardown, database, createUser } = require('./setup');
 // const TaskSchema = database.Tasks;
 const ListSchema = database.Lists;
 const { createTask, updateTask, deleteTask } = require('../src/controllers/tasks');
-const { createList } = require('../src/controllers/lists');
+const { createList, getLists } = require('../src/controllers/lists');
 
 let user;
 let validList;
@@ -40,6 +40,20 @@ describe('Tasks API', () => {
         list2 = await ListSchema.findById(list2._id);
         expect(list1.tasks).not.toContain(task._id);
         expect(list2.tasks).toContain(task._id);
+    });
+
+    test('Allows tasks to be set to complete and returns correct count', async () => {
+        let list = await createList({ title: 'New List' }, { database, user });
+        expect(list.completedTasks).toBe(0);
+        expect(list.tasks).toHaveLength(0);
+        const task = await createTask(list._id, { title: 'Test' }, { database, user });
+        list = await getLists(list._id, { database, user });
+        expect(list.completedTasks).toBe(0);
+        expect(list.tasks).toHaveLength(1);
+        await updateTask(task._id, { isCompleted: true }, { database, user });
+        list = await getLists(list._id, { database, user });
+        expect(list.completedTasks).toBe(1);
+        expect(list.tasks).toHaveLength(0);
     });
 
     test('Provides clear error messages when invalid data provided', async () => {

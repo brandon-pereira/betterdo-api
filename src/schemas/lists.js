@@ -39,6 +39,10 @@ module.exports = mongoose => {
                 },
                 message: props => `${props.value} is not a hex color code!`
             }
+        },
+        completedTasks: {
+            type: Number,
+            default: 0
         }
     });
 
@@ -73,6 +77,8 @@ module.exports = mongoose => {
         return await this.find({
             members: user_id
         });
+        // .lean()
+        // .exec();
     };
 
     model.getUserInbox = async function(user_id) {
