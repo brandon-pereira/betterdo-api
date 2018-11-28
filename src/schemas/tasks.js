@@ -55,8 +55,6 @@ module.exports = mongoose => {
                 this.invalidate(field, `Not permitted to modify ${field}!`);
             }
         });
-
-        // TODO: Ensure that this.list === valid list ID
     });
 
     const model = mongoose.model('Task', schema);
