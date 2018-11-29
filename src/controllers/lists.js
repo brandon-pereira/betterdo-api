@@ -1,6 +1,5 @@
 const { throwError } = require('../helpers/errorHandler');
 const { fetchHighPriority, fetchToday, fetchTomorrow } = require('../helpers/customLists');
-const countTasks = require('../helpers/countTasks');
 
 async function getLists(listId, { database, user, includeCompleted }) {
     // Get lists based on query data
@@ -27,9 +26,8 @@ async function getLists(listId, { database, user, includeCompleted }) {
     if (listId && lists) {
         if (!includeCompleted) {
             // counted completed tasks
-            const { incompleteTasks, completedTasks } = countTasks(lists.tasks);
-            lists.tasks = incompleteTasks;
-            lists.additionalTasks = completedTasks.length;
+            lists.additionalTasks = lists.completedTasks.length;
+            lists.completedTasks = [];
         }
         return lists;
     } else if (listId) {

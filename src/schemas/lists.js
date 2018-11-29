@@ -30,6 +30,12 @@ module.exports = mongoose => {
                 ref: 'Task'
             }
         ],
+        completedTasks: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'Task'
+            }
+        ],
         color: {
             type: String,
             default: '#666666',
@@ -106,32 +112,83 @@ module.exports = mongoose => {
         }
     };
 
-    model.addTaskToList = async function(task_id, list_id) {
+    model.addTaskToList = async function(task, list_id) {
+        // Find lists
         const list = await this.findOne({ _id: list_id });
-        // See if show is in list
-        if (!list.tasks.find(id => task_id.equals(id))) {
-            // If it isn't add it
-            list.tasks.push(task_id);
-            // Save/return
-            await list.save();
-            return list;
+        // Add task to appropriate list
+        if (!task.isCompleted) {
+            this._addTaskToTasksList(task._id, list);
+        } else {
+            this._addTaskToCompletedTasksList(task._id, list);
+        }
+        // Save/return
+        await list.save();
+        return list;
+    };
+
+    model.removeTaskFromList = async function(task, list_id) {
+        // Find list
+        const list = await this.findOne({ _id: list_id });
+        // Remove from lists
+        this._removeTaskFromTasksList(task._id, list);
+        this._removeTaskFromCompletedTasksList(task._id, list);
+        // Save/return
+        await list.save();
+        return list;
+    };
+
+    model.setTaskCompleted = async function(task, list_id) {
+        // Find list
+        const list = await this.findOne({ _id: list_id });
+        // Remove from lists
+        this._removeTaskFromTasksList(task._id, list);
+        this._addTaskToCompletedTasksList(task._id, list);
+        // Save/return
+        await list.save();
+        return list;
+    };
+
+    model.setTaskIncompleted = async function(task, list_id) {
+        // Find list
+        const list = await this.findOne({
+            _id: list_id
+        });
+        // Remove from lists
+        this._removeTaskFromCompletedTasksList(task._id, list);
+        this._addTaskToTasksList(task._id, list);
+        // Save/return
+        await list.save();
+        return list;
+    };
+
+    model._removeTaskFromCompletedTasksList = function(task_id, list) {
+        let index = list.completedTasks.findIndex(id => task_id.equals(id));
+        // Remove from completed tasks
+        if (index >= 0) {
+            list.completedTasks.splice(index, 1);
         }
         return list;
     };
 
-    model.removeTaskFromList = async function(task_id, list_id) {
-        // Mongoose ID to string
-        const list = await this.findOne({ _id: list_id });
-        // Try removing show
-        const index = list.tasks.findIndex(id => task_id.equals(id));
-        // console.log(index, list.tasks);
+    model._removeTaskFromTasksList = function(task_id, list) {
+        let index = list.tasks.findIndex(id => task_id.equals(id));
+        // Remove from tasks
         if (index >= 0) {
-            // Remove Index
             list.tasks.splice(index, 1);
-            // Save/return
-            await list.save();
         }
         return list;
+    };
+
+    model._addTaskToCompletedTasksList = function(task_id, list) {
+        if (!list.completedTasks.find(id => task_id.equals(id))) {
+            list.completedTasks.push(task_id);
+        }
+    };
+
+    model._addTaskToTasksList = function(task_id, list) {
+        if (!list.tasks.find(id => task_id.equals(id))) {
+            list.tasks.push(task_id);
+        }
     };
 
     return model;

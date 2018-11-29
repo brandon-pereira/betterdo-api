@@ -1,5 +1,3 @@
-const countTasks = require('../helpers/countTasks');
-
 async function init(listId = 'inbox', { database, user }) {
     let currentList = database.Lists.getLists(user._id, listId);
     let lists = database.Lists.getLists(user._id);
@@ -8,9 +6,8 @@ async function init(listId = 'inbox', { database, user }) {
         // user passed in invalid list
         currentList = await database.Lists.getLists(user._id, 'inbox');
     }
-    const { completedTasks, incompleteTasks } = countTasks(currentList.tasks);
-    currentList.tasks = incompleteTasks;
-    currentList.additionalTasks = completedTasks.length;
+    currentList.additionalTasks = currentList.completedTasks.length;
+    currentList.completedTasks = [];
     return {
         user,
         currentList,

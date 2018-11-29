@@ -18,7 +18,7 @@ async function createTask(listId, taskObj = {}, { database, user }) {
         list: list._id
     });
     // Add task to list
-    await database.Lists.addTaskToList(task._id, list._id);
+    await database.Lists.addTaskToList(task, list._id);
     // Return new list to front-end
     return task;
 }
@@ -31,7 +31,7 @@ async function updateTask(taskId, updatedTask = {}, { database, user }) {
     // If no results, throw error
     if (!task) throwError('Invalid Task ID');
     // Get List
-    const list = await database.Lists.getUserListById(user._id, task.list);
+    let list = await database.Lists.getUserListById(user._id, task.list);
     // Ensure valid permissions
     if (!list) {
         throwError('User is not authorized to access task', 'PermissionsError');
@@ -39,15 +39,26 @@ async function updateTask(taskId, updatedTask = {}, { database, user }) {
     // Code for handling change of list
     if (updatedTask.list && task.list.toString() !== updatedTask.list) {
         // Get new list
-        const newList = await database.Lists.getUserListById(user._id, updatedTask.list);
+        let newList = await database.Lists.getUserListById(user._id, updatedTask.list);
         // Verify updatedTask.list is valid list
         if (!newList) {
             throwError('User is not authorized to access list', 'PermissionsError');
         }
         // Remove from this list
-        await database.Lists.removeTaskFromList(task._id, list._id);
+        await database.Lists.removeTaskFromList(task, list._id);
         // Add to new list
-        await database.Lists.addTaskToList(task._id, newList._id);
+        await database.Lists.addTaskToList(task, newList._id);
+        // Set to new list so that later code doesn't need to process
+        task.list = updatedTask.list;
+        list = newList;
+    }
+    // If the task isCompleted state changed
+    if (updatedTask.isCompleted !== undefined && task.isCompleted !== updateTask.isCompleted) {
+        if (updatedTask.isCompleted) {
+            await database.Lists.setTaskCompleted(task._id, list._id);
+        } else {
+            await database.Lists.setTaskIncompleted(task._id, list._id);
+        }
     }
     // TODO: Merge tasks.subtasks with req.body.subtasks
     // Merge the tasks.. validation on the model will handle errors

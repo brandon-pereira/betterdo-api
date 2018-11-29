@@ -54,6 +54,18 @@ describe('Tasks API', () => {
         list = await getLists(list._id, { database, user });
         expect(list.additionalTasks).toBe(1);
         expect(list.tasks).toHaveLength(0);
+        await updateTask(task._id, { isCompleted: false }, { database, user });
+        list = await getLists(list._id, { database, user });
+        expect(list.additionalTasks).toBe(0);
+        expect(list.tasks).toHaveLength(1);
+        let list2 = await createList({ title: 'New List 2' }, { database, user });
+        await updateTask(task._id, { list: list2._id, isCompleted: true }, { database, user });
+        list = await getLists(list._id, { database, user });
+        list2 = await getLists(list2._id, { database, user });
+        expect(list.additionalTasks).toBe(0);
+        expect(list.tasks).toHaveLength(0);
+        expect(list2.additionalTasks).toBe(1);
+        expect(list2.tasks).toHaveLength(0);
     });
 
     test('Provides clear error messages when invalid data provided', async () => {
