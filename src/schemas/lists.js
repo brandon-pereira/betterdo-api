@@ -1,55 +1,61 @@
 const { Schema } = require('mongoose');
 
 module.exports = mongoose => {
-    const schema = new Schema({
-        title: {
-            type: String,
-            required: true,
-            maxlength: 100,
-            minlength: 1
-        },
-        owner: {
-            type: Schema.Types.ObjectId,
-            ref: 'User',
-            required: true
-        },
-        members: [
-            {
+    const schema = new Schema(
+        {
+            title: {
+                type: String,
+                required: true,
+                maxlength: 100,
+                minlength: 1
+            },
+            owner: {
                 type: Schema.Types.ObjectId,
-                ref: 'User'
+                ref: 'User',
+                required: true
+            },
+            members: [
+                {
+                    type: Schema.Types.ObjectId,
+                    ref: 'User'
+                }
+            ],
+            type: {
+                type: String,
+                default: 'default',
+                enum: ['inbox', 'default']
+            },
+            tasks: [
+                {
+                    type: Schema.Types.ObjectId,
+                    ref: 'Task'
+                }
+            ],
+            completedTasks: [
+                {
+                    type: Schema.Types.ObjectId,
+                    ref: 'Task'
+                }
+            ],
+            color: {
+                type: String,
+                default: '#666666',
+                validate: {
+                    validator: function(v) {
+                        return /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(v);
+                    },
+                    message: props => `${props.value} is not a hex color code!`
+                }
             }
-        ],
-        type: {
-            type: String,
-            default: 'default',
-            enum: ['inbox', 'default']
         },
-        tasks: [
-            {
-                type: Schema.Types.ObjectId,
-                ref: 'Task'
-            }
-        ],
-        completedTasks: [
-            {
-                type: Schema.Types.ObjectId,
-                ref: 'Task'
-            }
-        ],
-        color: {
-            type: String,
-            default: '#666666',
-            validate: {
-                validator: function(v) {
-                    return /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(v);
-                },
-                message: props => `${props.value} is not a hex color code!`
-            }
-        },
-        additionalTasks: {
-            type: Number,
-            default: 0
+        {
+            toObject: { virtuals: true },
+            toJSON: { virtuals: true }
         }
+    );
+
+    schema.virtual('additionalTasks').get(function() {
+        return this.completedTasks.length;
     });
 
     schema.pre('save', function() {
@@ -181,13 +187,13 @@ module.exports = mongoose => {
 
     model._addTaskToCompletedTasksList = function(task_id, list) {
         if (!list.completedTasks.find(id => task_id.equals(id))) {
-            list.completedTasks.push(task_id);
+            list.completedTasks.unshift(task_id);
         }
     };
 
     model._addTaskToTasksList = function(task_id, list) {
         if (!list.tasks.find(id => task_id.equals(id))) {
-            list.tasks.push(task_id);
+            list.tasks.unshift(task_id);
         }
     };
 

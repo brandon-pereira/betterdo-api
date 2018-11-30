@@ -6,8 +6,6 @@ async function init(listId = 'inbox', { database, user }) {
         // user passed in invalid list
         currentList = await database.Lists.getLists(user._id, 'inbox');
     }
-    currentList.additionalTasks = currentList.completedTasks.length;
-    currentList.completedTasks = [];
     return {
         user,
         currentList,

@@ -24,10 +24,11 @@ async function getLists(listId, { database, user, includeCompleted }) {
     }
     // return appropriate results
     if (listId && lists) {
-        if (!includeCompleted) {
-            // counted completed tasks
-            lists.additionalTasks = lists.completedTasks.length;
-            lists.completedTasks = [];
+        if (includeCompleted) {
+            await lists.populate('completedTasks').execPopulate();
+            // convert to object
+            lists = lists.toObject();
+            lists.additionalTasks = 0;
         }
         return lists;
     } else if (listId) {
