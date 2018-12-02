@@ -1,6 +1,7 @@
 const { throwError } = require('../helpers/errorHandler');
 const { fetchHighPriority, fetchToday, fetchTomorrow } = require('../helpers/customLists');
-async function getLists(listId, { database, user }) {
+
+async function getLists(listId, { database, user, includeCompleted }) {
     // Get lists based on query data
     let lists = [];
     if (listId === 'high-priority') {
@@ -23,7 +24,12 @@ async function getLists(listId, { database, user }) {
     }
     // return appropriate results
     if (listId && lists) {
-        // specific list
+        if (includeCompleted) {
+            await lists.populate('completedTasks').execPopulate();
+            // convert to object
+            lists = lists.toObject();
+            lists.additionalTasks = 0;
+        }
         return lists;
     } else if (listId) {
         // specific list but no results
@@ -59,6 +65,7 @@ async function updateList(listId, updatedList = {}, { database, user }) {
     if (list.type === 'inbox') {
         updatedList = { tasks: updatedList.tasks };
     }
+    // Ensure tasks length matches and no new tasks injected
     if (
         updatedList.tasks &&
         (!Array.isArray(updatedList.tasks) ||
@@ -67,10 +74,9 @@ async function updateList(listId, updatedList = {}, { database, user }) {
                 _id => !list.tasks.map(task => task._id.toString()).includes(_id)
             ))
     ) {
-        delete updatedList.tasks;
+        throwError('Invalid modification of tasks');
     }
     // Merge the lists.. validation on the model will handle errors
-
     Object.assign(list, updatedList);
     // Save the model
     await list.save();

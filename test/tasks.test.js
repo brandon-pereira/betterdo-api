@@ -2,7 +2,7 @@ const { teardown, database, createUser } = require('./setup');
 // const TaskSchema = database.Tasks;
 const ListSchema = database.Lists;
 const { createTask, updateTask, deleteTask } = require('../src/controllers/tasks');
-const { createList } = require('../src/controllers/lists');
+const { createList, getLists } = require('../src/controllers/lists');
 
 let user;
 let validList;
@@ -40,6 +40,32 @@ describe('Tasks API', () => {
         list2 = await ListSchema.findById(list2._id);
         expect(list1.tasks).not.toContain(task._id);
         expect(list2.tasks).toContain(task._id);
+    });
+
+    test('Allows tasks to be set to complete and returns correct count', async () => {
+        let list = await createList({ title: 'New List' }, { database, user });
+        expect(list.additionalTasks).toBe(0);
+        expect(list.tasks).toHaveLength(0);
+        const task = await createTask(list._id, { title: 'Test' }, { database, user });
+        list = await getLists(list._id, { database, user });
+        expect(list.additionalTasks).toBe(0);
+        expect(list.tasks).toHaveLength(1);
+        await updateTask(task._id, { isCompleted: true }, { database, user });
+        list = await getLists(list._id, { database, user });
+        expect(list.additionalTasks).toBe(1);
+        expect(list.tasks).toHaveLength(0);
+        await updateTask(task._id, { isCompleted: false }, { database, user });
+        list = await getLists(list._id, { database, user });
+        expect(list.additionalTasks).toBe(0);
+        expect(list.tasks).toHaveLength(1);
+        let list2 = await createList({ title: 'New List 2' }, { database, user });
+        await updateTask(task._id, { list: list2._id, isCompleted: true }, { database, user });
+        list = await getLists(list._id, { database, user });
+        list2 = await getLists(list2._id, { database, user });
+        expect(list.additionalTasks).toBe(0);
+        expect(list.tasks).toHaveLength(0);
+        expect(list2.additionalTasks).toBe(1);
+        expect(list2.tasks).toHaveLength(0);
     });
 
     test('Provides clear error messages when invalid data provided', async () => {

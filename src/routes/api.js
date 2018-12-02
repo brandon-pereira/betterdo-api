@@ -29,9 +29,13 @@ module.exports = (app, database) => {
      */
     api.get(['/lists', '/lists/:listId'], (req, res) =>
         routeHandler('getting lists', { req, res, database }, config =>
-            getLists(req.params.listId, config)
+            getLists(req.params.listId, {
+                ...config,
+                includeCompleted: Boolean(req.query.includeCompleted === 'true')
+            })
         )
     );
+
     api.put('/lists', (req, res) =>
         routeHandler('create list', { req, res, database }, config => createList(req.body, config))
     );

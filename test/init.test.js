@@ -37,6 +37,16 @@ describe('Initialization', () => {
         expect(response.currentList.tasks[0].title).toBe(validTask.title);
     });
 
+    test('Protects against entering invalid lists', async () => {
+        const response = await init('invalid_list', { database, user: user });
+        expect(typeof response.currentList).toBe('object');
+        expect(response.currentList._id.toString()).toBe(inbox._id.toString());
+        expect(response.currentList.type).toBe('inbox');
+        expect(response.currentList.tasks).toHaveLength(1);
+        expect(typeof response.currentList.tasks[0]).toBe('object');
+        expect(response.currentList.tasks[0].title).toBe(validTask.title);
+    });
+
     test('Should return lists', async () => {
         const response = await init(undefined, { database, user: user });
         expect(Array.isArray(response.lists)).toBeTruthy();

@@ -129,11 +129,16 @@ describe('Lists API', () => {
             { title: 'Bad Task' },
             { database, user }
         );
-        list = await updateList(
-            list._id,
-            { tasks: [badTask._id.toString(), task1._id.toString()] },
-            { database, user }
-        );
+        try {
+            await updateList(
+                list._id,
+                { tasks: [badTask._id.toString(), task1._id.toString()] },
+                { database, user }
+            );
+        } catch (err) {
+            expect(err.name).toBe('AccessError');
+            expect(err.message).toBe('Invalid modification of tasks');
+        }
         list = await getLists(list._id, { database, user });
         expect(list.tasks).toHaveLength(2);
         expect(list.tasks[0]._id.toString()).toBe(task1._id.toString());
@@ -145,7 +150,12 @@ describe('Lists API', () => {
         let list = await createList({ title: 'Test' }, { database, user });
         const task1 = (await createTask(list._id, { title: 'Good Task' }, { database, user }))._id;
         const task2 = (await createTask(list._id, { title: 'Good Task' }, { database, user }))._id;
-        list = await updateList(list._id, { tasks: [task2] }, { database, user });
+        try {
+            await updateList(list._id, { tasks: [task2] }, { database, user });
+        } catch (err) {
+            expect(err.name).toBe('AccessError');
+            expect(err.message).toBe('Invalid modification of tasks');
+        }
         list = await getLists(list._id, { database, user });
         expect(list.tasks).toHaveLength(2);
         expect(list.tasks[0]._id.toString()).toBe(task1._id.toString());
