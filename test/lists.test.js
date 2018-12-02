@@ -107,16 +107,16 @@ describe('Lists API', () => {
         const task3 = await createTask(list._id, { title: 'Test 3' }, { database, user });
         list = await getLists(list._id, { database, user });
         const sanitizeId = task => task._id.toString();
-        expect(list.tasks.map(sanitizeId)).toMatchObject([task1, task2, task3].map(sanitizeId));
+        expect(list.tasks.map(sanitizeId)).toMatchObject([task3, task2, task1].map(sanitizeId));
         list = await updateList(
             list._id,
             {
-                tasks: [task3, task2, task1].map(sanitizeId)
+                tasks: [task1, task2, task3].map(sanitizeId)
             },
             { database, user }
         );
         list = await getLists(list._id, { database, user });
-        expect(list.tasks.map(sanitizeId)).toMatchObject([task3, task2, task1].map(sanitizeId));
+        expect(list.tasks.map(sanitizeId)).toMatchObject([task1, task2, task3].map(sanitizeId));
     });
 
     test('Prevents tasks from being injected during reorder', async () => {
@@ -141,8 +141,8 @@ describe('Lists API', () => {
         }
         list = await getLists(list._id, { database, user });
         expect(list.tasks).toHaveLength(2);
-        expect(list.tasks[0]._id.toString()).toBe(task1._id.toString());
-        expect(list.tasks[1]._id.toString()).toBe(task2._id.toString());
+        expect(list.tasks[1]._id.toString()).toBe(task1._id.toString());
+        expect(list.tasks[0]._id.toString()).toBe(task2._id.toString());
     });
 
     test('Prevents tasks from being removed during reorder', async () => {
@@ -158,8 +158,8 @@ describe('Lists API', () => {
         }
         list = await getLists(list._id, { database, user });
         expect(list.tasks).toHaveLength(2);
-        expect(list.tasks[0]._id.toString()).toBe(task1._id.toString());
-        expect(list.tasks[1]._id.toString()).toBe(task2._id.toString());
+        expect(list.tasks[1]._id.toString()).toBe(task1._id.toString());
+        expect(list.tasks[0]._id.toString()).toBe(task2._id.toString());
     });
 
     test('Requires that the colour be a valid hex code', async () => {
