@@ -1,10 +1,11 @@
 const express = require('express');
+const path = require('path');
 
 module.exports = app => {
     /* Initialize a router, anything behind `/app` requires authentication. */
     app.all('/app', (req, res) => {
         console.log('Redirect /app to /app/');
-        res.redirect(`${process.env.SERVER_URL}/app/?a`);
+        res.redirect(path.join(process.env.SERVER_URL, 'app'));
     });
 
     app.use('/app/', (req, res, next) => {

@@ -2,6 +2,7 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
+const path = require('path');
 
 module.exports = (app, db) => {
     passport.use(
@@ -9,7 +10,7 @@ module.exports = (app, db) => {
             {
                 clientID: process.env.GOOGLE_CLIENT_ID,
                 clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-                callbackURL: process.env.SERVER_URL + '/auth/google/callback'
+                callbackURL: path.join(process.env.SERVER_URL, '/auth/google/callback')
             },
             async (accessToken, refreshToken, profile, cb) => {
                 let user = await db.Users.findOne({ google_id: profile.id });
@@ -51,11 +52,10 @@ module.exports = (app, db) => {
     app.use(passport.session());
     app.get('/auth/google', passport.authenticate('google', { scope: ['profile'] }));
     app.get('/auth/google/callback', passport.authenticate('google'), (req, res) => {
-        if (req.header('referrer')) {
-            res.redirect(req.header('referrer'));
-        } else {
-            res.redirect(`${process.env.SERVER_URL}/app`);
-        }
+        // if (req.header('referrer')) {
+        //     res.redirect(req.header('referrer'));
+        // } else {
+        res.redirect(path.join(process.env.SERVER_URL, 'app')); // }
     });
     app.get('/auth/logout', (req, res) => {
         req.logout();
