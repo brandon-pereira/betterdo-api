@@ -3,14 +3,14 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const url = require('url');
-console.log(url.resolve(process.env.SERVER_URL, '/auth/google/callback'));
+
 module.exports = (app, db) => {
     passport.use(
         new GoogleStrategy(
             {
                 clientID: process.env.GOOGLE_CLIENT_ID,
                 clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-                callbackURL: url.resolve(process.env.SERVER_URL, '/auth/google/callback')
+                callbackURL: url.resolve(process.env.SERVER_URL, 'auth/google/callback')
             },
             async (accessToken, refreshToken, profile, cb) => {
                 let user = await db.Users.findOne({ google_id: profile.id });
