@@ -3,7 +3,7 @@ const init = require('../controllers/init');
 const { getLists, createList, updateList, deleteList } = require('../controllers/lists');
 const { createTask, updateTask, deleteTask } = require('../controllers/tasks');
 const routeHandler = require('../helpers/routeHandler');
-const path = require('path');
+const url = require('url');
 
 module.exports = (app, database) => {
     /* Initialize a router, anything behind `/api` requires authentication. */
@@ -13,7 +13,7 @@ module.exports = (app, database) => {
             next();
         } else {
             console.log('Redirect to app from api');
-            res.redirect(path.join(process.env.SERVER_URL, 'app'));
+            res.redirect(url.resolve(process.env.SERVER_URL, 'app/'));
         }
     });
 
