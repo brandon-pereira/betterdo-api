@@ -5,7 +5,7 @@ module.exports = app => {
     // Force /app to redirect to /app/
     app.all('/app', (req, res) => {
         console.log('Redirect /app to /app/');
-        res.redirect(url.resolve(process.env.SERVER_URL, 'app'));
+        res.redirect(url.resolve(process.env.SERVER_URL, 'app/'));
     });
 
     // Anything behind `/app/` requires authentication.
