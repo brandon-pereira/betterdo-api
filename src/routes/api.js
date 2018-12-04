@@ -11,7 +11,7 @@ module.exports = (app, database) => {
         if (req.user) {
             next();
         } else {
-            res.redirect('../');
+            res.redirect(`${process.env.SERVER_URL}/app`);
         }
     });
 

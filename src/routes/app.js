@@ -6,7 +6,7 @@ module.exports = app => {
         if (req.user) {
             next();
         } else {
-            res.redirect('../');
+            res.redirect(process.env.SERVER_URL);
         }
     });
 
