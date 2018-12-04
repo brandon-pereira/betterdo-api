@@ -2,7 +2,10 @@ const express = require('express');
 
 module.exports = app => {
     /* Initialize a router, anything behind `/app` requires authentication. */
-    app.all('/app', (req, res) => res.redirect('/app/'));
+    app.all('/app', (req, res) => {
+        console.log('Redirect /app to /app/');
+        res.redirect('/app/');
+    });
 
     app.use('/app/', (req, res, next) => {
         console.log('HERE');
