@@ -5,7 +5,6 @@ app.set('strict routing', true);
 /**
  * Express middleware
  */
-// app.use(require('connect-slashes'));
 app.use(require('cookie-parser')());
 app.use(require('body-parser').json({}));
 app.use(require('body-parser').urlencoded({ extended: true }));
