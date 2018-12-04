@@ -2,7 +2,10 @@ const express = require('express');
 
 module.exports = app => {
     /* Initialize a router, anything behind `/app` requires authentication. */
-    app.use('/app', (req, res, next) => {
+    app.all('/app', (req, res) => res.redirect('/app/'));
+
+    app.use('/app/', (req, res, next) => {
+        console.log('HERE');
         if (req.user) {
             console.log('Valid /app request');
             next();
@@ -13,5 +16,5 @@ module.exports = app => {
     });
 
     /* Initialize the routes and attach them to the api */
-    app.use('/app', express.static(process.env.APP_FOLDER, {}));
+    app.use('/app/', express.static(process.env.APP_FOLDER, {}));
 };
