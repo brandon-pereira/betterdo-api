@@ -4,7 +4,7 @@ module.exports = app => {
     app.use('/', (req, res, next) => {
         if (req.path === '/' && req.user) {
             console.log('Redirect to app from root');
-            res.redirect(`/betterdo/appa`);
+            res.redirect(`/betterdo/app`);
         } else {
             next();
         }

@@ -4,6 +4,7 @@ module.exports = app => {
     /* Initialize a router, anything behind `/app` requires authentication. */
     app.use('/app', (req, res, next) => {
         if (req.user) {
+            console.log('Valid /app request');
             next();
         } else {
             console.log('Redirect to root from app');
