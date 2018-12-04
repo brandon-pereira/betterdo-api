@@ -4,7 +4,7 @@ module.exports = app => {
     /* Initialize a router, anything behind `/app` requires authentication. */
     app.all('/app', (req, res) => {
         console.log('Redirect /app to /app/');
-        res.redirect('/app/');
+        res.redirect(`${process.env.SERVER_URL}/app/?a`);
     });
 
     app.use('/app/', (req, res, next) => {
