@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-
+app.set('strict routing', true);
 /**
  * Express middleware
  */
