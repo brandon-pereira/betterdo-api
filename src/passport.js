@@ -3,7 +3,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const url = require('url');
-
+console.log(url.resolve(process.env.SERVER_URL, '/auth/google/callback'));
 module.exports = (app, db) => {
     passport.use(
         new GoogleStrategy(
