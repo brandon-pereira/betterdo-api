@@ -45,6 +45,17 @@ describe('Lists API', () => {
         }
     });
 
+    test('Protects against fetching invalid list ID', async () => {
+        expect.assertions(2);
+        const user = await createUser();
+        try {
+            await createTask('INVALID_ID', { title: 'Good List' }, { database, user });
+        } catch (err) {
+            expect(err.name).toBe('AccessError');
+            expect(err.message).toBe('Invalid List ID');
+        }
+    });
+
     test('Allows list to be modified', async () => {
         expect.assertions(1);
         const user = await createUser();
