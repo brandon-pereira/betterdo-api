@@ -6,6 +6,7 @@ module.exports = app => {
         if (req.user) {
             next();
         } else {
+            console.log('Redirect to root from app');
             res.redirect(process.env.SERVER_URL);
         }
     });

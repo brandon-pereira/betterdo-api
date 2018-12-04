@@ -11,6 +11,7 @@ module.exports = (app, database) => {
         if (req.user) {
             next();
         } else {
+            console.log('Redirect to app from api');
             res.redirect(`${process.env.SERVER_URL}/app`);
         }
     });
