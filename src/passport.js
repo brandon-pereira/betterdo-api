@@ -54,7 +54,7 @@ module.exports = (app, db) => {
         if (req.header('referrer')) {
             res.redirect(req.header('referrer'));
         } else {
-            res.redirect(process.env.SERVER_ROOT);
+            res.redirect(process.env.BASE_FOLDER);
         }
     });
     app.get('/auth/logout', (req, res) => {
@@ -62,7 +62,7 @@ module.exports = (app, db) => {
         if (req.header('referrer')) {
             res.redirect(req.header('referrer'));
         } else {
-            res.redirect(process.env.SERVER_ROOT);
+            res.redirect(process.env.BASE_FOLDER);
         }
     });
 };
