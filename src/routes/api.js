@@ -11,7 +11,7 @@ module.exports = (app, database) => {
         if (req.user) {
             next();
         } else {
-            res.status(501).json({
+            res.status(401).json({
                 error: 'Authentication Required'
             })
         }
