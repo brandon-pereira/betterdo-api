@@ -3,7 +3,6 @@ const init = require('../controllers/init');
 const { getLists, createList, updateList, deleteList } = require('../controllers/lists');
 const { createTask, updateTask, deleteTask } = require('../controllers/tasks');
 const routeHandler = require('../helpers/routeHandler');
-const url = require('url');
 
 module.exports = (app, database) => {
     /* Initialize a router, anything behind `/api` requires authentication. */
@@ -12,7 +11,9 @@ module.exports = (app, database) => {
         if (req.user) {
             next();
         } else {
-            res.redirect(url.resolve(process.env.SERVER_URL, 'app/'));
+            res.status(501).json({
+                error: 'Authentication Required'
+            })
         }
     });
 

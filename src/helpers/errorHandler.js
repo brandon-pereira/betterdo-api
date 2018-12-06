@@ -17,7 +17,7 @@ function handleUncaughtError(taskName, res, err) {
             error: err.message
         });
     } else if (err.name === 'PermissionError') {
-        res.status(501).json({
+        res.status(403).json({
             error: err.message
         });
     } else {
