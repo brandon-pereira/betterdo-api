@@ -10,5 +10,5 @@ module.exports = app => {
         }
     });
 
-    app.get('/', express.static('public'));
+    app.get('/', express.static(process.env.LANDING_FOLDER));
 };
