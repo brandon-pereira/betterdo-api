@@ -19,6 +19,20 @@ module.exports = mongoose => {
         isBeta: {
             type: Boolean,
             default: false
+        },
+        customLists: {
+            highPriority: {
+                type: Boolean,
+                default: false
+            },
+            today: {
+                type: Boolean,
+                default: true
+            },
+            tomorrow: {
+                type: Boolean,
+                default: true
+            }
         }
     });
 

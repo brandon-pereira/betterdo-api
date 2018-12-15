@@ -10,9 +10,9 @@ async function fetchHighPriority({ database, user }) {
 }
 async function fetchTomorrow({ database, user }) {
     return new database.Lists({
-        _id: 'high-priority',
-        title: 'High Priority',
-        type: 'high-priority',
+        _id: 'tomorrow',
+        title: 'Tomorrow',
+        type: 'tomorrow',
         tasks: await fetchTomorrowTasks({ database, user }),
         members: [user._id],
         owner: user._id
@@ -20,9 +20,9 @@ async function fetchTomorrow({ database, user }) {
 }
 async function fetchToday({ database, user }) {
     return new database.Lists({
-        _id: 'high-priority',
-        title: 'High Priority',
-        type: 'high-priority',
+        _id: 'today',
+        title: 'Today',
+        type: 'today',
         tasks: await fetchTodayTasks({ database, user }),
         members: [user._id],
         owner: user._id
@@ -79,6 +79,5 @@ function fetchTodayTasks({ user, database }) {
 module.exports = {
     fetchHighPriority,
     fetchTomorrow,
-    fetchToday,
-    fetchTasksWithinDates
+    fetchToday
 };
