@@ -4,7 +4,7 @@ const { fetchHighPriority, fetchToday, fetchTomorrow } = require('../helpers/cus
 async function getLists(listId, { database, user, includeCompleted }) {
     // Get lists based on query data
     let lists = [];
-    if (listId === 'high-priority') {
+    if (listId === 'highPriority') {
         lists = await fetchHighPriority({
             database,
             user

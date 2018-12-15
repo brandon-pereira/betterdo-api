@@ -23,7 +23,7 @@ module.exports = mongoose => {
             type: {
                 type: String,
                 default: 'default',
-                enum: ['inbox', 'default']
+                enum: ['inbox', 'today', 'tomorrow', 'highPriority', 'default']
             },
             tasks: [
                 {
@@ -55,7 +55,7 @@ module.exports = mongoose => {
     );
 
     schema.virtual('additionalTasks').get(function() {
-        return this.completedTasks.length;
+        return this.completedTasks ? this.completedTasks.length : 0;
     });
 
     schema.pre('save', function() {

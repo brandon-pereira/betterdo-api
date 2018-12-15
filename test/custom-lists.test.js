@@ -74,7 +74,7 @@ describe('Custom Lists API', () => {
             { title: 'Valid', priority: 'high' },
             { database, user: user1 }
         );
-        const user1lists = await getLists('high-priority', { database, user: user1 });
+        const user1lists = await getLists('highPriority', { database, user: user1 });
         expect(user1lists.tasks).toHaveLength(1);
     });
 });
