@@ -1,29 +1,35 @@
 async function fetchHighPriority({ database, user }) {
+    const { completedTasks, tasks } = await fetchHighPriorityTasks({ database, user });
     return new database.Lists({
-        _id: 'high-priority',
+        _id: 'highPriority',
         title: 'High Priority',
-        type: 'high-priority',
-        tasks: await fetchHighPriorityTasks({ database, user }),
+        type: 'highPriority',
+        completedTasks,
+        tasks,
         members: [user._id],
         owner: user._id
     });
 }
 async function fetchTomorrow({ database, user }) {
+    const { completedTasks, tasks } = await fetchTomorrowTasks({ database, user });
     return new database.Lists({
         _id: 'tomorrow',
         title: 'Tomorrow',
         type: 'tomorrow',
-        tasks: await fetchTomorrowTasks({ database, user }),
+        completedTasks,
+        tasks,
         members: [user._id],
         owner: user._id
     });
 }
 async function fetchToday({ database, user }) {
+    const { completedTasks, tasks } = await fetchTodayTasks({ database, user });
     return new database.Lists({
-        _id: 'today',
+        id: 'today',
         title: 'Today',
         type: 'today',
-        tasks: await fetchTodayTasks({ database, user }),
+        tasks,
+        completedTasks,
         members: [user._id],
         owner: user._id
     });
@@ -39,41 +45,49 @@ async function fetchHighPriorityTasks({ database, user }) {
             match: { members: { $in: [user._id] } }
         })
         .exec();
-    return tasks.filter(tasks => tasks.list);
+    return sortTasks(tasks);
 }
 
 async function fetchTasksWithinDates(lowest, highest, { user, database }) {
-    const tasks = await database.Tasks.find({
-        dueDate: {
-            $gte: lowest,
-            $lt: highest
-        }
-    })
-        .populate({
-            path: 'list',
-            select: 'members',
-            match: { members: { $in: [user._id] } }
-        })
+    const tasks = await database.Tasks.find({ dueDate: { $gte: lowest, $lt: highest } })
+        .populate({ path: 'list', select: 'members', match: { members: { $in: [user._id] } } })
         .exec();
-    return tasks.filter(tasks => tasks.list);
+    return sortTasks(tasks);
 }
 
 async function fetchTomorrowTasks({ user, database }) {
     const start = new Date();
     start.setDate(start.getDate() + 1);
-    start.setHours(0, 0, 0, 0);
+    start.setUTCHours(0, 0, 0, 0);
     const end = new Date();
     end.setDate(end.getDate() + 1);
-    end.setHours(23, 59, 59, 999);
+    end.setUTCHours(23, 59, 59, 999);
     return fetchTasksWithinDates(start, end, { user, database });
 }
 
 function fetchTodayTasks({ user, database }) {
     const start = new Date();
-    start.setHours(0, 0, 0, 0);
+    start.setUTCHours(0, 0, 0, 0);
     const end = new Date();
-    end.setHours(23, 59, 59, 999);
+    end.setUTCHours(23, 59, 59, 999);
     return fetchTasksWithinDates(start, end, { user, database });
+}
+
+function sortTasks(unsortedTasks) {
+    return unsortedTasks
+        .filter(tasks => tasks.list) // remove others lists
+        .reduce(
+            // return object with 2 arrays sorted by complete and incomplete
+            (acc, curr) => {
+                if (curr.isCompleted) {
+                    acc.completedTasks.push(curr);
+                } else {
+                    acc.tasks.push(curr);
+                }
+                return acc;
+            },
+            { completedTasks: [], tasks: [] }
+        );
 }
 
 module.exports = {
