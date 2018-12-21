@@ -5,10 +5,10 @@ function isCustomList(listId) {
 }
 
 async function fetchUserCustomLists({ database, user }) {
-    const listsPromise = Object.keys(user.customLists).map(key =>
-        fetchCustomList(key, { database, user })
+    const listsPromise = Object.entries(user.customLists).map(([key, value]) =>
+        value ? fetchCustomList(key, { database, user }) : null
     );
-    return await Promise.all(listsPromise);
+    return (await Promise.all(listsPromise)).filter(list => list);
 }
 
 async function fetchCustomList(listId, opts) {

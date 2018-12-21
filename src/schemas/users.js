@@ -23,7 +23,7 @@ module.exports = mongoose => {
         customLists: {
             highPriority: {
                 type: Boolean,
-                default: false
+                default: true
             },
             today: {
                 type: Boolean,
@@ -31,7 +31,7 @@ module.exports = mongoose => {
             },
             tomorrow: {
                 type: Boolean,
-                default: true
+                default: false
             }
         }
     });
