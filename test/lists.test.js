@@ -81,7 +81,7 @@ describe('Lists API', () => {
         );
         await Promise.all(lists);
         const fetchedLists = await getLists(null, { database, user });
-        expect(fetchedLists.lists).toHaveLength(randomNumber);
+        expect(fetchedLists).toHaveLength(randomNumber);
     });
 
     test('Protects against fetching list non-member list', async () => {

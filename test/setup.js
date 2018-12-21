@@ -2,7 +2,11 @@ process.env.DATABASE_NAME = 'betterdo-unitTests';
 const database = require('../src/database');
 const createUser = async ({ createInbox } = {}) => {
     const user = await database.Users.create({
-        firstName: 'unitTest'
+        firstName: 'unitTest',
+        customLists: {
+            highPriority: false,
+            today: false
+        }
     });
     if (createInbox) {
         await database.Lists.create({
