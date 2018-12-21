@@ -1,6 +1,8 @@
+const { getLists } = require('./lists');
+
 async function init(listId = 'inbox', { database, user }) {
-    let currentList = database.Lists.getLists(user._id, listId);
-    let lists = database.Lists.getLists(user._id);
+    let currentList = getLists(listId, { database, user }).catch(() => null);
+    let lists = getLists(undefined, { database, user });
     [currentList, lists] = await Promise.all([currentList, lists]);
     if (currentList === null) {
         // user passed in invalid list

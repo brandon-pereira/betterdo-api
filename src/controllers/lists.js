@@ -1,24 +1,11 @@
 const { throwError } = require('../helpers/errorHandler');
-const { fetchHighPriority, fetchToday, fetchTomorrow } = require('../helpers/customLists');
+const { isCustomList, fetchCustomList, fetchUserCustomLists } = require('../helpers/customLists');
 
 async function getLists(listId, { database, user, includeCompleted }) {
     // Get lists based on query data
     let lists = [];
-    if (listId === 'highPriority') {
-        lists = await fetchHighPriority({
-            database,
-            user
-        });
-    } else if (listId === 'today') {
-        lists = await fetchToday({
-            user,
-            database
-        });
-    } else if (listId === 'tomorrow') {
-        lists = await fetchTomorrow({
-            user,
-            database
-        });
+    if (isCustomList(listId)) {
+        lists = await fetchCustomList(listId, { database, user });
     } else {
         lists = await database.Lists.getLists(user._id, listId);
     }
@@ -36,7 +23,10 @@ async function getLists(listId, { database, user, includeCompleted }) {
         throwError('Invalid List ID');
     } else {
         // all lists for user
-        return { lists };
+        const userLists = lists;
+        const inbox = lists.shift();
+        const customLists = await fetchUserCustomLists({ database, user });
+        return [inbox, ...customLists, ...userLists];
     }
 }
 

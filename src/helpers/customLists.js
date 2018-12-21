@@ -1,38 +1,67 @@
+const CUSTOM_LISTS = ['highPriority', 'today', 'tomorrow'];
+
+function isCustomList(listId) {
+    return CUSTOM_LISTS.includes(listId);
+}
+
+async function fetchUserCustomLists({ database, user }) {
+    const listsPromise = Object.keys(user.customLists).map(key =>
+        fetchCustomList(key, { database, user })
+    );
+    return await Promise.all(listsPromise);
+}
+
+async function fetchCustomList(listId, opts) {
+    if (listId === 'highPriority') {
+        return fetchHighPriority(opts);
+    } else if (listId === 'today') {
+        return fetchToday(opts);
+    } else if (listId === 'tomorrow') {
+        return fetchTomorrow(opts);
+    }
+}
+
 async function fetchHighPriority({ database, user }) {
     const { completedTasks, tasks } = await fetchHighPriorityTasks({ database, user });
-    return new database.Lists({
-        _id: 'highPriority',
+    const list = new database.Lists({
         title: 'High Priority',
         type: 'highPriority',
         completedTasks,
         tasks,
         members: [user._id],
         owner: user._id
-    });
+    }).toObject();
+    list._id = 'highPriority';
+    list.id = 'highPriority';
+    return list;
 }
 async function fetchTomorrow({ database, user }) {
     const { completedTasks, tasks } = await fetchTomorrowTasks({ database, user });
-    return new database.Lists({
-        _id: 'tomorrow',
+    const list = new database.Lists({
         title: 'Tomorrow',
         type: 'tomorrow',
         completedTasks,
         tasks,
         members: [user._id],
         owner: user._id
-    });
+    }).toObject();
+    list._id = 'tomorrow';
+    list.id = 'tomorrow';
+    return list;
 }
 async function fetchToday({ database, user }) {
     const { completedTasks, tasks } = await fetchTodayTasks({ database, user });
-    return new database.Lists({
-        id: 'today',
+    const list = new database.Lists({
         title: 'Today',
         type: 'today',
         tasks,
         completedTasks,
         members: [user._id],
         owner: user._id
-    });
+    }).toObject();
+    list._id = 'today';
+    list.id = 'today';
+    return list;
 }
 
 async function fetchHighPriorityTasks({ database, user }) {
@@ -91,6 +120,9 @@ function sortTasks(unsortedTasks) {
 }
 
 module.exports = {
+    isCustomList,
+    fetchCustomList,
+    fetchUserCustomLists,
     fetchHighPriority,
     fetchTomorrow,
     fetchToday
