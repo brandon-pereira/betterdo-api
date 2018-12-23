@@ -6,19 +6,28 @@ function isCustomList(listId) {
 
 async function fetchUserCustomLists({ database, user }) {
     const listsPromise = Object.entries(user.customLists).map(([key, value]) =>
-        value ? fetchCustomList(key, { database, user }) : null
+        value ? fetchCustomList(key, false, { database, user }) : null
     );
     return (await Promise.all(listsPromise)).filter(list => list);
 }
 
-async function fetchCustomList(listId, opts) {
+async function fetchCustomList(listId, includeCompleted = false, opts) {
+    // fetch list
+    let list = null;
     if (listId === 'highPriority') {
-        return fetchHighPriority(opts);
+        list = await fetchHighPriority(opts);
     } else if (listId === 'today') {
-        return fetchToday(opts);
+        list = await fetchToday(opts);
     } else if (listId === 'tomorrow') {
-        return fetchTomorrow(opts);
+        list = await fetchTomorrow(opts);
     }
+    // calculate completed tasks visible
+    if (!includeCompleted) {
+        list.completedTasks = [];
+    } else {
+        list.additionalTasks = 0;
+    }
+    return list;
 }
 
 async function fetchHighPriority({ database, user }) {

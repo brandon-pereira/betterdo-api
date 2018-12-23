@@ -3,28 +3,23 @@ const { isCustomList, fetchCustomList, fetchUserCustomLists } = require('../help
 
 async function getLists(listId, { database, user, includeCompleted }) {
     // Get lists based on query data
-    let lists = [];
-    if (isCustomList(listId)) {
-        lists = await fetchCustomList(listId, { database, user });
-    } else {
-        lists = await database.Lists.getLists(user._id, listId);
-    }
-    // return appropriate results
-    if (listId && lists) {
-        if (includeCompleted) {
-            await lists.populate('completedTasks').execPopulate();
-            // convert to object
-            lists = lists.toObject();
-            lists.additionalTasks = 0;
-        }
-        return lists;
+    if (listId && isCustomList(listId)) {
+        return await fetchCustomList(listId, includeCompleted, { database, user });
     } else if (listId) {
-        // specific list but no results
-        throwError('Invalid List ID');
+        let list = await database.Lists.getLists(user._id, listId);
+        if (!list) {
+            throwError('Invalid List ID');
+        }
+        if (includeCompleted) {
+            await list.populate('completedTasks').execPopulate();
+            list = list.toObject();
+            list.additionalTasks = 0;
+        }
+        return list;
     } else {
         // all lists for user
-        const userLists = lists;
-        const inbox = lists.shift();
+        const userLists = await database.Lists.getLists(user._id);
+        const inbox = userLists.shift();
         const customLists = await fetchUserCustomLists({ database, user });
         return [inbox, ...customLists, ...userLists];
     }
