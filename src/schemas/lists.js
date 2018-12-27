@@ -94,11 +94,14 @@ module.exports = mongoose => {
     };
 
     model.getUserInbox = async function(user_id) {
+        const userQueryData = ['_id', 'firstName', 'lastName'];
         return await this.findOne({
             type: 'inbox',
             members: user_id
         })
             .populate('tasks')
+            .populate('members', userQueryData)
+            .populate('owner', userQueryData)
             .exec();
     };
 
