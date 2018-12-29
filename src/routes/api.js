@@ -2,6 +2,7 @@ const express = require('express');
 const init = require('../controllers/init');
 const { getLists, createList, updateList, deleteList } = require('../controllers/lists');
 const { createTask, updateTask, deleteTask } = require('../controllers/tasks');
+const { updateUser } = require('../controllers/users');
 const routeHandler = require('../helpers/routeHandler');
 
 module.exports = (app, database) => {
@@ -13,7 +14,7 @@ module.exports = (app, database) => {
         } else {
             res.status(401).json({
                 error: 'Authentication Required'
-            })
+            });
         }
     });
 
@@ -68,6 +69,15 @@ module.exports = (app, database) => {
     api.delete('/tasks/:taskId', (req, res) =>
         routeHandler('deleting task', { req, res, database }, config =>
             deleteTask(req.params.taskId, config)
+        )
+    );
+
+    /**
+     * Users
+     */
+    api.post('/users', (req, res) =>
+        routeHandler('updating user', { req, res, database }, config =>
+            updateUser(req.body, config)
         )
     );
 

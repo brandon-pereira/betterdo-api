@@ -4,9 +4,14 @@ module.exports = mongoose => {
         google_id: String,
         firstName: {
             type: String,
-            required: true
+            required: true,
+            maxlength: 100,
+            minlength: 1
         },
-        lastName: String,
+        lastName: {
+            type: String,
+            maxlength: 100
+        },
         email: {
             type: String,
             required: true
