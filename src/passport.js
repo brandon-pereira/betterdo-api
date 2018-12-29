@@ -13,20 +13,39 @@ module.exports = (app, db) => {
                 callbackURL: url.resolve(process.env.SERVER_URL, 'auth/google/callback')
             },
             async (accessToken, refreshToken, profile, cb) => {
-                let user = await db.Users.findOne({ google_id: profile.id });
+                console.log(profile);
+                const googleId = profile.id;
+                const googleInfo = {
+                    google_id: profile.id,
+                    firstName: profile.name.givenName,
+                    lastName: profile.name.familyName,
+                    email: profile.emails[0].value,
+                    profilePicture: profile.photos[0].value
+                };
+                let user = await db.Users.findOne({
+                    google_id: googleId
+                });
                 if (!user) {
-                    user = await db.Users.create({
-                        google_id: profile.id,
-                        firstName: profile.name.givenName,
-                        lastName: profile.name.familyName
-                    });
+                    // Create User
+                    user = await db.Users.create(googleInfo);
                     await db.Lists.create({
                         title: 'Inbox',
                         type: 'inbox',
                         owner: user._id
                     });
+                    return cb(null, user);
+                } else {
+                    // Existing user
+                    const hasGoogleAccountUpdated = Object.keys(googleInfo).find(
+                        key => googleInfo[key] !== user[key]
+                    );
+                    if (hasGoogleAccountUpdated) {
+                        console.log('user info updated', hasGoogleAccountUpdated);
+                        user.set(googleInfo);
+                        await user.save();
+                    }
+                    return cb(null, user);
                 }
-                cb(null, user);
             }
         )
     );
@@ -50,7 +69,7 @@ module.exports = (app, db) => {
     );
     app.use(passport.initialize());
     app.use(passport.session());
-    app.get('/auth/google', passport.authenticate('google', { scope: ['profile'] }));
+    app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
     app.get('/auth/google/callback', passport.authenticate('google'), (req, res) => {
         res.redirect(url.resolve(process.env.SERVER_URL, 'app/'));
     });

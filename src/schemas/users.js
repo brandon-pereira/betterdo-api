@@ -7,6 +7,10 @@ module.exports = mongoose => {
             required: true
         },
         lastName: String,
+        email: {
+            type: String,
+            required: true
+        },
         creationDate: {
             type: Date,
             default: Date.now
