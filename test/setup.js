@@ -3,6 +3,7 @@ const database = require('../src/database');
 const createUser = async ({ createInbox } = {}) => {
     const user = await database.Users.create({
         firstName: 'unitTest',
+        email: 'unit@tests.com',
         customLists: {
             highPriority: false,
             today: false

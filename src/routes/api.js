@@ -2,7 +2,7 @@ const express = require('express');
 const init = require('../controllers/init');
 const { getLists, createList, updateList, deleteList } = require('../controllers/lists');
 const { createTask, updateTask, deleteTask } = require('../controllers/tasks');
-const { updateUser } = require('../controllers/users');
+const { updateUser, getUser } = require('../controllers/users');
 const routeHandler = require('../helpers/routeHandler');
 
 module.exports = (app, database) => {
@@ -75,6 +75,11 @@ module.exports = (app, database) => {
     /**
      * Users
      */
+    api.get('/users/:email', (req, res) =>
+        routeHandler('getting user by email', { req, res, database }, config =>
+            getUser(req.params.email, config)
+        )
+    );
     api.post('/users', (req, res) =>
         routeHandler('updating user', { req, res, database }, config =>
             updateUser(req.body, config)
