@@ -86,6 +86,19 @@ async function fetchHighPriorityTasks({ database, user }) {
     return sortTasks(tasks);
 }
 
+function modifyTaskForCustomList(listId, taskObj) {
+    if (listId === 'highPriority') {
+        taskObj.priority = 'high';
+    } else if (listId === 'today') {
+        taskObj.dueDate = new Date();
+    } else if (listId === 'tomorrow') {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        taskObj.dueDate = tomorrow;
+    }
+    return taskObj;
+}
+
 async function fetchTasksWithinDates(lowest, highest, { user, database }) {
     const tasks = await database.Tasks.find({ dueDate: { $gte: lowest, $lt: highest } })
         .populate({ path: 'list', select: 'members', match: { members: { $in: [user._id] } } })
@@ -96,18 +109,18 @@ async function fetchTasksWithinDates(lowest, highest, { user, database }) {
 async function fetchTomorrowTasks({ user, database }) {
     const start = new Date();
     start.setDate(start.getDate() + 1);
-    start.setUTCHours(0, 0, 0, 0);
+    start.setHours(0, 0, 0, 0);
     const end = new Date();
     end.setDate(end.getDate() + 1);
-    end.setUTCHours(23, 59, 59, 999);
+    end.setHours(23, 59, 59, 999);
     return fetchTasksWithinDates(start, end, { user, database });
 }
 
 function fetchTodayTasks({ user, database }) {
     const start = new Date();
-    start.setUTCHours(0, 0, 0, 0);
+    start.setHours(0, 0, 0, 0);
     const end = new Date();
-    end.setUTCHours(23, 59, 59, 999);
+    end.setHours(23, 59, 59, 999);
     return fetchTasksWithinDates(start, end, { user, database });
 }
 
@@ -134,5 +147,6 @@ module.exports = {
     fetchUserCustomLists,
     fetchHighPriority,
     fetchTomorrow,
-    fetchToday
+    fetchToday,
+    modifyTaskForCustomList
 };

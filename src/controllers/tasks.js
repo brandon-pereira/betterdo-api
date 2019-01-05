@@ -1,10 +1,16 @@
 const { throwError } = require('../helpers/errorHandler');
+const { isCustomList, modifyTaskForCustomList } = require('../helpers/customLists');
 
 async function createTask(listId, taskObj = {}, { database, user }) {
     // Ensure list id is passed
     if (!listId) throwError('Invalid List ID');
+    // If the list is a custom list, modify task with new settings
+    if (isCustomList(listId)) {
+        taskObj = modifyTaskForCustomList(listId, taskObj);
+        listId = 'inbox';
+    }
     // Ensure list exists and user has permissions
-    const list = await database.Lists.getUserListById(user._id, listId);
+    const list = await database.Lists.getLists(user._id, listId);
     // If no results, throw error
     if (!list) throwError('Invalid List ID');
     // Remove potentially harmful properties
