@@ -1,3 +1,5 @@
+const { throwError } = require('../helpers/errorHandler');
+
 async function updateUser(dirtyUserProps = {}, { database, user }) {
     // Get user
     let userRef = await database.Users.findById(user._id);
@@ -20,6 +22,22 @@ async function updateUser(dirtyUserProps = {}, { database, user }) {
     return userRef;
 }
 
+async function getUser(email, { database }) {
+    let user = await database.Users.findOne({ email: email });
+    if (user) {
+        return {
+            _id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName ? user.lastName.charAt(0) : null,
+            email: user.email,
+            profilePicture: user.profilePicture
+        };
+    } else {
+        throwError('Invalid User Email');
+    }
+}
+
 module.exports = {
-    updateUser
+    updateUser,
+    getUser
 };
