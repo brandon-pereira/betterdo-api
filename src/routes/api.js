@@ -57,9 +57,11 @@ module.exports = (app, database) => {
      * Tasks
      */
     api.put('/tasks', (req, res) =>
-        routeHandler('adding task', { req, res, database }, config =>
-            createTask(req.body.listId, req.body, config)
-        )
+        routeHandler('adding task', { req, res, database }, config => {
+            const listId = req.body.listId;
+            delete req.body.listId;
+            return createTask(listId, req.body, config);
+        })
     );
     api.post('/tasks/:taskId', (req, res) =>
         routeHandler('updating task', { req, res, database }, config =>
