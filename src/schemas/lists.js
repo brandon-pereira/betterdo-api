@@ -59,7 +59,9 @@ module.exports = mongoose => {
     });
 
     schema.pre('save', function() {
-        this.members = [this.owner];
+        if (this.isNew) {
+            this.members = [this.owner];
+        }
     });
 
     schema.pre('validate', function() {
@@ -69,6 +71,14 @@ module.exports = mongoose => {
                 this.invalidate(field, `Not permitted to modify ${field}!`);
             }
         });
+
+        if (
+            !this.isNew &&
+            this.isModified('members') &&
+            !this.members.find(member => member._id.toString() === this.owner.toString())
+        ) {
+            this.invalidate('members', `Not permitted to remove owner!`);
+        }
     });
 
     const model = mongoose.model('List', schema);
@@ -107,13 +117,12 @@ module.exports = mongoose => {
 
     model.getUserListById = async function(user_id, list_id) {
         try {
-            const userQueryData = ['_id', 'firstName', 'lastName'];
+            const userQueryData = ['_id', 'firstName', 'lastName', 'profilePicture'];
             return await this.findOne({
                 _id: list_id,
                 members: user_id
             })
                 .populate('members', userQueryData)
-                .populate('owner', userQueryData)
                 .populate('tasks')
                 .exec();
         } catch (err) {

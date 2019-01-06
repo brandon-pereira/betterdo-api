@@ -60,13 +60,26 @@ async function updateList(listId, updatedList = {}, { database, user }) {
             ))
     ) {
         throwError('Invalid modification of tasks');
+    } else if (updateList.tasks) {
+        // Valid tasks, update order
+        list.tasks = updatedList.tasks;
+        // Don't merge below
+        delete updateList.tasks;
+        // Update tasks obj
+        await list.populate('tasks').execPopulate();
+    }
+    // If members list changes
+    if (updatedList.members && Array.isArray(updatedList.members)) {
+        list.members = updatedList.members;
+        delete updatedList.members;
+        await list
+            .populate('members', ['_id', 'firstName', 'lastName', 'profilePicture'])
+            .execPopulate();
     }
     // Merge the lists.. validation on the model will handle errors
     Object.assign(list, updatedList);
     // Save the model
     await list.save();
-    // Repopulate the tasks (if order changes)
-    await list.populate('tasks').execPopulate();
     // Return list to front-end
     return list;
 }
