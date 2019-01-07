@@ -60,11 +60,11 @@ async function updateList(listId, updatedList = {}, { database, user }) {
             ))
     ) {
         throwError('Invalid modification of tasks');
-    } else if (updateList.tasks) {
+    } else if (updatedList.tasks) {
         // Valid tasks, update order
         list.tasks = updatedList.tasks;
         // Don't merge below
-        delete updateList.tasks;
+        delete updatedList.tasks;
         // Update tasks obj
         await list.populate('tasks').execPopulate();
     }
