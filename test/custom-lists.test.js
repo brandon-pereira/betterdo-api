@@ -24,6 +24,7 @@ describe('Custom Lists API', () => {
         const result = await getLists(inbox._id, { database, user: user1 });
         expect(result.title).toBe('Inbox');
     });
+
     test("Inbox shouldn't allow deletion", async () => {
         expect.assertions(2);
         try {
@@ -33,6 +34,7 @@ describe('Custom Lists API', () => {
             expect(err.name).toBe('AccessError');
         }
     });
+
     test('Today list should only return valid tasks', async () => {
         let today = await getLists('today', { database, user: user1 });
         expect(today.tasks).toHaveLength(0);
@@ -44,6 +46,7 @@ describe('Custom Lists API', () => {
         today = await getLists('today', { database, user: user1 });
         expect(today.tasks).toHaveLength(1);
     });
+
     test('Tomorrow list should only return valid tasks', async () => {
         let today = await getLists('tomorrow', { database, user: user1 });
         expect(today.tasks).toHaveLength(0);
@@ -58,6 +61,7 @@ describe('Custom Lists API', () => {
         today = await getLists('tomorrow', { database, user: user1 });
         expect(today.tasks).toHaveLength(1);
     });
+
     test('High priority list should only return valid tasks', async () => {
         await createTask(
             validList1._id,
@@ -76,5 +80,60 @@ describe('Custom Lists API', () => {
         );
         const user1lists = await getLists('highPriority', { database, user: user1 });
         expect(user1lists.tasks).toHaveLength(1);
+    });
+
+    test('Should allow creating high priority tasks from highPriority list', async () => {
+        const task = await createTask(
+            'highPriority',
+            { title: 'title' },
+            { database, user: user1 }
+        );
+        expect(task.priority).toBe('high');
+        const hpList = await getLists('highPriority', { database, user: user1 });
+        expect(hpList.tasks.map(t => t._id.toString())).toContain(task._id.toString());
+        const inbox = await getLists('inbox', { database, user: user1 });
+        expect(inbox.tasks.map(t => t._id.toString())).toContain(task._id.toString());
+    });
+
+    test('Should allow creating tasks due today from today list', async () => {
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        const task = await createTask('today', { title: 'title' }, { database, user: user1 });
+        expect(task.dueDate.toString()).toBe(now.toString());
+        const list = await getLists('today', { database, user: user1 });
+        expect(list.tasks.map(t => t._id.toString())).toContain(task._id.toString());
+        const inbox = await getLists('inbox', { database, user: user1 });
+        expect(inbox.tasks.map(t => t._id.toString())).toContain(task._id.toString());
+    });
+
+    test('Should allow creating tasks due tomorrow from tomorrow list', async () => {
+        const now = new Date();
+        now.setDate(now.getDate() + 1);
+        now.setHours(0, 0, 0, 0);
+        const task = await createTask('tomorrow', { title: 'title' }, { database, user: user1 });
+        expect(task.dueDate.toString()).toBe(now.toString());
+        const list = await getLists('tomorrow', { database, user: user1 });
+        expect(list.tasks.map(t => t._id.toString())).toContain(task._id.toString());
+        const inbox = await getLists('inbox', { database, user: user1 });
+        expect(inbox.tasks.map(t => t._id.toString())).toContain(task._id.toString());
+    });
+
+    test('Should allow returning additional tasks', async () => {
+        const task = await createTask(
+            'highPriority',
+            { title: 'title', isCompleted: true },
+            { database, user: user1 }
+        );
+        let list = await getLists('highPriority', { database, user: user1 });
+        expect(list.tasks.map(t => t._id.toString())).not.toContain(task._id.toString());
+        expect(list.additionalTasks).toBe(1);
+        expect(list.completedTasks).toHaveLength(0);
+        list = await getLists('highPriority', {
+            database,
+            user: user1,
+            includeCompleted: true
+        });
+        expect(list.completedTasks.map(t => t._id.toString())).toContain(task._id.toString());
+        expect(list.additionalTasks).toBe(0);
     });
 });

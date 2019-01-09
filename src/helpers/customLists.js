@@ -90,9 +90,12 @@ function modifyTaskForCustomList(listId, taskObj) {
     if (listId === 'highPriority') {
         taskObj.priority = 'high';
     } else if (listId === 'today') {
-        taskObj.dueDate = new Date();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        taskObj.dueDate = today;
     } else if (listId === 'tomorrow') {
         const tomorrow = new Date();
+        tomorrow.setHours(0, 0, 0, 0);
         tomorrow.setDate(tomorrow.getDate() + 1);
         taskObj.dueDate = tomorrow;
     }

@@ -19,7 +19,9 @@ const createUser = async ({ createInbox } = {}) => {
     return user;
 };
 
-async function teardown() {}
+async function teardown() {
+    // await database.connection.db.dropDatabase();
+}
 
 module.exports = {
     teardown,

@@ -110,6 +110,34 @@ describe('Lists API', () => {
         }
     });
 
+    test('Allows members to be added to list', async () => {
+        expect.assertions(1);
+        const user1 = await createUser();
+        const user2 = await createUser();
+        let list = await createList({ title: 'Title' }, { database, user: user1 });
+        await updateList(list._id, { members: [user1._id, user2._id] }, { database, user: user1 });
+        list = await getLists(list._id, { database, user: user1 });
+        expect(list.members.map(m => m._id)).toEqual(
+            expect.arrayContaining([user1._id, user2._id])
+        );
+    });
+
+    test('Protects against removing owner from list', async () => {
+        expect.assertions(2);
+        const user1 = await createUser();
+        const user2 = await createUser();
+        let list = await createList({ title: 'Title' }, { database, user: user1 });
+        await updateList(list._id, { members: [user1._id, user2._id] }, { database, user: user1 });
+        try {
+            await updateList(list._id, { members: [user2._id] }, { database, user: user2 });
+        } catch (err) {
+            expect(err.name).toBe('ValidationError');
+            expect(err.message).toBe(
+                'List validation failed: members: Not permitted to remove owner!'
+            );
+        }
+    });
+
     test('Allows lists tasks to be reordered', async () => {
         const user = await createUser();
         let list = await createList({ title: 'Test' }, { database, user });
