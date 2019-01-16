@@ -54,7 +54,8 @@ module.exports = mongoose => {
                 type: Boolean,
                 default: false
             }
-        }
+        },
+        pushSubscription: Object
     });
 
     return schema;

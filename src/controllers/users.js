@@ -1,9 +1,22 @@
 const { throwError } = require('../helpers/errorHandler');
 
-async function updateUser(dirtyUserProps = {}, { database, user }) {
+async function updateUser(dirtyUserProps = {}, { database, user, notifier }) {
     // Get user
     let userRef = await database.Users.findById(user._id);
     // Remove potentially harmful stuff
+    if (dirtyUserProps.pushSubscription && typeof dirtyUserProps.pushSubscription === 'object') {
+        userRef.pushSubscription = dirtyUserProps.pushSubscription;
+        userRef.save();
+        // Attempt to send a push notification to test
+        try {
+            await notifier.send(user._id, { title: "You're subscribed!", body: 'Time to party!' });
+        } catch (err) {
+            console.log(err);
+            userRef.pushSubscription = null;
+            userRef.save();
+        }
+        return user;
+    }
     // if (typeof dirtyUserProps.isBeta === 'boolean') {
     //     userRef.isBeta = dirtyUserProps.isBeta;
     // }

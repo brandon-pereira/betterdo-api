@@ -5,7 +5,7 @@ const { createTask, updateTask, deleteTask } = require('../controllers/tasks');
 const { updateUser, getUser } = require('../controllers/users');
 const routeHandler = require('../helpers/routeHandler');
 
-module.exports = (app, database) => {
+module.exports = (app, database, notifier) => {
     /* Initialize a router, anything behind `/api` requires authentication. */
     const api = express.Router();
     api.use('/', (req, res, next) => {
@@ -83,7 +83,7 @@ module.exports = (app, database) => {
         )
     );
     api.post('/users', (req, res) =>
-        routeHandler('updating user', { req, res, database }, config =>
+        routeHandler('updating user', { req, res, database, notifier }, config =>
             updateUser(req.body, config)
         )
     );
