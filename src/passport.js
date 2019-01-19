@@ -64,7 +64,10 @@ module.exports = (app, db) => {
             secret: process.env.SESSION_SECRET,
             resave: false,
             saveUninitialized: true,
-            store: new MongoStore({ mongooseConnection: db.connection })
+            store: new MongoStore({ mongooseConnection: db.connection }),
+            cookie: {
+                maxAge: 1000 * 60 * 60 * 24 * 31 * 6 // ms * sec * mins * hours * days * 6 = ~ 6 months
+            }
         })
     );
     app.use(passport.initialize());
