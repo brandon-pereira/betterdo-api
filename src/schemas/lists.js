@@ -103,28 +103,35 @@ module.exports = mongoose => {
         // .exec();
     };
 
-    model.getUserInbox = async function(user_id) {
-        const userQueryData = ['_id', 'firstName', 'lastName'];
-        return await this.findOne({
-            type: 'inbox',
-            members: user_id
-        })
-            .populate('tasks')
+    model.populateList = async function(listRef) {
+        const userQueryData = ['_id', 'firstName', 'lastName', 'profilePicture'];
+        return listRef
+            .populate({
+                path: 'tasks',
+                populate: { path: 'createdBy', model: 'User', select: userQueryData }
+            })
             .populate('members', userQueryData)
-            .populate('owner', userQueryData)
-            .exec();
+            .execPopulate();
+    };
+
+    model.getUserInbox = async function(user_id) {
+        return this.populateList(
+            await this.findOne({
+                type: 'inbox',
+                members: user_id
+            })
+        );
     };
 
     model.getUserListById = async function(user_id, list_id) {
         try {
-            const userQueryData = ['_id', 'firstName', 'lastName', 'profilePicture'];
-            return await this.findOne({
+            const list = await this.findOne({
                 _id: list_id,
                 members: user_id
-            })
-                .populate('members', userQueryData)
-                .populate('tasks')
-                .exec();
+            });
+            if (list) {
+                return this.populateList(list);
+            }
         } catch (err) {
             return null;
         }

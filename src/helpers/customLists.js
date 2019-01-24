@@ -83,6 +83,8 @@ async function fetchHighPriorityTasks({ database, user }) {
             match: { members: { $in: [user._id] } }
         })
         .exec();
+    // Populate all created by
+    await Promise.all(tasks.map(task => database.Tasks.populateTask(task)));
     return sortTasks(tasks);
 }
 
@@ -106,6 +108,8 @@ async function fetchTasksWithinDates(lowest, highest, { user, database }) {
     const tasks = await database.Tasks.find({ dueDate: { $gte: lowest, $lt: highest } })
         .populate({ path: 'list', select: 'members', match: { members: { $in: [user._id] } } })
         .exec();
+    // Populate all created by
+    await Promise.all(tasks.map(task => database.Tasks.populateTask(task)));
     return sortTasks(tasks);
 }
 

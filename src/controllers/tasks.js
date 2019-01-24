@@ -25,6 +25,8 @@ async function createTask(listId, taskObj = {}, { database, user }) {
     });
     // Add task to list
     await database.Lists.addTaskToList(task, list._id);
+    // Populate task fields
+    await database.Tasks.populateTask(task);
     // Return new list to front-end
     return task;
 }
@@ -71,6 +73,8 @@ async function updateTask(taskId, updatedTask = {}, { database, user }) {
     Object.assign(task, updatedTask);
     // Save the model
     await task.save();
+    // Populate task fields
+    await database.Tasks.populateTask(task);
     // Return list to front-end
     return task;
 }

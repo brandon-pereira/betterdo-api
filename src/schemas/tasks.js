@@ -59,5 +59,10 @@ module.exports = mongoose => {
 
     const model = mongoose.model('Task', schema);
 
+    model.populateTask = async function(taskRef) {
+        const userQueryData = ['_id', 'firstName', 'lastName', 'profilePicture'];
+        return taskRef.populate('createdBy', userQueryData).execPopulate();
+    };
+
     return model;
 };

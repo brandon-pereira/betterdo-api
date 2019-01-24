@@ -105,7 +105,7 @@ describe('Tasks API', () => {
             { database, user }
         );
         expect(task.title).toBe('Test');
-        expect(task.createdBy).toBe(user._id);
+        expect(task.createdBy._id.toString()).toBe(user._id.toString());
     });
 
     test('Protects against modifying protected fields', async () => {
