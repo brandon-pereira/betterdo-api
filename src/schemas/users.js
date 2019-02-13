@@ -1,6 +1,7 @@
-// const { Schema } = require('mongoose');
+const { Schema } = require('mongoose');
+
 module.exports = mongoose => {
-    const schema = mongoose.model('User', {
+    const schema = new Schema({
         google_id: {
             type: String,
             unique: true,
@@ -54,8 +55,29 @@ module.exports = mongoose => {
                 type: Boolean,
                 default: false
             }
+        },
+        lists: {
+            type: Array,
+            default: []
         }
     });
 
-    return schema;
+    const model = mongoose.model('User', schema);
+
+    model.removeListFromUser = function(list_id, user) {
+        let index = user.lists.findIndex(id => list_id.equals(id));
+        if (index >= 0) {
+            user.lists.splice(index, 1);
+        }
+        return user;
+    };
+
+    model.addListToUser = function(list_id, user) {
+        if (!user.lists.find(id => list_id.equals(id))) {
+            user.lists.unshift(list_id);
+        }
+        return user;
+    };
+
+    return model;
 };

@@ -27,11 +27,16 @@ async function getLists(listId, { database, user, includeCompleted }) {
         return list;
     } else {
         // all lists for user
-        const userLists = await database.Lists.getLists(user._id);
+        const userLists = await fetchUserLists({ database, user });
         const inbox = userLists.shift();
         const customLists = await fetchUserCustomLists({ database, user });
         return [inbox, ...customLists, ...userLists];
     }
+}
+
+async function fetchUserLists({ user }) {
+    const lists = user.lists;
+    return lists;
 }
 
 async function createList(listObj = {}, { database, user }) {
@@ -44,6 +49,8 @@ async function createList(listObj = {}, { database, user }) {
         ...listObj,
         owner: user._id
     });
+    // Add list to users array
+    await database.Users.addListToUser(list._id, user);
     // Return new list to front-end
     return list;
 }
@@ -100,6 +107,9 @@ async function deleteList(listId, { database, user }) {
         type: 'default'
     });
     if (status && status.n > 0) {
+        // Remove list to users array
+        await database.Users.removeListFromUser(listId, user);
+        // Return success message
         return { success: true };
     }
     throwError('Invalid List ID');
