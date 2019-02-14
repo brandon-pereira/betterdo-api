@@ -13,7 +13,6 @@ module.exports = (app, db) => {
                 callbackURL: url.resolve(process.env.SERVER_URL, 'auth/google/callback')
             },
             async (accessToken, refreshToken, profile, cb) => {
-                console.log(profile);
                 const googleId = profile.id;
                 const googleInfo = {
                     google_id: profile.id,
@@ -26,6 +25,7 @@ module.exports = (app, db) => {
                     google_id: googleId
                 });
                 if (!user) {
+                    console.log('new user', googleInfo);
                     // Create User
                     user = await db.Users.create(googleInfo);
                     await db.Lists.create({
