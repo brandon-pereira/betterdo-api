@@ -1,4 +1,4 @@
-const { WebPushNotifications } = require('web-pushnotifications');
+const WebPushNotifications = require('web-pushnotifications');
 
 module.exports = (app, db) => {
     const notificationQueue = [];
