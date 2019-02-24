@@ -9,7 +9,7 @@ module.exports = (app, db) => {
     };
     const getUserPushSubscription = async userId => {
         const user = await db.Users.findById(userId);
-        return user.pushSubscription;
+        return user.pushSubscriptions[0];
     };
     const scheduleNotification = (date, userId, payload) => {
         notificationQueue.push({
@@ -32,4 +32,6 @@ module.exports = (app, db) => {
     // notifier.schedule(new Date(), 'a', {
     //     title: "It's now now!"
     // });
+
+    return notifier;
 };

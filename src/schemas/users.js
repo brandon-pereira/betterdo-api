@@ -55,7 +55,12 @@ module.exports = mongoose => {
                 default: false
             }
         },
-        pushSubscription: Object
+        pushSubscriptions: [
+            {
+                type: String,
+                required: true
+            }
+        ]
     });
 
     return schema;

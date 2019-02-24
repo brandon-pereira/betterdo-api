@@ -4,15 +4,15 @@ async function updateUser(dirtyUserProps = {}, { database, user, notifier }) {
     // Get user
     let userRef = await database.Users.findById(user._id);
     // Remove potentially harmful stuff
-    if (dirtyUserProps.pushSubscription && typeof dirtyUserProps.pushSubscription === 'object') {
-        userRef.pushSubscription = dirtyUserProps.pushSubscription;
+    if (dirtyUserProps.pushSubscription && typeof dirtyUserProps.pushSubscription === 'string') {
+        userRef.pushSubscriptions.push(dirtyUserProps.pushSubscription);
         userRef.save();
         // Attempt to send a push notification to test
         try {
             await notifier.send(user._id, { title: "You're subscribed!", body: 'Time to party!' });
         } catch (err) {
             console.log(err);
-            userRef.pushSubscription = null;
+            userRef.pushSubscriptions.splice(-1, 1);
             userRef.save();
         }
         return user;
