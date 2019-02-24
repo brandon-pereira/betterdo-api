@@ -10,11 +10,13 @@ const createUser = async ({ createInbox } = {}) => {
         }
     });
     if (createInbox) {
-        await database.Lists.create({
+        const inbox = await database.Lists.create({
             title: 'Inbox',
             type: 'inbox',
             owner: user._id
         });
+        // console.log(inbox._id);
+        await database.Users.addListToUser(inbox._id, user);
     }
     return user;
 };
