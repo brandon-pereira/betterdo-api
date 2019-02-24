@@ -24,7 +24,7 @@ describe('Initialization', () => {
     test('Should return user information', async () => {
         const response = await init(undefined, { database, user: user });
         expect(typeof response.user).toBe('object');
-        expect(response.user).toMatchObject(user.toObject());
+        expect(response.user.toObject()).toMatchObject(user.toObject());
     });
 
     test('Should return inbox and its tasks', async () => {

@@ -11,7 +11,16 @@ async function getLists(listId, { database, user, includeCompleted }) {
             throwError('Invalid List ID');
         }
         if (includeCompleted) {
-            await list.populate('completedTasks').execPopulate();
+            await list
+                .populate({
+                    path: 'completedTasks',
+                    populate: {
+                        path: 'createdBy',
+                        model: 'User',
+                        select: ['_id', 'firstName', 'lastName', 'profilePicture']
+                    }
+                })
+                .execPopulate();
             list = list.toObject();
             list.additionalTasks = 0;
         }
@@ -65,21 +74,18 @@ async function updateList(listId, updatedList = {}, { database, user }) {
         list.tasks = updatedList.tasks;
         // Don't merge below
         delete updatedList.tasks;
-        // Update tasks obj
-        await list.populate('tasks').execPopulate();
     }
     // If members list changes
     if (updatedList.members && Array.isArray(updatedList.members)) {
         list.members = updatedList.members;
         delete updatedList.members;
-        await list
-            .populate('members', ['_id', 'firstName', 'lastName', 'profilePicture'])
-            .execPopulate();
     }
     // Merge the lists.. validation on the model will handle errors
     Object.assign(list, updatedList);
     // Save the model
     await list.save();
+    // Repopulate object
+    await database.Lists.populateList(list);
     // Return list to front-end
     return list;
 }

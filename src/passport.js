@@ -13,7 +13,6 @@ module.exports = (app, db) => {
                 callbackURL: url.resolve(process.env.SERVER_URL, 'auth/google/callback')
             },
             async (accessToken, refreshToken, profile, cb) => {
-                console.log(profile);
                 const googleId = profile.id;
                 const googleInfo = {
                     google_id: profile.id,
@@ -26,6 +25,7 @@ module.exports = (app, db) => {
                     google_id: googleId
                 });
                 if (!user) {
+                    console.log('new user', googleInfo);
                     // Create User
                     user = await db.Users.create(googleInfo);
                     await db.Lists.create({
@@ -64,7 +64,10 @@ module.exports = (app, db) => {
             secret: process.env.SESSION_SECRET,
             resave: false,
             saveUninitialized: true,
-            store: new MongoStore({ mongooseConnection: db.connection })
+            store: new MongoStore({ mongooseConnection: db.connection }),
+            cookie: {
+                maxAge: 1000 * 60 * 60 * 24 * 31 * 6 // ms * sec * mins * hours * days * 6 = ~ 6 months
+            }
         })
     );
     app.use(passport.initialize());

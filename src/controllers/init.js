@@ -6,7 +6,7 @@ async function init(listId = 'inbox', { database, user }) {
     [currentList, lists] = await Promise.all([currentList, lists]);
     if (currentList === null) {
         // user passed in invalid list
-        currentList = await database.Lists.getLists(user._id, 'inbox');
+        currentList = await getLists('inbox', { database, user });
     }
     return {
         user,
