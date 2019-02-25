@@ -1,7 +1,7 @@
 const WebPushNotifications = require('web-pushnotifications');
 
 module.exports = (app, db) => {
-    const notificationQueue = [];
+    let notificationQueue = [];
     const vapidKeys = {
         publicKey: process.env.VAPID_PUBLIC_KEY,
         privateKey: process.env.VAPID_PRIVATE_KEY,
@@ -21,12 +21,23 @@ module.exports = (app, db) => {
     const fetchNotifications = date => {
         return notificationQueue.filter(notification => notification.date <= date);
     };
+    const clearNotification = ({ date, userId, payload }) => {
+        notificationQueue = notificationQueue.filter(notification => {
+            const DATES_MATCH = notification.date === date;
+            const SAME_USER = notification.userId === userId;
+            if (DATES_MATCH && SAME_USER) {
+                return false;
+            }
+            return true;
+        });
+    };
 
     const notifier = new WebPushNotifications({
         vapidKeys,
         getUserPushSubscription,
         fetchNotifications,
-        scheduleNotification
+        scheduleNotification,
+        clearNotification
     });
 
     // notifier.schedule(new Date(), 'a', {
