@@ -12,7 +12,9 @@ module.exports = (app, db) => {
         return user.pushSubscriptions[0];
     };
     const scheduleNotification = (date, userId, payload) => {
+        const id = Math.random();
         notificationQueue.push({
+            id,
             date,
             userId,
             payload
@@ -21,15 +23,8 @@ module.exports = (app, db) => {
     const fetchNotifications = date => {
         return notificationQueue.filter(notification => notification.date <= date);
     };
-    const clearNotification = ({ date, userId, payload }) => {
-        notificationQueue = notificationQueue.filter(notification => {
-            const DATES_MATCH = notification.date === date;
-            const SAME_USER = notification.userId === userId;
-            if (DATES_MATCH && SAME_USER) {
-                return false;
-            }
-            return true;
-        });
+    const clearNotification = payload => {
+        notificationQueue = notificationQueue.filter(noti => noti.id !== payload.id);
     };
 
     const notifier = new WebPushNotifications({
