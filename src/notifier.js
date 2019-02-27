@@ -4,7 +4,7 @@ module.exports = (app, db) => {
     const vapidKeys = {
         publicKey: process.env.VAPID_PUBLIC_KEY,
         privateKey: process.env.VAPID_PRIVATE_KEY,
-        email: 'brandonpereiras@gmail.com'
+        email: process.env.VAPID_EMAIL
     };
 
     const getUserPushSubscription = async userId => {
