@@ -3,7 +3,7 @@ const { WebPushNotifications, MongoAdapter } = require('web-pushnotifications');
 module.exports = (app, db) => {
     const getUserPushSubscription = async userId => {
         const user = await db.Users.findById(userId);
-        return user.pushSubscriptions[user.pushSubscriptions.length - 1];
+        return user.pushSubscriptions[0];
     };
 
     const notifier = new WebPushNotifications({
@@ -11,6 +11,10 @@ module.exports = (app, db) => {
             publicKey: process.env.VAPID_PUBLIC_KEY,
             privateKey: process.env.VAPID_PRIVATE_KEY,
             email: process.env.VAPID_EMAIL
+        },
+        notificationDefaults: {
+            badge: '/notification-badge.png',
+            icon: '/android-chrome-192x192.png'
         },
         getUserPushSubscription,
         adapter: new MongoAdapter(db.connection)
