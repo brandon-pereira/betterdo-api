@@ -3,7 +3,7 @@ const { WebPushNotifications, MongoAdapter } = require('web-pushnotifications');
 module.exports = (app, db) => {
     const getUserPushSubscription = async userId => {
         const user = await db.Users.findById(userId);
-        return user.pushSubscriptions[user.pushSubscriptions.length - 1];
+        return user.pushSubscriptions;
     };
 
     const notifier = new WebPushNotifications({
