@@ -6,6 +6,16 @@ module.exports = (app, db) => {
         return user.pushSubscriptions;
     };
 
+    const removeUserPushSubscription = async (userId, subscription) => {
+        const user = await db.Users.findById(userId);
+        const index = user.pushSubscriptions.indexOf(subscription);
+        if (index !== -1) {
+            user.pushSubscriptions.splice(index, 1);
+        }
+        user.save();
+        return user.pushSubscriptions;
+    };
+
     const notifier = new WebPushNotifications({
         vapidKeys: {
             publicKey: process.env.VAPID_PUBLIC_KEY,
@@ -17,6 +27,7 @@ module.exports = (app, db) => {
             icon: '/android-chrome-192x192.png'
         },
         getUserPushSubscription,
+        removeUserPushSubscription,
         adapter: new MongoAdapter(db.connection)
     });
 
