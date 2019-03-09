@@ -1,5 +1,6 @@
 const { throwError } = require('../helpers/errorHandler');
 const { isCustomList, modifyTaskForCustomList } = require('../helpers/customLists');
+const { notifyAboutSharedList } = require('../helpers/notify');
 
 async function createTask(listId, taskObj = {}, { database, user }) {
     // Ensure list id is passed
@@ -31,7 +32,7 @@ async function createTask(listId, taskObj = {}, { database, user }) {
     return task;
 }
 
-async function updateTask(taskId, updatedTask = {}, { database, user }) {
+async function updateTask(taskId, updatedTask = {}, { database, user, notifier }) {
     // Ensure list id is passed
     if (!taskId) throwError('Invalid Task ID');
     // Get task
@@ -73,6 +74,12 @@ async function updateTask(taskId, updatedTask = {}, { database, user }) {
     Object.assign(task, updatedTask);
     // Save the model
     await task.save();
+    // Notify about shared list update
+    notifyAboutSharedList(`${user.firstName} updated a task in "${list.title}"`, {
+        notifier,
+        members: list.members,
+        user
+    });
     // Populate task fields
     await database.Tasks.populateTask(task);
     // Return list to front-end
