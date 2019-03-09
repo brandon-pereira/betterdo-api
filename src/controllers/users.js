@@ -4,20 +4,11 @@ async function updateUser(dirtyUserProps = {}, { database, user, notifier }) {
     // Get user
     let userRef = await database.Users.findById(user._id);
     // Remove potentially harmful stuff
+    let didUpdatePushSubscription = false;
     if (dirtyUserProps.pushSubscription && typeof dirtyUserProps.pushSubscription === 'string') {
         if (!userRef.pushSubscriptions.includes(dirtyUserProps.pushSubscription)) {
+            didUpdatePushSubscription = true;
             userRef.pushSubscriptions.push(dirtyUserProps.pushSubscription);
-            // Attempt to send a push notification to test
-            try {
-                await notifier.send(user._id, {
-                    title: "You're subscribed!",
-                    body: 'Time to party!'
-                });
-                console.log('Successfully sent notification');
-            } catch (err) {
-                console.log('Failed to send notification to user. Push subscription corrupt.', err);
-                userRef.pushSubscriptions.splice(-1, 1);
-            }
         }
     }
     // if (typeof dirtyUserProps.isBeta === 'boolean') {
@@ -34,6 +25,13 @@ async function updateUser(dirtyUserProps = {}, { database, user, notifier }) {
     });
     // Save
     await userRef.save();
+    // Send push notification
+    if (didUpdatePushSubscription) {
+        await notifier.send(user._id, {
+            title: "You're subscribed!",
+            body: 'Time to party!'
+        });
+    }
     // Return to front-end
     return userRef;
 }
