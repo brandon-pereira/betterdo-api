@@ -2,7 +2,7 @@ const { throwError } = require('../helpers/errorHandler');
 const { isCustomList, modifyTaskForCustomList } = require('../helpers/customLists');
 const { notifyAboutSharedList } = require('../helpers/notify');
 
-async function createTask(listId, taskObj = {}, { database, user }) {
+async function createTask(listId, taskObj = {}, { database, user, notifier }) {
     // Ensure list id is passed
     if (!listId) throwError('Invalid List ID');
     // If the list is a custom list, modify task with new settings
@@ -26,6 +26,12 @@ async function createTask(listId, taskObj = {}, { database, user }) {
     });
     // Add task to list
     await database.Lists.addTaskToList(task, list._id);
+    // Notify about shared list task addition
+    notifyAboutSharedList(`${user.firstName} added ${task.title} to ${list.title}.`, {
+        notifier,
+        members: list.members,
+        user
+    });
     // Populate task fields
     await database.Tasks.populateTask(task);
     // Return new list to front-end
@@ -33,6 +39,7 @@ async function createTask(listId, taskObj = {}, { database, user }) {
 }
 
 async function updateTask(taskId, updatedTask = {}, { database, user, notifier }) {
+    let notificationSent = false;
     // Ensure list id is passed
     if (!taskId) throwError('Invalid Task ID');
     // Get task
@@ -64,6 +71,13 @@ async function updateTask(taskId, updatedTask = {}, { database, user, notifier }
     // If the task isCompleted state changed
     if (updatedTask.isCompleted !== undefined && task.isCompleted !== updateTask.isCompleted) {
         if (updatedTask.isCompleted) {
+            notificationSent = true;
+            // Notify about shared list task deletion
+            notifyAboutSharedList(`${user.firstName} completed ${task.title} in ${list.title}.`, {
+                notifier,
+                members: list.members,
+                user
+            });
             await database.Lists.setTaskCompleted(task._id, list._id);
         } else {
             await database.Lists.setTaskIncompleted(task._id, list._id);
@@ -75,18 +89,20 @@ async function updateTask(taskId, updatedTask = {}, { database, user, notifier }
     // Save the model
     await task.save();
     // Notify about shared list update
-    notifyAboutSharedList(`${user.firstName} updated a task in "${list.title}"`, {
-        notifier,
-        members: list.members,
-        user
-    });
+    if (!notificationSent) {
+        notifyAboutSharedList(`${user.firstName} updated ${task.title} in ${list.title}.`, {
+            notifier,
+            members: list.members,
+            user
+        });
+    }
     // Populate task fields
     await database.Tasks.populateTask(task);
     // Return list to front-end
     return task;
 }
 
-async function deleteTask(taskId, { database, user }) {
+async function deleteTask(taskId, { database, user, notifier }) {
     // Ensure list id is passed
     if (!taskId) throwError('Invalid Task ID');
     // Get task
@@ -101,6 +117,12 @@ async function deleteTask(taskId, { database, user }) {
     await database.Lists.removeTaskFromList(task._id, task.list);
     // Delete task
     await database.Tasks.deleteOne({ _id: task._id });
+    // Notify about shared list task deletion
+    notifyAboutSharedList(`${user.firstName} deleted ${task.title} from ${list.title}.`, {
+        notifier,
+        members: list.members,
+        user
+    });
     return { success: true };
 }
 
