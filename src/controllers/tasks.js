@@ -29,7 +29,7 @@ async function createTask(listId, taskObj = {}, { database, user, notifier }) {
     // Notify about shared list task addition
     notifyAboutSharedList(`${user.firstName} added ${task.title} to ${list.title}.`, {
         notifier,
-        members: list.members,
+        list,
         user
     });
     // Populate task fields
@@ -75,7 +75,7 @@ async function updateTask(taskId, updatedTask = {}, { database, user, notifier }
             // Notify about shared list task deletion
             notifyAboutSharedList(`${user.firstName} completed ${task.title} in ${list.title}.`, {
                 notifier,
-                members: list.members,
+                list,
                 user
             });
             await database.Lists.setTaskCompleted(task._id, list._id);
@@ -92,7 +92,7 @@ async function updateTask(taskId, updatedTask = {}, { database, user, notifier }
     if (!notificationSent) {
         notifyAboutSharedList(`${user.firstName} updated ${task.title} in ${list.title}.`, {
             notifier,
-            members: list.members,
+            list,
             user
         });
     }
@@ -120,7 +120,7 @@ async function deleteTask(taskId, { database, user, notifier }) {
     // Notify about shared list task deletion
     notifyAboutSharedList(`${user.firstName} deleted ${task.title} from ${list.title}.`, {
         notifier,
-        members: list.members,
+        list,
         user
     });
     return { success: true };
