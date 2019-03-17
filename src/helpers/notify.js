@@ -7,6 +7,7 @@ module.exports.notifyAboutSharedList = (title, { notifier, list }) => {
             if (member._id.toString() !== user._id.toString()) {
                 notifier.send(member._id, {
                     title,
+                url: `/${listId}`,
                 tag: `shared-list:${listId}`,
                     data: {
                         listId: listId,

@@ -27,7 +27,8 @@ module.exports = (app, db) => {
         },
         notificationDefaults: {
             badge: '/notification-badge.png',
-            icon: '/android-chrome-192x192.png'
+            icon: '/android-chrome-192x192.png',
+            url: '/'
         },
         getUserPushSubscription,
         removeUserPushSubscription,
