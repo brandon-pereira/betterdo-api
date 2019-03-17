@@ -41,6 +41,10 @@ module.exports = mongoose => {
             type: Boolean,
             default: false
         },
+        isPushEnabled: {
+            type: Boolean,
+            default: true
+        },
         customLists: {
             highPriority: {
                 type: Boolean,

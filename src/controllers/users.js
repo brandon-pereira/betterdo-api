@@ -14,6 +14,9 @@ async function updateUser(dirtyUserProps = {}, { database, user, notifier }) {
     // if (typeof dirtyUserProps.isBeta === 'boolean') {
     //     userRef.isBeta = dirtyUserProps.isBeta;
     // }
+    if (typeof dirtyUserProps.isPushEnabled === 'boolean') {
+        userRef.isPushEnabled = dirtyUserProps.isPushEnabled;
+    }
     if (dirtyUserProps.customLists && typeof dirtyUserProps.customLists === 'object') {
         Object.assign(userRef.customLists, dirtyUserProps.customLists);
     }

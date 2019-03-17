@@ -3,7 +3,10 @@ const { WebPushNotifications, MongoAdapter } = require('web-pushnotifications');
 module.exports = (app, db) => {
     const getUserPushSubscription = async userId => {
         const user = await db.Users.findById(userId);
-        return user.pushSubscriptions;
+        if (user.isPushEnabled) {
+            return user.pushSubscriptions;
+        }
+        return [];
     };
 
     const removeUserPushSubscription = async (userId, subscription) => {
