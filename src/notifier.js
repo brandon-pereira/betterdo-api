@@ -1,4 +1,4 @@
-const { WebPushNotifications, MongoAdapter } = require('web-pushnotifications');
+const { WebNotifier, MongoAdapter } = require('web-notifier');
 
 module.exports = (app, db) => {
     const getUserPushSubscription = async userId => {
@@ -19,7 +19,7 @@ module.exports = (app, db) => {
         return user.pushSubscriptions;
     };
 
-    const notifier = new WebPushNotifications({
+    const notifier = new WebNotifier({
         vapidKeys: {
             publicKey: process.env.VAPID_PUBLIC_KEY,
             privateKey: process.env.VAPID_PRIVATE_KEY,
@@ -35,7 +35,7 @@ module.exports = (app, db) => {
         adapter: new MongoAdapter(db.connection)
     });
 
-    // notifier.schedule(new Date(), 'a', {
+    // const id = notifier.schedule(new Date(), 'a', {
     //     title: "It's now now!"
     // });
 

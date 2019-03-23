@@ -11,7 +11,7 @@ const app = require('./src/express');
 const db = require('./src/database');
 
 /**
- * Get a reference to pushnotifier
+ * Get a reference to notifier
  */
 const notifier = require('./src/notifier')(app, db);
 
