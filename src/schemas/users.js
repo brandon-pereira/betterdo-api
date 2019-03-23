@@ -41,6 +41,10 @@ module.exports = mongoose => {
             type: Boolean,
             default: false
         },
+        isPushEnabled: {
+            type: Boolean,
+            default: true
+        },
         customLists: {
             highPriority: {
                 type: Boolean,
@@ -54,7 +58,13 @@ module.exports = mongoose => {
                 type: Boolean,
                 default: false
             }
-        }
+        },
+        pushSubscriptions: [
+            {
+                type: String,
+                required: true
+            }
+        ]
     });
 
     return schema;
