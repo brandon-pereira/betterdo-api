@@ -26,9 +26,9 @@ module.exports = (app, db) => {
             email: process.env.VAPID_EMAIL
         },
         notificationDefaults: {
-            badge: '/notification-badge.png',
-            icon: '/android-chrome-192x192.png',
-            url: '/'
+            badge: `${process.env.SERVER_URL}/app/notification-badge.png`,
+            icon: `${process.env.SERVER_URL}/app/android-chrome-192x192.png`,
+            url: `${process.env.SERVER_URL}/app/`
         },
         getUserPushSubscription,
         removeUserPushSubscription,

@@ -10,7 +10,7 @@ module.exports.notifyAboutSharedList = (title, { notifier, list }) => {
             d.setMinutes(d.getMinutes() + 1);
             const id = await notifier.schedule(d, member._id, {
                 title,
-                url: `/${listId}`,
+                url: `${process.env.SERVER_URL}/app/${listId}`,
                 tag: `shared-list:${listId}`,
                 data: {
                     listId: listId,
