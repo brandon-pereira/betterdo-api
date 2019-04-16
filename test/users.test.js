@@ -53,7 +53,7 @@ describe('Users API', () => {
         userCache = await createUser();
         const returnedUsers = await getUser(userCache.email, { database, user: userCache });
         userCache = await Users.findById(userCache._id);
-        expect(returnedUsers._id.toString()).toBe(userCache._id.toString());
+        expect(returnedUsers._id).toMatchId(userCache._id);
     });
 
     test('Throws error finding users with invalid email', async () => {

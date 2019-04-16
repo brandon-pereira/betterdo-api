@@ -11,7 +11,7 @@ describe('Lists API', () => {
         const user = await createUser();
         const list = await createList({ title: 'Test' }, { database, user });
         expect(list.title).toBe('Test');
-        expect(list.members[0]._id).toBe(user._id);
+        expect(list.members[0]._id).toMatchId(user._id);
     });
 
     test('Provides clear error messages when invalid data provided', async () => {
@@ -180,8 +180,8 @@ describe('Lists API', () => {
         }
         list = await getLists(list._id, { database, user });
         expect(list.tasks).toHaveLength(2);
-        expect(list.tasks[1]._id.toString()).toBe(task1._id.toString());
-        expect(list.tasks[0]._id.toString()).toBe(task2._id.toString());
+        expect(list.tasks[1]._id).toMatchId(task1._id);
+        expect(list.tasks[0]._id).toMatchId(task2._id);
     });
 
     test('Prevents tasks from being removed during reorder', async () => {
@@ -197,8 +197,8 @@ describe('Lists API', () => {
         }
         list = await getLists(list._id, { database, user });
         expect(list.tasks).toHaveLength(2);
-        expect(list.tasks[1]._id.toString()).toBe(task1._id.toString());
-        expect(list.tasks[0]._id.toString()).toBe(task2._id.toString());
+        expect(list.tasks[1]._id).toMatchId(task1._id);
+        expect(list.tasks[0]._id).toMatchId(task2._id);
     });
 
     test('Requires that the colour be a valid hex code', async () => {

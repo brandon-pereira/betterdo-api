@@ -5,7 +5,7 @@ module.exports.notifyAboutSharedList = (title, { notifier, user, list }) => {
 
     if (isSharedList) {
         members.forEach(async member => {
-            if (member._id.toString() !== user._id.toString()) {
+            if (!member._id.equals(user._id)) {
                 await notifier.send(member._id, {
                     title,
                     url: `${process.env.SERVER_URL}app/#/${listId}`,

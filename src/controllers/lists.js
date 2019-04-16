@@ -66,9 +66,10 @@ async function updateList(listId, updatedList = {}, { database, user }) {
         updatedList.tasks &&
         (!Array.isArray(updatedList.tasks) ||
             updatedList.tasks.length !== list.tasks.length ||
-            updatedList.tasks.some(_id => list.tasks.some(task => !task._id.equals(_id))))
+            updatedList.tasks.find(
+                _id => !list.tasks.map(task => task._id.toString()).includes(_id)
+            ))
     ) {
-        //  ['a', 'b', 'c'] => ['a', 'b', 'd']
         throwError('Invalid modification of tasks');
     } else if (updatedList.tasks) {
         // Valid tasks, update order
