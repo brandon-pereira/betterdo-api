@@ -11,6 +11,11 @@ const app = require('./src/express');
 const db = require('./src/database');
 
 /**
+ * Get a reference to notifier
+ */
+const notifier = require('./src/notifier')(app, db);
+
+/**
  * Passport authentication middleware
  */
 require('./src/passport')(app, db);
@@ -19,7 +24,7 @@ require('./src/passport')(app, db);
  * Initialize Routes
  */
 require('./src/routes/app')(app, db);
-require('./src/routes/api')(app, db);
+require('./src/routes/api')(app, db, notifier);
 require('./src/routes/root')(app, db);
 
 app.listen(process.env.SERVER_PORT || 8080, () => {

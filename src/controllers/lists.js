@@ -53,6 +53,8 @@ async function createList(listObj = {}, { database, user }) {
     });
     // Add list to users array
     await database.Users.addListToUser(list._id, user);
+    // Populate
+    await database.Lists.populateList(list);
     // Return new list to front-end
     return list;
 }

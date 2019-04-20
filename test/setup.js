@@ -1,5 +1,16 @@
 process.env.DATABASE_NAME = 'betterdo-unitTests';
 const database = require('../src/database');
+
+expect.extend({
+    toMatchId(received, id) {
+        const pass = received.toString() === id.toString();
+        return {
+            message: () => `expected "${received}" to match "${id}"`,
+            pass
+        };
+    }
+});
+
 const createUser = async ({ createInbox } = {}) => {
     const user = await database.Users.create({
         firstName: 'unitTest',

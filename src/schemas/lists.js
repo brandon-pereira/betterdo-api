@@ -75,7 +75,7 @@ module.exports = mongoose => {
         if (
             !this.isNew &&
             this.isModified('members') &&
-            !this.members.find(member => member._id.toString() === this.owner.toString())
+            !this.members.find(member => member._id.equals(this.owner))
         ) {
             this.invalidate('members', `Not permitted to remove owner!`);
         }

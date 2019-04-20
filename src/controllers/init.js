@@ -11,7 +11,10 @@ async function init(listId = 'inbox', { database, user }) {
     return {
         user,
         currentList,
-        lists
+        lists,
+        config: {
+            vapidKey: process.env.VAPID_PUBLIC_KEY
+        }
     };
 }
 

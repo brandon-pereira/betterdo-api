@@ -5,7 +5,7 @@ const { createTask, updateTask, deleteTask } = require('../controllers/tasks');
 const { updateUser, getUser } = require('../controllers/users');
 const routeHandler = require('../helpers/routeHandler');
 
-module.exports = (app, database) => {
+module.exports = (app, database, notifier) => {
     /* Initialize a router, anything behind `/api` requires authentication. */
     const api = express.Router();
     api.use('/', (req, res, next) => {
@@ -22,7 +22,7 @@ module.exports = (app, database) => {
      * Init
      */
     api.get(['/init', '/init/:listId'], (req, res) =>
-        routeHandler('getting initial payload', { req, res, database }, config =>
+        routeHandler('getting initial payload', { req, res, database, notifier }, config =>
             init(req.params.listId, config)
         )
     );
@@ -31,7 +31,7 @@ module.exports = (app, database) => {
      * Lists
      */
     api.get(['/lists', '/lists/:listId'], (req, res) =>
-        routeHandler('getting lists', { req, res, database }, config =>
+        routeHandler('getting lists', { req, res, database, notifier }, config =>
             getLists(req.params.listId, {
                 ...config,
                 includeCompleted: Boolean(req.query.includeCompleted === 'true')
@@ -40,15 +40,17 @@ module.exports = (app, database) => {
     );
 
     api.put('/lists', (req, res) =>
-        routeHandler('create list', { req, res, database }, config => createList(req.body, config))
+        routeHandler('create list', { req, res, database, notifier }, config =>
+            createList(req.body, config)
+        )
     );
     api.post('/lists/:listId', (req, res) =>
-        routeHandler('update list', { req, res, database }, config =>
+        routeHandler('update list', { req, res, database, notifier }, config =>
             updateList(req.params.listId, req.body, config)
         )
     );
     api.delete('/lists/:listId', (req, res) =>
-        routeHandler('delete list', { req, res, database }, config =>
+        routeHandler('delete list', { req, res, database, notifier }, config =>
             deleteList(req.params.listId, config)
         )
     );
@@ -57,19 +59,19 @@ module.exports = (app, database) => {
      * Tasks
      */
     api.put('/tasks', (req, res) =>
-        routeHandler('adding task', { req, res, database }, config => {
+        routeHandler('adding task', { req, res, database, notifier }, config => {
             const listId = req.body.listId;
             delete req.body.listId;
             return createTask(listId, req.body, config);
         })
     );
     api.post('/tasks/:taskId', (req, res) =>
-        routeHandler('updating task', { req, res, database }, config =>
+        routeHandler('updating task', { req, res, database, notifier }, config =>
             updateTask(req.params.taskId, req.body, config)
         )
     );
     api.delete('/tasks/:taskId', (req, res) =>
-        routeHandler('deleting task', { req, res, database }, config =>
+        routeHandler('deleting task', { req, res, database, notifier }, config =>
             deleteTask(req.params.taskId, config)
         )
     );
@@ -78,12 +80,12 @@ module.exports = (app, database) => {
      * Users
      */
     api.get('/users/:email', (req, res) =>
-        routeHandler('getting user by email', { req, res, database }, config =>
+        routeHandler('getting user by email', { req, res, database, notifier }, config =>
             getUser(req.params.email, config)
         )
     );
     api.post('/users', (req, res) =>
-        routeHandler('updating user', { req, res, database }, config =>
+        routeHandler('updating user', { req, res, database, notifier }, config =>
             updateUser(req.body, config)
         )
     );

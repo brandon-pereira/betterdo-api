@@ -42,6 +42,10 @@ module.exports = mongoose => {
             type: Boolean,
             default: false
         },
+        isPushEnabled: {
+            type: Boolean,
+            default: true
+        },
         customLists: {
             highPriority: {
                 type: Boolean,
@@ -60,6 +64,12 @@ module.exports = mongoose => {
             {
                 type: Schema.Types.ObjectId,
                 ref: 'List'
+            }
+        ],
+        pushSubscriptions: [
+            {
+                type: String,
+                required: true
             }
         ]
     });
