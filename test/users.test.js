@@ -9,7 +9,7 @@ describe('Users Schema', () => {
         expect.assertions(4);
         const _userData = {
             firstName: 'unitTest',
-            email: 'unit@test.com'
+            email: `${Date.now()}-${Math.random()}@unitTests.com`
         };
         userCache = await Users.create(_userData);
         expect(userCache.firstName).toBe(_userData.firstName);
@@ -23,7 +23,7 @@ describe('Users Schema', () => {
         expect.assertions(2);
         try {
             await Users.create({
-                email: 'unit@test.com'
+                email: `${Date.now()}-${Math.random()}@unitTests.com`
             });
         } catch (err) {
             expect(err.message).toBe(
@@ -49,7 +49,6 @@ describe('Users API', () => {
     });
 
     test('Allows finding users with valid email', async () => {
-        await Users.remove({});
         userCache = await createUser();
         const returnedUsers = await getUser(userCache.email, { database, user: userCache });
         userCache = await Users.findById(userCache._id);

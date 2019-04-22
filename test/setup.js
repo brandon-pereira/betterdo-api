@@ -26,7 +26,6 @@ const createUser = async ({ createInbox } = {}) => {
             type: 'inbox',
             owner: user._id
         });
-        // console.log(inbox._id);
         await database.Users.addListToUser(inbox._id, user);
     }
     return user;
