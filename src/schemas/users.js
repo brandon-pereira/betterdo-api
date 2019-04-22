@@ -78,7 +78,7 @@ module.exports = mongoose => {
 
     model.getLists = async function(userId) {
         const user = await model.findById(userId);
-        await user.populate('lists');
+        await user.populate('lists').execPopulate();
         return user.lists;
     };
 

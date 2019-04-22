@@ -11,6 +11,20 @@ async function updateUser(dirtyUserProps = {}, { database, user, notifier }) {
             userRef.pushSubscriptions.push(dirtyUserProps.pushSubscription);
         }
     }
+    // Ensure tasks length matches and no new tasks injected
+    if (
+        dirtyUserProps.lists &&
+        (!Array.isArray(dirtyUserProps.lists) ||
+            dirtyUserProps.lists.length !== userRef.lists.length ||
+            dirtyUserProps.lists.find(_id => !userRef.lists.map(id => id.toString()).includes(_id)))
+    ) {
+        throwError('Invalid modification of tasks');
+    } else if (dirtyUserProps.lists) {
+        // Valid tasks, update order
+        userRef.lists = dirtyUserProps.lists;
+        // Don't merge below
+        delete dirtyUserProps.lists;
+    }
     // if (typeof dirtyUserProps.isBeta === 'boolean') {
     //     userRef.isBeta = dirtyUserProps.isBeta;
     // }

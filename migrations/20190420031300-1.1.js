@@ -5,7 +5,7 @@ module.exports = {
         console.log(await db.collection('users').findOne({ _id: tempUserId }));
         let lists = await db
             .collection('lists')
-            .find({ members: ObjectId('5c736dd1dcc6d280d547dab4') })
+            .find({ members: ObjectId('5c736dd1dcc6d280d547dab4'), type: 'default' })
             .toArray();
 
         console.log(lists);

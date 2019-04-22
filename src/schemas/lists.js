@@ -96,11 +96,11 @@ module.exports = mongoose => {
     };
 
     model.getUserLists = async function(user_id) {
-        return await this.find({
-            members: user_id
-        });
-        // .lean()
-        // .exec();
+        return this.populateList(
+            await this.find({
+                members: user_id
+            })
+        );
     };
 
     model.populateList = async function(listRef) {
