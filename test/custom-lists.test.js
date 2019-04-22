@@ -10,7 +10,7 @@ let inbox;
 let validList1;
 let validList2;
 beforeAll(async () => {
-    user1 = await createUser({ createInbox: true });
+    user1 = await createUser();
     user2 = await createUser();
     inbox = await getLists('inbox', { user: user1, database });
     validList1 = await createList({ title: 'Valid List' }, { database, user: user1 });

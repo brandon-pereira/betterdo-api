@@ -80,7 +80,7 @@ describe('Lists API', () => {
             await createList({ title: `List ${i}` }, { database, user });
         }
         const fetchedLists = await getLists(null, { database, user });
-        expect(fetchedLists).toHaveLength(randomNumber);
+        expect(fetchedLists).toHaveLength(randomNumber + 1); // all created lists and inbox
     });
 
     test('Protects against fetching list non-member list', async () => {
