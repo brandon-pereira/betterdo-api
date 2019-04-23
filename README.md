@@ -4,8 +4,6 @@ The API for BetterDo. This repository controls the UI routing and enables a REST
 
 It's recommended you run this with the UI. See [betterdo-ui](https://github.com/brandon-pereira/betterdo-ui/).
 
-**NOTE**: This is still a WIP. See below for a full list of todos. Also see below for a list of things I'd like to add.
-
 ## Features
 
 -   Simple usable REST API 🤖
@@ -34,13 +32,3 @@ It's recommended you run this with the UI. See [betterdo-ui](https://github.com/
     -   `PUT` add task
     -   `POST` update task
     -   `DELETE` deleteTask
-
-### TODO
-
--   [ ] Merge subtasks between server/front-end (or should it blindly trust?)
--   [ ] Allow updating list order (and validate)
-
-### Future Feature Ideas
-
--   [ ] Recurring tasks
--   [ ] Update user data
