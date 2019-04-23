@@ -56,6 +56,30 @@ describe('Users API', () => {
         expect(returnedUsers._id).toMatchId(userCache._id);
     });
 
+    test('Allows global push subscription to be toggled', async () => {
+        userCache = await createUser();
+        userCache = await Users.findById(userCache._id);
+        expect(userCache.isPushEnabled).toBe(true);
+        await updateUser({ isPushEnabled: false }, { database, user: userCache });
+        userCache = await Users.findById(userCache._id);
+        expect(userCache.isPushEnabled).toBe(false);
+    });
+
+    test('Allows push subscriptions to be added', async () => {
+        const notifier = { send: jest.fn() };
+        userCache = await createUser();
+        userCache = await Users.findById(userCache._id);
+        expect(userCache.pushSubscriptions).toHaveLength(0);
+        await updateUser({ pushSubscription: 'test1' }, { database, notifier, user: userCache });
+        userCache = await Users.findById(userCache._id);
+        expect(userCache.pushSubscriptions).toEqual(expect.arrayContaining(['test1']));
+        await updateUser({ pushSubscription: 'test2' }, { database, notifier, user: userCache });
+        await updateUser({ pushSubscription: 'test1' }, { database, notifier, user: userCache });
+        userCache = await Users.findById(userCache._id);
+        expect(userCache.pushSubscriptions).toEqual(expect.arrayContaining(['test1', 'test2']));
+        expect(notifier.send.mock.calls.length).toBe(2);
+    });
+
     test('Throws error finding users with invalid email', async () => {
         expect.assertions(2);
         userCache = await createUser();

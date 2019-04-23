@@ -88,17 +88,7 @@ module.exports = mongoose => {
             return this.getUserInbox(user_id);
         } else if (list_id) {
             return this.getUserListById(user_id, list_id);
-        } else {
-            throw new Error('Invalid List ID.');
         }
-    };
-
-    model.getUserLists = async function(user_id) {
-        return this.populateList(
-            await this.find({
-                members: user_id
-            })
-        );
     };
 
     model.populateList = async function(listRef) {
