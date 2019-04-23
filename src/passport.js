@@ -57,7 +57,7 @@ module.exports = (app, db) => {
     passport.deserializeUser(async (id, done) => {
         const user = await db.Users.findOne({ _id: id });
         if (user) {
-            return done(null, user.toJSON());
+            return done(null, user);
         }
         return done(null, null, { message: 'AuthenticationRequired' });
     });

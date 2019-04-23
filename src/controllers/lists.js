@@ -1,5 +1,6 @@
 const { throwError } = require('../helpers/errorHandler');
 const { isCustomList, fetchCustomList, fetchUserCustomLists } = require('../helpers/customLists');
+const mongoose = require('mongoose');
 
 async function getLists(listId, { database, user, includeCompleted }) {
     // Get lists based on query data
@@ -107,7 +108,7 @@ async function deleteList(listId, { database, user }) {
     });
     if (status && status.n > 0) {
         // Remove list to users array
-        await database.Users.removeListFromUser(listId, user);
+        await database.Users.removeListFromUser(new mongoose.Types.ObjectId(listId), user);
         // Return success message
         return { success: true };
     }
