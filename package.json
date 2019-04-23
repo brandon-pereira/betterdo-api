@@ -41,6 +41,8 @@
             "!src/helpers/errorHandler.js",
             "!src/helpers/routeHandler.js",
             "!src/express.js",
+            "!src/notifier.js",
+            "!src/helpers/notify.js",
             "!src/passport.js",
             "!src/routes/*"
         ]
