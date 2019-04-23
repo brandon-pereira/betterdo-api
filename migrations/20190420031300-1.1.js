@@ -1,20 +1,22 @@
-const { ObjectId } = require('mongodb');
-const tempUserId = ObjectId('5c736dd1dcc6d280d547dab4');
 module.exports = {
     async up(db) {
-        console.log(await db.collection('users').findOne({ _id: tempUserId }));
-        let lists = await db
-            .collection('lists')
-            .find({ members: ObjectId('5c736dd1dcc6d280d547dab4'), type: 'default' })
-            .toArray();
-
-        console.log(lists);
-        lists = lists.map(id => id._id.toString());
-        await db.collection('users').updateOne({ _id: tempUserId }, { $set: { lists } });
-        console.log(await db.collection('users').findOne({ _id: tempUserId }));
+        const _users = db.collection('users');
+        const _lists = db.collection('lists');
+        const users = await _users.find({}).toArray();
+        const updateUsers = users.map(async user => {
+            let userLists = await _lists
+                .find({
+                    members: user._id,
+                    type: 'default'
+                })
+                .toArray();
+            userLists = userLists.map(id => id._id.toString());
+            await _users.updateOne({ _id: user._id }, { $set: { lists: userLists } });
+        });
+        await Promise.all(updateUsers);
     },
 
     down(db) {
-        return db.collection('users').updateOne({ _id: tempUserId }, { $set: { lists: [] } });
+        return db.collection('users').updateMany({}, { $set: { lists: [] } });
     }
 };
