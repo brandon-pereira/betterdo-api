@@ -7,7 +7,7 @@ async function getLists(listId, { database, user, includeCompleted }) {
     if (listId && isCustomList(listId)) {
         return await fetchCustomList(listId, includeCompleted, { database, user });
     } else if (listId) {
-        let list = await database.Lists.getLists(user._id, listId);
+        let list = await database.Lists.getList(user._id, listId);
         if (!list) {
             throwError('Invalid List ID');
         }

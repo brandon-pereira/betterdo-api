@@ -11,7 +11,7 @@ async function createTask(listId, taskObj = {}, { database, user, notifier }) {
         listId = 'inbox';
     }
     // Ensure list exists and user has permissions
-    const list = await database.Lists.getLists(user._id, listId);
+    const list = await database.Lists.getList(user._id, listId);
     // If no results, throw error
     if (!list) throwError('Invalid List ID');
     // Remove potentially harmful properties
