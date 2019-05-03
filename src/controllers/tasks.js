@@ -83,7 +83,6 @@ async function updateTask(taskId, updatedTask = {}, { database, user, notifier }
             await database.Lists.setTaskIncompleted(task._id, list._id);
         }
     }
-    // TODO: Merge tasks.subtasks with req.body.subtasks
     // Merge the tasks.. validation on the model will handle errors
     Object.assign(task, updatedTask);
     // Save the model
