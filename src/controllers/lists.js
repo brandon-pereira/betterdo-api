@@ -1,12 +1,13 @@
 const { throwError } = require('../helpers/errorHandler');
 const { isCustomList, fetchCustomList, fetchUserCustomLists } = require('../helpers/customLists');
+const mongoose = require('mongoose');
 
 async function getLists(listId, { database, user, includeCompleted }) {
     // Get lists based on query data
     if (listId && isCustomList(listId)) {
         return await fetchCustomList(listId, includeCompleted, { database, user });
     } else if (listId) {
-        let list = await database.Lists.getLists(user._id, listId);
+        let list = await database.Lists.getList(user._id, listId);
         if (!list) {
             throwError('Invalid List ID');
         }
@@ -26,11 +27,11 @@ async function getLists(listId, { database, user, includeCompleted }) {
         }
         return list;
     } else {
-        // all lists for user
-        const userLists = await database.Lists.getLists(user._id);
-        const inbox = userLists.shift();
-        const customLists = await fetchUserCustomLists({ database, user });
-        return [inbox, ...customLists, ...userLists];
+        let inbox = database.Lists.getUserInbox(user._id);
+        let userLists = database.Users.getLists(user._id);
+        let customLists = fetchUserCustomLists({ database, user });
+        [inbox, userLists, customLists] =  await Promise.all([inbox, customLists, userLists]);
+        return [inbox, ...userLists, ...customLists];
     }
 }
 
@@ -44,6 +45,8 @@ async function createList(listObj = {}, { database, user }) {
         ...listObj,
         owner: user._id
     });
+    // Add list to users array
+    await database.Users.addListToUser(list._id, user);
     // Populate
     await database.Lists.populateList(list);
     // Return new list to front-end
@@ -102,6 +105,9 @@ async function deleteList(listId, { database, user }) {
         type: 'default'
     });
     if (status && status.n > 0) {
+        // Remove list to users array
+        await database.Users.removeListFromUser(new mongoose.Types.ObjectId(listId), user);
+        // Return success message
         return { success: true };
     }
     throwError('Invalid List ID');

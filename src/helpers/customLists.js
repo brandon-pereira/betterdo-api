@@ -22,9 +22,9 @@ async function fetchCustomList(listId, includeCompleted = false, opts) {
         list = await fetchTomorrow(opts);
     }
     // calculate completed tasks visible
-    if (!includeCompleted) {
+    if (list && !includeCompleted) {
         list.completedTasks = [];
-    } else {
+    } else if (list && includeCompleted) {
         list.additionalTasks = 0;
     }
     return list;

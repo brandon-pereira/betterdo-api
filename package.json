@@ -31,6 +31,7 @@
         "babel-eslint": "^10.0.1",
         "eslint-plugin-jest": "^22.1.0",
         "jest": "^23.6.0",
+        "migrate-mongo": "^5.0.1",
         "nodemon": "^1.18.7"
     },
     "jest": {
@@ -40,6 +41,8 @@
             "!src/helpers/errorHandler.js",
             "!src/helpers/routeHandler.js",
             "!src/express.js",
+            "!src/notifier.js",
+            "!src/helpers/notify.js",
             "!src/passport.js",
             "!src/routes/*"
         ]

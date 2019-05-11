@@ -83,24 +83,12 @@ module.exports = mongoose => {
 
     const model = mongoose.model('List', schema);
 
-    model.getLists = async function(user_id, list_id) {
-        let lists = [];
+    model.getList = async function(user_id, list_id) {
         if (list_id === 'inbox') {
-            lists = this.getUserInbox(user_id);
+            return this.getUserInbox(user_id);
         } else if (list_id) {
-            lists = this.getUserListById(user_id, list_id);
-        } else if (user_id) {
-            lists = this.getUserLists(user_id);
+            return this.getUserListById(user_id, list_id);
         }
-        return lists;
-    };
-
-    model.getUserLists = async function(user_id) {
-        return await this.find({
-            members: user_id
-        });
-        // .lean()
-        // .exec();
     };
 
     model.populateList = async function(listRef) {

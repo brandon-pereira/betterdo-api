@@ -76,12 +76,11 @@ describe('Lists API', () => {
         expect.assertions(1);
         const user = await createUser();
         const randomNumber = Math.floor(Math.random() * 10) + 1; // random between 1 and 10
-        const lists = [...Array(randomNumber).keys()].map(i =>
-            createList({ title: `List ${i}` }, { database, user })
-        );
-        await Promise.all(lists);
+        for (let i of [...Array(randomNumber).keys()]) {
+            await createList({ title: `List ${i}` }, { database, user });
+        }
         const fetchedLists = await getLists(null, { database, user });
-        expect(fetchedLists).toHaveLength(randomNumber);
+        expect(fetchedLists).toHaveLength(randomNumber + 1); // all created lists and inbox
     });
 
     test('Protects against fetching list non-member list', async () => {
@@ -207,22 +206,17 @@ describe('Lists API', () => {
         const props = { database, user };
         const badColors = ['red', '#SSSSSS'];
         const goodColors = ['#FFF', '#FF00AA'];
-        const goodColorsPromise = Promise.all(
-            goodColors.map(color =>
-                createList({ title: 'test', color }, props).then(list =>
-                    expect(list.color).toBe(color)
-                )
-            )
-        );
-        const badColorsPromise = Promise.all(
-            badColors.map(color =>
-                createList({ title: 'test', color }, props).catch(err => {
-                    expect(err.name).toBe('ValidationError');
-                    expect(err.message).toContain('hex');
-                })
-            )
-        );
-        return Promise.all([goodColorsPromise, badColorsPromise]);
+        for (let color of goodColors) {
+            await createList({ title: 'test', color }, props).then(list =>
+                expect(list.color).toBe(color)
+            );
+        }
+        for (let color of badColors) {
+            await createList({ title: 'test', color }, props).catch(err => {
+                expect(err.name).toBe('ValidationError');
+                expect(err.message).toContain('hex');
+            });
+        }
     });
 });
 

@@ -11,7 +11,7 @@ expect.extend({
     }
 });
 
-const createUser = async ({ createInbox } = {}) => {
+const createUser = async () => {
     const user = await database.Users.create({
         firstName: 'unitTest',
         email: `${Date.now()}-${Math.random()}@unitTests.com`,
@@ -20,13 +20,11 @@ const createUser = async ({ createInbox } = {}) => {
             today: false
         }
     });
-    if (createInbox) {
-        await database.Lists.create({
-            title: 'Inbox',
-            type: 'inbox',
-            owner: user._id
-        });
-    }
+    await database.Lists.create({
+        title: 'Inbox',
+        type: 'inbox',
+        owner: user._id
+    });
     return user;
 };
 

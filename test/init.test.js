@@ -8,7 +8,7 @@ let inbox;
 let validTask;
 let validList;
 beforeAll(async () => {
-    user = await createUser({ createInbox: true });
+    user = await createUser();
     inbox = await getLists('inbox', { user, database });
     validTask = await createTask(inbox._id, { title: 'Lorem Ipsum' }, { database, user });
     validList = await createList({ title: 'Valid List' }, { database, user });

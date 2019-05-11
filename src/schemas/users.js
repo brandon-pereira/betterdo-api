@@ -1,6 +1,7 @@
-// const { Schema } = require('mongoose');
+const { Schema } = require('mongoose');
+
 module.exports = mongoose => {
-    const schema = mongoose.model('User', {
+    const schema = new Schema({
         google_id: {
             type: String,
             unique: true,
@@ -59,6 +60,12 @@ module.exports = mongoose => {
                 default: false
             }
         },
+        lists: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'List'
+            }
+        ],
         pushSubscriptions: [
             {
                 type: String,
@@ -67,5 +74,30 @@ module.exports = mongoose => {
         ]
     });
 
-    return schema;
+    const model = mongoose.model('User', schema);
+
+    model.getLists = async function(userId) {
+        const user = await model.findById(userId);
+        await user.populate('lists').execPopulate();
+        return user.lists;
+    };
+
+    model.removeListFromUser = async function(list_id, user) {
+        let index = user.lists.findIndex(id => list_id.equals(id));
+        if (index >= 0) {
+            user.lists.splice(index, 1);
+        }
+        await user.save();
+        return user;
+    };
+
+    model.addListToUser = async function(list_id, user) {
+        if (!user.lists.find(id => list_id.equals(id))) {
+            user.lists.push(list_id);
+        }
+        await user.save();
+        return user;
+    };
+
+    return model;
 };
