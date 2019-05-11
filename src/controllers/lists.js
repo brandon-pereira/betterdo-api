@@ -27,13 +27,11 @@ async function getLists(listId, { database, user, includeCompleted }) {
         }
         return list;
     } else {
-        // all lists for user
-        let userLists = await database.Users.getLists(user._id);
-        // const userLists = await fetchUserLists({ database, user });
-        const inbox = await database.Lists.getUserInbox(user._id);
-        // console.log(inbox);
-        const customLists = await fetchUserCustomLists({ database, user });
-        return [inbox, ...customLists, ...userLists];
+        let inbox = database.Lists.getUserInbox(user._id);
+        let userLists = database.Users.getLists(user._id);
+        let customLists = fetchUserCustomLists({ database, user });
+        [inbox, userLists, customLists] =  await Promise.all([inbox, customLists, userLists]);
+        return [inbox, ...userLists, ...customLists];
     }
 }
 
