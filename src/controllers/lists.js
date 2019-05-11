@@ -30,7 +30,7 @@ async function getLists(listId, { database, user, includeCompleted }) {
         let inbox = database.Lists.getUserInbox(user._id);
         let userLists = database.Users.getLists(user._id);
         let customLists = fetchUserCustomLists({ database, user });
-        [inbox, userLists, customLists] =  await Promise.all([inbox, customLists, userLists]);
+        [inbox, userLists, customLists] = await Promise.all([inbox, customLists, userLists]);
         return [inbox, ...userLists, ...customLists];
     }
 }
