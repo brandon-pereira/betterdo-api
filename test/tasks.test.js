@@ -24,7 +24,7 @@ describe('Tasks API', () => {
         const task = await createTask(list._id, { title: 'Test' }, { database, user });
         await ListSchema.addTaskToList(task._id, list._id); // ensure no duplicates
         list = await ListSchema.findById(list._id);
-        expect(list.tasks).toContain(task._id);
+        expect(list.tasks).toContainEqual(task._id);
         expect(list.tasks).toHaveLength(1); // if 2, not deduping
         await deleteTask(task._id, { database, user });
         list = await ListSchema.findById(list._id);
@@ -38,8 +38,8 @@ describe('Tasks API', () => {
         await updateTask(task._id, { list: list2._id }, { database, user });
         list1 = await ListSchema.findById(list1._id);
         list2 = await ListSchema.findById(list2._id);
-        expect(list1.tasks).not.toContain(task._id);
-        expect(list2.tasks).toContain(task._id);
+        expect(list1.tasks).not.toContainEqual(task._id);
+        expect(list2.tasks).toContainEqual(task._id);
     });
 
     test('Allows tasks to be set to complete and returns correct count', async () => {
