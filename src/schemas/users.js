@@ -86,16 +86,16 @@ module.exports = mongoose => {
         let index = user.lists.findIndex(id => list_id.equals(id));
         if (index >= 0) {
             user.lists.splice(index, 1);
+            await user.save();
         }
-        await user.save();
         return user;
     };
 
     model.addListToUser = async function(list_id, user) {
         if (!user.lists.find(id => list_id.equals(id))) {
             user.lists.push(list_id);
+            await user.save();
         }
-        await user.save();
         return user;
     };
 
