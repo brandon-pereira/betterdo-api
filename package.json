@@ -47,6 +47,7 @@
             "!src/helpers/notify.js",
             "!src/passport.js",
             "!src/routes/*"
-        ]
+        ],
+        "globalTeardown": "./test/teardown.js"
     }
 }
