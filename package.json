@@ -14,7 +14,7 @@
     "dependencies": {
         "@passport-next/passport": "^2.1.0",
         "@passport-next/passport-google-oauth2": "^1.0.0",
-        "body-parser": "^1.18.3",
+        "body-parser": "^1.19.0",
         "connect-ensure-login": "^0.1.1",
         "connect-mongo": "^2.0.3",
         "cookie-parser": "^1.4.3",
