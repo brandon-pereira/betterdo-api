@@ -1,51 +1,51 @@
 {
-    "name": "betterdo-api",
-    "version": "1.0.0",
-    "description": "Back-end for BetterDo v4",
-    "main": "index.js",
-    "repository": "https://github.com/brandon-pereira/betterdo-api",
-    "scripts": {
-        "start": "node ./index.js",
-        "dev": "./node_modules/.bin/nodemon ./index.js",
-        "test": "eslint . && jest"
-    },
-    "author": "brandon-pereira",
-    "license": "ISC",
-    "dependencies": {
-        "body-parser": "^1.19.0",
-        "connect-ensure-login": "^0.1.1",
-        "connect-mongo": "^2.0.3",
-        "cookie-parser": "^1.4.4",
-        "dotenv": "^8.0.0",
-        "express": "^4.16.4",
-        "express-session": "^1.16.1",
-        "mongoose": "^5.5.7",
-        "passport": "^0.4.0",
-        "passport-google-oauth20": "^2.0.0",
-        "web-notifier": "^1.0.2"
-    },
-    "devDependencies": {
-        "babel-eslint": "^10.0.1",
-        "eslint": "^5.16.0",
-        "eslint-plugin-jest": "^22.5.1",
-        "eslint-plugin-prettier": "^3.1.0",
-        "jest": "^24.8.0",
-        "migrate-mongo": "^5.0.1",
-        "nodemon": "^1.19.0",
-        "prettier": "^1.17.0"
-    },
-    "jest": {
-        "testEnvironment": "node",
-        "collectCoverageFrom": [
-            "src/**/*.{js}",
-            "!src/helpers/errorHandler.js",
-            "!src/helpers/routeHandler.js",
-            "!src/express.js",
-            "!src/notifier.js",
-            "!src/helpers/notify.js",
-            "!src/passport.js",
-            "!src/routes/*"
-        ],
-        "globalTeardown": "./test/teardown.js"
-    }
+  "name": "betterdo-api",
+  "version": "1.0.0",
+  "description": "Back-end for BetterDo v4",
+  "main": "index.js",
+  "repository": "https://github.com/brandon-pereira/betterdo-api",
+  "scripts": {
+    "start": "node ./index.js",
+    "dev": "./node_modules/.bin/nodemon ./index.js",
+    "test": "eslint . && jest"
+  },
+  "author": "brandon-pereira",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "connect-ensure-login": "^0.1.1",
+    "connect-mongo": "^2.0.3",
+    "cookie-parser": "^1.4.4",
+    "dotenv": "^8.0.0",
+    "express": "^4.17.0",
+    "express-session": "^1.16.1",
+    "mongoose": "^5.5.11",
+    "passport": "^0.4.0",
+    "passport-google-oauth20": "^2.0.0",
+    "web-notifier": "^1.0.2"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.16.0",
+    "eslint-plugin-jest": "^22.6.4",
+    "eslint-plugin-prettier": "^3.1.0",
+    "jest": "^24.8.0",
+    "migrate-mongo": "^5.0.1",
+    "nodemon": "^1.19.0",
+    "prettier": "^1.17.1"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "src/**/*.{js}",
+      "!src/helpers/errorHandler.js",
+      "!src/helpers/routeHandler.js",
+      "!src/express.js",
+      "!src/notifier.js",
+      "!src/helpers/notify.js",
+      "!src/passport.js",
+      "!src/routes/*"
+    ],
+    "globalTeardown": "./test/teardown.js"
+  }
 }
