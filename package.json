@@ -34,7 +34,7 @@
         "jest": "^24.8.0",
         "migrate-mongo": "^5.0.1",
         "nodemon": "^1.19.0",
-        "prettier": "^1.17.0"
+        "prettier": "^1.17.1"
     },
     "jest": {
         "testEnvironment": "node",
