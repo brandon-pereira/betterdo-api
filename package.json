@@ -30,7 +30,7 @@
     "eslint-plugin-jest": "^22.6.4",
     "eslint-plugin-prettier": "^3.1.0",
     "jest": "^24.8.0",
-    "migrate-mongo": "^5.0.1",
+    "migrate-mongo": "^6.0.0",
     "nodemon": "^1.19.1",
     "prettier": "^1.17.1"
   },
