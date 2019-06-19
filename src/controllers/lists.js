@@ -82,6 +82,25 @@ async function updateList(listId, updatedList = {}, { database, user }) {
     }
     // If members list changes
     if (updatedList.members && Array.isArray(updatedList.members)) {
+        const currentMembers = list.members.map(member => member._id.toString());
+        updatedList.members = updatedList.members.map(member => member.toString());
+        const newMembers = updatedList.members.filter(member => !currentMembers.includes(member));
+        const removedMembers = currentMembers.filter(
+            member => !updatedList.members.includes(member)
+        );
+        const addMembersPromise = Promise.all(
+            newMembers.map(async member => {
+                const user = await database.Users.findById(member);
+                await database.Users.addListToUser(list._id, user);
+            })
+        );
+        const removeMembersPromise = Promise.all(
+            removedMembers.map(async member => {
+                const user = await database.Users.findById(member);
+                await database.Users.removeListFromUser(list._id, user);
+            })
+        );
+        await Promise.all([addMembersPromise, removeMembersPromise]);
         list.members = updatedList.members;
         delete updatedList.members;
     }

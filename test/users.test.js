@@ -1,7 +1,7 @@
 const { database, createUser } = require('./setup');
 const { Users } = database;
 const { updateUser, getUser } = require('../src/controllers/users');
-const { createList } = require('../src/controllers/lists');
+const { createList, updateList } = require('../src/controllers/lists');
 
 let userCache = null;
 
@@ -162,5 +162,28 @@ describe('Users API', () => {
         expect(user.lists).toHaveLength(2);
         expect(user.lists[0]._id).toMatchId(list1._id);
         expect(user.lists[1]._id).toMatchId(list2._id);
+    });
+
+    test('Allows members to be added to shared lists', async () => {
+        let user1 = await createUser();
+        let user2 = await createUser();
+        const list = await createList({ title: 'Test' }, { database, user: user1 });
+        await updateList(list._id, { members: [user1._id, user2._id] }, { database, user: user1 });
+        user1 = await Users.findById(user1._id);
+        user2 = await Users.findById(user2._id);
+        expect(user1.lists).toHaveLength(1);
+        expect(user2.lists).toHaveLength(1);
+    });
+
+    test('Allows members to be removed from shared lists', async () => {
+        let user1 = await createUser();
+        let user2 = await createUser();
+        const list = await createList({ title: 'Test' }, { database, user: user1 });
+        await updateList(list._id, { members: [user1._id, user2._id] }, { database, user: user1 });
+        await updateList(list._id, { members: [user1._id] }, { database, user: user1 });
+        user1 = await Users.findById(user1._id);
+        user2 = await Users.findById(user2._id);
+        expect(user1.lists).toHaveLength(1);
+        expect(user2.lists).toHaveLength(0);
     });
 });
