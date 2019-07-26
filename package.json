@@ -27,7 +27,7 @@
   "devDependencies": {
     "babel-eslint": "^10.0.2",
     "eslint": "^6.0.1",
-    "eslint-plugin-jest": "^22.13.6",
+    "eslint-plugin-jest": "^22.14.0",
     "eslint-plugin-prettier": "^3.1.0",
     "jest": "^24.8.0",
     "migrate-mongo": "^6.0.1",
