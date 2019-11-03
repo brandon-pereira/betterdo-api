@@ -11,6 +11,7 @@ module.exports = {
     extends: 'eslint:recommended',
     rules: {
         'prettier/prettier': 'error',
-        'no-console': 0
+        'no-console': 0,
+        'require-atomic-updates': 0
     }
 };
