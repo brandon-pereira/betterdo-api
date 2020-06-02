@@ -229,7 +229,7 @@ describe('Lists Schema', () => {
                 owner: 'invalid_id'
             });
         } catch (err) {
-            expect(err.message).toContain('List validation failed: owner: Cast to ObjectID failed');
+            expect(err.message).toContain('List validation failed: owner: Cast to ObjectId failed');
         }
     });
 

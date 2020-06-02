@@ -4,7 +4,8 @@ mongoose.connection.on('error', err => console.error('connection error:', err));
 
 mongoose.connect(`mongodb://localhost/${process.env.DATABASE_NAME || 'betterdo'}`, {
     useCreateIndex: true,
-    useNewUrlParser: true
+    useNewUrlParser: true,
+    useUnifiedTopology: true
 });
 
 module.exports = {
