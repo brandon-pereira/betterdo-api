@@ -117,15 +117,25 @@ async function updateList(listId, updatedList = {}, { database, user }) {
 async function deleteList(listId, { database, user }) {
     // Ensure list id is passed
     if (!listId) throwError('Invalid List ID');
-    // Get list
-    const status = await database.Lists.deleteOne({
+    // Get list (and ensure valid)
+    const list = await database.Lists.findOne({
         _id: listId,
         members: user._id,
         type: 'default'
     });
+    if (!list) {
+        throwError('Invalid List ID');
+    }
+    // await list.populate('members').execPopulate();
+    const status = await database.Lists.deleteOne({ _id: list._id });
     if (status && status.n > 0) {
         // Remove list to users array
-        await database.Users.removeListFromUser(new mongoose.Types.ObjectId(listId), user);
+        await Promise.all(
+            list.members.map(async member => {
+                const _user = await database.Users.findById(member);
+                await database.Users.removeListFromUser(new mongoose.Types.ObjectId(listId), _user);
+            })
+        );
         // Return success message
         return { success: true };
     }

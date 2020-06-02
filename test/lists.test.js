@@ -72,6 +72,23 @@ describe('Lists API', () => {
         expect(deletedList.success).toBeTruthy();
     });
 
+    test('When deleting lists, removes for all users', async () => {
+        expect.assertions(2);
+        const user1 = await createUser();
+        const user2 = await createUser();
+        let list = await createList({ title: 'Temp List' }, { database, user: user1 });
+        // Add user 2 to the list
+        await updateList(list._id, { members: [user1._id, user2._id] }, { database, user: user1 });
+        // Delete the list
+        await deleteList(list._id, { database, user: user1 });
+        // We query db directly because .populate removes invalid ids
+        const lists1 = await database.Users.findById(user1._id);
+        const lists2 = await database.Users.findById(user2._id);
+        // Ensure removed from all users
+        expect(lists1.lists).toHaveLength(0);
+        expect(lists2.lists).toHaveLength(0);
+    });
+
     test('Allows fetching multiple lists', async () => {
         expect.assertions(1);
         const user = await createUser();

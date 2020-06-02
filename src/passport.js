@@ -44,6 +44,13 @@ module.exports = (app, db) => {
                         user.set(googleInfo);
                         await user.save();
                     }
+                    // Now ensure all lists are valid
+                    const userListCount = user.lists.length;
+                    await user.populate('lists').execPopulate();
+                    if (user.lists.length !== userListCount) {
+                        user.lists = user.lists.map(list => list._id);
+                        await user.save();
+                    }
                     return cb(null, user);
                 }
             }
