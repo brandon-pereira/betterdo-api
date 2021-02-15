@@ -1,5 +1,4 @@
 const express = require('express');
-const init = require('../controllers/init');
 const { getLists, createList, updateList, deleteList } = require('../controllers/lists');
 const { getTask, createTask, updateTask, deleteTask } = require('../controllers/tasks');
 const { updateUser, getCurrentUser, getUser } = require('../controllers/users');
@@ -17,15 +16,6 @@ module.exports = (app, database, notifier) => {
             });
         }
     });
-
-    /**
-     * Init
-     */
-    api.get(['/init', '/init/:listId'], (req, res) =>
-        routeHandler('getting initial payload', { req, res, database, notifier }, config =>
-            init(req.params.listId, config)
-        )
-    );
 
     /**
      * Lists
