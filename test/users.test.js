@@ -1,6 +1,6 @@
 const { database, createUser } = require('./setup');
 const { Users } = database;
-const { updateUser, getUser } = require('../src/controllers/users');
+const { updateUser, getUser, getCurrentUser } = require('../src/controllers/users');
 const { createList, updateList } = require('../src/controllers/lists');
 
 let userCache = null;
@@ -54,6 +54,22 @@ describe('Users API', () => {
         const returnedUsers = await getUser(userCache.email, { database, user: userCache });
         userCache = await Users.findById(userCache._id);
         expect(returnedUsers._id).toMatchId(userCache._id);
+    });
+
+    test('Allows finding current user', async () => {
+        userCache = await createUser();
+        const returnedUsers = await getCurrentUser({ database, user: userCache });
+        userCache = await Users.findById(userCache._id);
+        expect(returnedUsers._id).toMatchId(userCache._id);
+    });
+
+    test('Prevents getting current user when not logged in', async () => {
+        try {
+            await getCurrentUser({ database, user: undefined });
+        } catch (err) {
+            expect(err.name).toBe('AccessError');
+            expect(err.message).toBe('Not Authenticated');
+        }
     });
 
     test('Allows global push subscription to be toggled', async () => {

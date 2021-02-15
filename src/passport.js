@@ -75,6 +75,7 @@ module.exports = (app, db) => {
             resave: false,
             saveUninitialized: true,
             store: new MongoStore({ mongooseConnection: db.connection }),
+            sameSite: 'none',
             cookie: {
                 maxAge: 1000 * 60 * 60 * 24 * 31 * 6 // ms * sec * mins * hours * days * 6 = ~ 6 months
             }
@@ -84,7 +85,7 @@ module.exports = (app, db) => {
     app.use(passport.session());
     app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
     app.get('/auth/google/callback', passport.authenticate('google'), (req, res) => {
-        res.redirect(url.resolve(process.env.SERVER_URL, 'app/'));
+        res.redirect(url.resolve(process.env.APP_URL, '/'));
     });
     app.get('/auth/logout', (req, res) => {
         req.logout();
