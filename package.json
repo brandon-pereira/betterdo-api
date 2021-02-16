@@ -25,10 +25,11 @@
         "web-notifier": "^1.0.2"
     },
     "devDependencies": {
+        "cors": "^2.8.5",
         "eslint": "^6.2.0",
         "eslint-plugin-jest": "^22.15.0",
         "eslint-plugin-prettier": "^3.1.0",
-        "jest": "^24.8.0",
+        "jest": "^26.6.3",
         "migrate-mongo": "^6.0.1",
         "nodemon": "^1.19.1",
         "prettier": "^1.18.2"
@@ -36,14 +37,14 @@
     "jest": {
         "testEnvironment": "node",
         "collectCoverageFrom": [
-            "src/**/*.{js}",
+            "src/**/*.js",
             "!src/helpers/errorHandler.js",
             "!src/helpers/routeHandler.js",
             "!src/express.js",
             "!src/notifier.js",
             "!src/helpers/notify.js",
             "!src/passport.js",
-            "!src/routes/*"
+            "!src/routes/*.js"
         ],
         "globalTeardown": "./test/teardown.js"
     }

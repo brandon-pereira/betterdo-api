@@ -101,6 +101,23 @@ async function updateTask(taskId, updatedTask = {}, { database, user, notifier }
     return task;
 }
 
+async function getTask(taskId, { database, user }) {
+    // Ensure list id is passed
+    if (!taskId) throwError('Invalid Task ID');
+    // Get task
+    const task = await database.Tasks.findById(taskId);
+    // Ensure task id is valid
+    if (!task) throwError('Invalid Task ID');
+    // Get parent list
+    const list = await database.Lists.getUserListById(user._id, task.list);
+    // Ensure valid permissions
+    if (!list) throwError('User is not authorized to access task', 'PermissionsError');
+    // Populate task fields
+    await database.Tasks.populateTask(task);
+    // Return task to front-end
+    return task;
+}
+
 async function deleteTask(taskId, { database, user, notifier }) {
     // Ensure list id is passed
     if (!taskId) throwError('Invalid Task ID');
@@ -128,5 +145,6 @@ async function deleteTask(taskId, { database, user, notifier }) {
 module.exports = {
     createTask,
     updateTask,
-    deleteTask
+    deleteTask,
+    getTask
 };

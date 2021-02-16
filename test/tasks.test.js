@@ -1,7 +1,7 @@
 const { teardown, database, createUser } = require('./setup');
 // const TaskSchema = database.Tasks;
 const ListSchema = database.Lists;
-const { createTask, updateTask, deleteTask } = require('../src/controllers/tasks');
+const { createTask, updateTask, deleteTask, getTask } = require('../src/controllers/tasks');
 const { createList, getLists } = require('../src/controllers/lists');
 
 let user;
@@ -16,6 +16,14 @@ describe('Tasks API', () => {
     test('Can be created with valid data', async () => {
         const task = await createTask(validList._id, { title: 'Test' }, { database, user });
         expect(task.list).toEqual(validList._id);
+        expect(task.title).toBe('Test');
+    });
+
+    test('Can retrieve task details when queried', async () => {
+        const createdTask = await createTask(validList._id, { title: 'Test' }, { database, user });
+        const task = await getTask(createdTask.id, { database, user });
+        expect(task.list).toMatchId(validList.id);
+        expect(task.id).toMatchId(createdTask.id);
         expect(task.title).toBe('Test');
     });
 
@@ -50,33 +58,33 @@ describe('Tasks API', () => {
         list = await getLists(list._id, { database, user });
         expect(list.additionalTasks).toBe(0);
         expect(list.tasks).toHaveLength(1);
-        await updateTask(task._id, { isCompleted: true }, { database, user });
-        list = await getLists(list._id, { database, user });
+        await updateTask(task.id, { isCompleted: true }, { database, user });
+        list = await getLists(list.id, { database, user });
         expect(list.additionalTasks).toBe(1);
         expect(list.tasks).toHaveLength(0);
-        list = await getLists(list._id, { database, user, includeCompleted: true });
+        list = await getLists(list.id, { database, user, includeCompleted: true });
         expect(list.additionalTasks).toBe(0);
         expect(list.completedTasks).toHaveLength(1);
         expect(list.tasks).toHaveLength(0);
-        await updateTask(task._id, { isCompleted: false }, { database, user });
-        list = await getLists(list._id, { database, user });
+        await updateTask(task.id, { isCompleted: false }, { database, user });
+        list = await getLists(list.id, { database, user });
         expect(list.additionalTasks).toBe(0);
         expect(list.tasks).toHaveLength(1);
-        list = await getLists(list._id, { database, user, includeCompleted: true });
+        list = await getLists(list.id, { database, user, includeCompleted: true });
         expect(list.additionalTasks).toBe(0);
         expect(list.completedTasks).toHaveLength(0);
         expect(list.tasks).toHaveLength(1);
         let list2 = await createList({ title: 'New List 2' }, { database, user });
-        await updateTask(task._id, { list: list2._id, isCompleted: true }, { database, user });
-        list = await getLists(list._id, { database, user });
-        list2 = await getLists(list2._id, { database, user });
+        await updateTask(task.id, { list: list2.id, isCompleted: true }, { database, user });
+        list = await getLists(list.id, { database, user });
+        list2 = await getLists(list2.id, { database, user });
         expect(list.additionalTasks).toBe(0);
         expect(list.tasks).toHaveLength(0);
         expect(list2.additionalTasks).toBe(1);
         expect(list2.tasks).toHaveLength(0);
-        await updateTask(task._id, { list: list._id }, { database, user });
-        list = await getLists(list._id, { database, user });
-        list2 = await getLists(list2._id, { database, user });
+        await updateTask(task.id, { list: list.id }, { database, user });
+        list = await getLists(list.id, { database, user });
+        list2 = await getLists(list2.id, { database, user });
         expect(list2.additionalTasks).toBe(0);
         expect(list2.tasks).toHaveLength(0);
         expect(list.additionalTasks).toBe(1);

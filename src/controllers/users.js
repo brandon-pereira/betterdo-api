@@ -53,22 +53,50 @@ async function updateUser(dirtyUserProps = {}, { database, user, notifier }) {
     return userRef;
 }
 
+async function getCurrentUser({ user }) {
+    if (user) {
+        return sanitizeCurrentUser(user);
+    } else {
+        throwError('Not Authenticated');
+    }
+}
+
 async function getUser(email, { database }) {
     let user = await database.Users.findOne({ email: email });
     if (user) {
-        return {
-            _id: user._id,
-            firstName: user.firstName,
-            lastName: user.lastName ? user.lastName.charAt(0) : null,
-            email: user.email,
-            profilePicture: user.profilePicture
-        };
+        return sanitizeOtherUser(user);
     } else {
         throwError('Invalid User Email');
     }
 }
 
+function sanitizeCurrentUser(user) {
+    // ALl the "otherUser" data plus additional
+    const currentUser = sanitizeOtherUser(user);
+    currentUser.customLists = user.customLists;
+    currentUser.isBeta = user.isBeta;
+    currentUser.isPushEnabled = user.isPushEnabled;
+    currentUser.lastLogin = user.lastLogin;
+    currentUser.creationDate = user.creationDate;
+    currentUser.lastName = user.lastName;
+    currentUser.config = {
+        vapidKey: process.env.VAPID_PUBLIC_KEY
+    };
+    return currentUser;
+}
+
+function sanitizeOtherUser(user) {
+    return {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName ? user.lastName.charAt(0) : null,
+        email: user.email,
+        profilePicture: user.profilePicture
+    };
+}
+
 module.exports = {
     updateUser,
+    getCurrentUser,
     getUser
 };

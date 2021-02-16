@@ -25,13 +25,30 @@ async function getLists(listId, { database, user, includeCompleted }) {
             list = list.toObject();
             list.additionalTasks = 0;
         }
-        return list;
+        return {
+            type: list.type,
+            additionalTasks: list.additionalTasks,
+            completedTasks: includeCompleted ? list.completedTasks : [],
+            color: list.color,
+            id: list.id,
+            title: list.title,
+            tasks: list.tasks,
+            members: list.members
+        };
     } else {
         let inbox = database.Lists.getUserInbox(user._id);
         let userLists = database.Users.getLists(user._id);
         let customLists = fetchUserCustomLists({ database, user });
         [inbox, userLists, customLists] = await Promise.all([inbox, customLists, userLists]);
-        return [inbox, ...userLists, ...customLists];
+        const lists = [inbox, ...userLists, ...customLists];
+        return lists.map(list => ({
+            type: list.type,
+            additionalTasks: list.additionalTasks,
+            color: list.color,
+            tasks: list.tasks,
+            id: list.id,
+            title: list.title
+        }));
     }
 }
 
