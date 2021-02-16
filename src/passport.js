@@ -85,7 +85,7 @@ module.exports = (app, db) => {
     app.use(passport.session());
     app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
     app.get('/auth/google/callback', passport.authenticate('google'), (req, res) => {
-        res.redirect(url.resolve(process.env.APP_URL, '/'));
+        res.redirect(url.resolve(process.env.APP_URL, '/app'));
     });
     app.get('/auth/logout', (req, res) => {
         req.logout();
