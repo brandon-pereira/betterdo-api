@@ -28,7 +28,7 @@ module.exports = (app, db) => {
         notificationDefaults: {
             badge: `${process.env.SERVER_URL}/app/notification-badge.png`,
             icon: `${process.env.SERVER_URL}/app/android-chrome-192x192.png`,
-            url: `${process.env.SERVER_URL}app/`
+            url: `${process.env.SERVER_URL}/`
         },
         getUserPushSubscription,
         removeUserPushSubscription,
