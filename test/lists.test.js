@@ -14,6 +14,12 @@ describe('Lists API', () => {
         expect(list.members[0]._id).toMatchId(user._id);
     });
 
+    test('Can fetch single list ', async () => {
+        const user = await createUser();
+        const list = await createList({ title: 'Test' }, { database, user });
+        expect(list).toMatchSnapshot();
+    });
+
     test('Provides clear error messages when invalid data provided', async () => {
         expect.assertions(2);
         const user = await createUser();

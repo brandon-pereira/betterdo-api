@@ -27,6 +27,7 @@ async function getLists(listId, { database, user, includeCompleted }) {
         }
         return {
             type: list.type,
+            owner: list.owner,
             additionalTasks: list.additionalTasks,
             completedTasks: includeCompleted ? list.completedTasks : [],
             color: list.color,

@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Lists API Can fetch single list  1`] = `
+Object {
+  "__v": 0,
+  "_id": "60fe1aa41094c014c6fce8c3",
+  "additionalTasks": 0,
+  "color": "#666666",
+  "completedTasks": Array [],
+  "id": "60fe1aa41094c014c6fce8c3",
+  "members": Array [
+    Object {
+      "_id": "60fe1aa41094c014c6fce8c1",
+      "firstName": "unitTest",
+    },
+  ],
+  "owner": "60fe1aa41094c014c6fce8c1",
+  "tasks": Array [],
+  "title": "Test",
+  "type": "default",
+}
+`;
