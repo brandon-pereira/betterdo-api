@@ -1,7 +1,8 @@
-const { WebNotifier, MongoAdapter } = require('web-notifier');
+import { App, Database } from './types';
+import { WebNotifier, MongoAdapter } from 'web-notifier';
 
-module.exports = (app, db) => {
-    const getUserPushSubscription = async userId => {
+export default (app: App, db: Database) => {
+    const getUserPushSubscription = async (userId: String) => {
         const user = await db.Users.findById(userId);
         if (user.isPushEnabled) {
             return user.pushSubscriptions;
@@ -9,7 +10,7 @@ module.exports = (app, db) => {
         return [];
     };
 
-    const removeUserPushSubscription = async (userId, subscription) => {
+    const removeUserPushSubscription = async (userId: String, subscription: String) => {
         const user = await db.Users.findById(userId);
         const index = user.pushSubscriptions.indexOf(subscription);
         if (index !== -1) {
@@ -34,10 +35,6 @@ module.exports = (app, db) => {
         removeUserPushSubscription,
         adapter: new MongoAdapter(db.connection)
     });
-
-    // const id = notifier.schedule(new Date(), 'a', {
-    //     title: "It's now now!"
-    // });
 
     return notifier;
 };

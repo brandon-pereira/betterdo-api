@@ -1,10 +1,12 @@
+import { App, Database } from './types';
+
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const url = require('url');
 
-module.exports = (app, db) => {
+export default (app: App, db: Database) => {
     passport.use(
         new GoogleStrategy(
             {
@@ -12,7 +14,7 @@ module.exports = (app, db) => {
                 clientSecret: process.env.GOOGLE_CLIENT_SECRET,
                 callbackURL: url.resolve(process.env.SERVER_URL, 'auth/google/callback')
             },
-            async (accessToken, refreshToken, profile, cb) => {
+            async (accessToken: string, refreshToken: string, profile: any, cb: Function) => {
                 const googleId = profile.id;
                 const googleInfo = {
                     google_id: profile.id,
