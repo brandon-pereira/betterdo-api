@@ -9,7 +9,7 @@ export { ObjectId } from 'mongodb';
 export interface Database {
     connection: typeof connection;
     Users: UserModel;
-    Lists: any;
+    Lists: ListModel;
     // Tasks: any;
 }
 
@@ -17,6 +17,7 @@ export interface App extends Application {}
 
 export interface List {
     id: ObjectId;
+    title: string;
     tasks: Array<string>;
     completedTasks: Array<string>;
     members: Array<string>;
@@ -28,6 +29,7 @@ export interface Task {
     isCompleted: boolean;
 }
 
+// User
 export interface User {
     email: string;
     firstName: string;
@@ -37,27 +39,29 @@ export interface User {
     pushSubscriptions: Array<string>;
 }
 
-export interface ListBaseDocument extends List, Document {}
-
-export interface ListDocument extends ListBaseDocument {}
 export interface UserDocument extends User, Document {
-    lists: Array<string>;
+    getLists(): Promise<Array<List>>;
+    removeListFromUser?(listId: ObjectId, user: User): Promise<User>;
+    addListToUser?(listId: ObjectId, user: User): Promise<User>;
 }
 
-export interface UserModel extends Model<UserDocument> {
-    getLists(userId: ObjectId): Promise<Array<List | String>>;
+export interface UserModel extends Model<UserDocument> {}
+
+export interface ListBaseDocument extends List, Document {}
+
+export interface ListDocument extends ListBaseDocument {
+    getLists(): Promise<Array<List | String>>;
     removeListFromUser?(listId: ObjectId, user: User): Promise<User>;
     addListToUser?(listId: ObjectId, user: User): Promise<User>;
 }
 
 export interface ListModel extends Model<ListDocument> {
-    getLists(userId: ObjectId): Promise<Array<List>>;
     getList(userId: ObjectId, listId: ObjectId): Promise<ListDocument>;
     removeListFromUser(listId: ObjectId, user: User): Promise<User>;
     addListToUser(listId: ObjectId, user: User): Promise<User>;
     getUserInbox(userId: ObjectId): Promise<ListDocument>;
     getUserListById(userId: ObjectId, listId: ObjectId): Promise<ListDocument>;
-    populateList(list: ListDocument): Promise<ListDocument>;
+    populateList(list: ListDocument | null): Promise<ListDocument>;
     addTaskToList(task: TaskDocument, listId: ObjectId): Promise<ListDocument>;
     removeTaskFromList(task: TaskDocument, listId: ObjectId): Promise<ListDocument>;
     setTaskComplete(task: TaskDocument, listId: ObjectId): Promise<ListDocument>;

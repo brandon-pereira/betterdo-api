@@ -25,8 +25,13 @@ import db from './database';
         if (!user) {
             return;
         }
-        const userLists = await db.Users.getLists(user._id);
-        console.log(userLists);
+        const userLists = await user.getLists();
+
+        // console.log(userLists);
+        console.log(userLists[0].id);
+        // const list = await db.Lists.getList(user.id, userLists[0].id);
+        const inbox = await db.Lists.getList(user.id, 'inbox');
+        console.log(inbox);
     } catch (err) {
         console.log(err);
     }

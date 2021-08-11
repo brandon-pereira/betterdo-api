@@ -1,7 +1,7 @@
-import { model, Schema } from 'mongoose';
-import { ListModel, ListDocument, ObjectId, Task, List } from '../types';
+import { Model, model, Schema } from 'mongoose';
+import { List, ObjectId, ListDocument, ListModel } from '../types';
 
-const schema = new Schema(
+const ListSchema = new Schema<ListDocument, ListModel>(
     {
         title: {
             type: String,
@@ -79,37 +79,58 @@ const schema = new Schema(
 //     }
 // });
 
-const List = model<ListDocument>('List', schema);
+ListSchema.statics.getList = async function(user_id: ObjectId, list_id: ObjectId | string) {
+    if (list_id === 'inbox') {
+        return this.getUserInbox(user_id);
+    } else if (list_id) {
+        try {
+            const _list = await this.findOne({
+                _id: list_id,
+                members: user_id.toString()
+            });
+            if (_list) {
+                console.log(this.getList);
+                return this.populateList(_list);
+            } else {
+                throw new Error('Invalid List ID');
+            }
+        } catch (err) {
+            console.log(err);
+            return null;
+        }
+    } else {
+        throw new Error('Missing List ID');
+    }
+};
 
-// schema.statics.getList = async function(user_id: ObjectId, list_id: ObjectId | string) {
-//     if (list_id === 'inbox') {
-//         return schema.getUserInbox(user_id);
-//     } else if (list_id) {
-//         return schema.getUserListById(user_id, list_id);
-//     } else {
-//         throw new Error('Missing List ID');
-//     }
-// };
+ListSchema.statics.populateList = async function(list: ListDocument) {
+    if (!list) {
+        return null;
+    }
+    const userQueryData = ['_id', 'firstName', 'lastName', 'profilePicture'];
+    return (
+        list
+            // .populate({
+            //     path: 'tasks',
+            //     populate: {
+            //         path: 'createdBy',
+            //         model: 'User',
+            //         select: userQueryData
+            //     }
+            // })
+            .populate({ path: 'members', select: userQueryData })
+            .execPopulate()
+    );
+};
 
-// schema.statics.populateList = async function(_list: ListDocument) {
-//     const userQueryData = ['_id', 'firstName', 'lastName', 'profilePicture'];
-//     return _list
-//         .populate({
-//             path: 'tasks',
-//             populate: { path: 'createdBy', model: 'User', select: userQueryData }
-//         })
-//         .populate('members', userQueryData)
-//         .execPopulate();
-// };
-
-// schema.statics.getUserInbox = async function(user_id: ObjectId) {
-//     return List.populateList(
-//         await List.findOne({
-//             type: 'inbox',
-//             members: user_id
-//         })
-//     );
-// };
+ListSchema.statics.getUserInbox = async function(user_id: ObjectId) {
+    return this.populateList(
+        await this.findOne({
+            type: 'inbox',
+            members: user_id.toString()
+        })
+    );
+};
 
 // schema.statics.getUserListById = async function(user_id: ObjectId, list_id: ObjectId) {
 //     try {
@@ -203,5 +224,7 @@ const List = model<ListDocument>('List', schema);
 //         List.tasks.unshift((task_id as unknown) as string);
 //     }
 // };
+
+const List: ListModel = model<ListDocument, ListModel>('List', ListSchema);
 
 export default List;

@@ -1,7 +1,7 @@
-import { model, Model, Document, Schema } from 'mongoose';
-import { ObjectId, UserDocument, UserModel } from '../types';
+import { model, Schema } from 'mongoose';
+import { User, UserDocument, UserModel } from '../types';
 
-const schema = new Schema({
+const UserSchema = new Schema<UserDocument>({
     google_id: {
         type: String,
         unique: true,
@@ -71,32 +71,28 @@ const schema = new Schema({
     ]
 });
 
-const user: UserModel = model('User', schema);
-
-user.statics.getLists = async function(userId: ObjectId) {
-    const _user = await user.findById(userId);
-    if (_user) {
-        await _user.populate('lists').execPopulate();
-        return _user.lists;
-    }
-    throw new Error('Invalid User ID');
+UserSchema.methods.getLists = async function() {
+    await this.populate('lists').execPopulate();
+    return this.lists;
 };
 
-user.removeListFromUser = async function(listId: ObjectId, _user: UserDocument) {
-    let index = _user.lists.findIndex((id: string) => listId.equals(id));
-    if (index >= 0) {
-        _user.lists.splice(index, 1);
-        await _user.save();
-    }
-    return _user;
-};
+const User = model<UserDocument, UserModel>('User', UserSchema);
 
-user.addListToUser = async function(listId: ObjectId, _user: UserDocument) {
-    if (!_user.lists.find((id: string) => listId.equals(id))) {
-        _user.lists.push((listId as unknown) as string);
-        await _user.save();
-    }
-    return _user;
-};
+// user.removeListFromUser = async function(listId: ObjectId, _user: UserDocument) {
+//     let index = _user.lists.findIndex((id: string) => listId.equals(id));
+//     if (index >= 0) {
+//         _user.lists.splice(index, 1);
+//         await _user.save();
+//     }
+//     return _user;
+// };
 
-export default user;
+// user.addListToUser = async function(listId: ObjectId, _user: UserDocument) {
+//     if (!_user.lists.find((id: string) => listId.equals(id))) {
+//         _user.lists.push((listId as unknown) as string);
+//         await _user.save();
+//     }
+//     return _user;
+// };
+
+export default User;
