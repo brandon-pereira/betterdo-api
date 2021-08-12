@@ -1,10 +1,18 @@
-import { App, Database } from './types';
+import { App, Database, User } from './types';
 
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const url = require('url');
+
+interface GoogleUser {
+    google_id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    profilePicture: string;
+}
 
 export default (app: App, db: Database) => {
     passport.use(
@@ -17,12 +25,12 @@ export default (app: App, db: Database) => {
             async (accessToken: string, refreshToken: string, profile: any, cb: Function) => {
                 const googleId = profile.id;
                 const googleInfo = {
-                    google_id: profile.id,
+                    google_id: googleId,
                     firstName: profile.name.givenName,
                     lastName: profile.name.familyName,
                     email: profile.emails[0].value,
                     profilePicture: profile.photos[0].value
-                };
+                } as GoogleUser;
                 let user = await db.Users.findOne({
                     google_id: googleId
                 });
@@ -33,14 +41,18 @@ export default (app: App, db: Database) => {
                     await db.Lists.create({
                         title: 'Inbox',
                         type: 'inbox',
-                        owner: user._id
+                        owner: user.id
                     });
                     return cb(null, user);
                 } else {
+                    // TODO: Fix this
                     // Existing user
-                    const hasGoogleAccountUpdated = Object.keys(googleInfo).find(
-                        key => googleInfo[key] !== user[key]
-                    );
+                    const hasGoogleAccountUpdated = Object.keys(googleInfo).find(key => {
+                        // if (googleInfo[key]) {
+                        //     googleInfo[key] !== user[key];
+                        // }
+                        return false;
+                    });
                     if (hasGoogleAccountUpdated) {
                         console.log('user info updated', hasGoogleAccountUpdated);
                         user.set(googleInfo);
@@ -50,7 +62,7 @@ export default (app: App, db: Database) => {
                     const userListCount = user.lists.length;
                     await user.populate('lists').execPopulate();
                     if (user.lists.length !== userListCount) {
-                        user.lists = user.lists.map(list => list._id);
+                        user.lists = user.lists.map(list => list.id);
                         await user.save();
                     }
                     return cb(null, user);
@@ -59,11 +71,9 @@ export default (app: App, db: Database) => {
         )
     );
 
-    passport.serializeUser(function(user, done) {
-        done(null, user._id);
-    });
+    passport.serializeUser((user: User, done: Function) => done(null, user.id));
 
-    passport.deserializeUser(async (id, done) => {
+    passport.deserializeUser(async (id: string, done: Function) => {
         const user = await db.Users.findOne({ _id: id });
         if (user) {
             return done(null, user);
@@ -91,10 +101,11 @@ export default (app: App, db: Database) => {
     });
     app.get('/auth/logout', (req, res) => {
         req.logout();
-        if (req.header('referrer')) {
-            res.redirect(req.header('referrer'));
+        const referrer = req.header('referrer');
+        if (referrer) {
+            res.redirect(referrer);
         } else {
-            res.redirect(process.env.SERVER_URL);
+            res.redirect(process.env.SERVER_URL || '');
         }
     });
 };

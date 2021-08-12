@@ -1,10 +1,12 @@
-const express = require('express');
+import express from 'express';
+import { Notifier } from 'web-notifier';
 const { getLists, createList, updateList, deleteList } = require('../controllers/lists');
 const { getTask, createTask, updateTask, deleteTask } = require('../controllers/tasks');
 const { updateUser, getCurrentUser, getUser } = require('../controllers/users');
-const routeHandler = require('../helpers/routeHandler');
+import routeHandler from '../helpers/routeHandler';
+import { App, Database } from '../types';
 
-module.exports = (app, database, notifier) => {
+export default ({ db, notifier, app }: { app: App; db: Database; notifier: Notifier }) => {
     /* Initialize a router, anything behind `/api` requires authentication. */
     const api = express.Router();
     api.use('/', (req, res, next) => {
@@ -21,7 +23,7 @@ module.exports = (app, database, notifier) => {
      * Lists
      */
     api.get(['/lists', '/lists/:listId'], (req, res) =>
-        routeHandler('getting lists', { req, res, database, notifier }, config =>
+        routeHandler('getting lists', { req, res, db, notifier }, config =>
             getLists(req.params.listId, {
                 ...config,
                 includeCompleted: Boolean(req.query.includeCompleted === 'true')
@@ -30,17 +32,17 @@ module.exports = (app, database, notifier) => {
     );
 
     api.put('/lists', (req, res) =>
-        routeHandler('create list', { req, res, database, notifier }, config =>
+        routeHandler('create list', { req, res, db, notifier }, config =>
             createList(req.body, config)
         )
     );
     api.post('/lists/:listId', (req, res) =>
-        routeHandler('update list', { req, res, database, notifier }, config =>
+        routeHandler('update list', { req, res, db, notifier }, config =>
             updateList(req.params.listId, req.body, config)
         )
     );
     api.delete('/lists/:listId', (req, res) =>
-        routeHandler('delete list', { req, res, database, notifier }, config =>
+        routeHandler('delete list', { req, res, db, notifier }, config =>
             deleteList(req.params.listId, config)
         )
     );
@@ -49,24 +51,24 @@ module.exports = (app, database, notifier) => {
      * Tasks
      */
     api.put('/tasks', (req, res) =>
-        routeHandler('adding task', { req, res, database, notifier }, config => {
+        routeHandler('adding task', { req, res, db, notifier }, config => {
             const listId = req.body.listId;
             delete req.body.listId;
             return createTask(listId, req.body, config);
         })
     );
     api.get('/tasks/:taskId', (req, res) =>
-        routeHandler('getting task', { req, res, database, notifier }, config =>
+        routeHandler('getting task', { req, res, db, notifier }, config =>
             getTask(req.params.taskId, config)
         )
     );
     api.post('/tasks/:taskId', (req, res) =>
-        routeHandler('updating task', { req, res, database, notifier }, config =>
+        routeHandler('updating task', { req, res, db, notifier }, config =>
             updateTask(req.params.taskId, req.body, config)
         )
     );
     api.delete('/tasks/:taskId', (req, res) =>
-        routeHandler('deleting task', { req, res, database, notifier }, config =>
+        routeHandler('deleting task', { req, res, db, notifier }, config =>
             deleteTask(req.params.taskId, config)
         )
     );
@@ -75,17 +77,17 @@ module.exports = (app, database, notifier) => {
      * Users
      */
     api.get('/users/:email', (req, res) =>
-        routeHandler('getting user by email', { req, res, database, notifier }, config =>
+        routeHandler('getting user by email', { req, res, db, notifier }, config =>
             getUser(req.params.email, config)
         )
     );
     api.get('/user', (req, res) =>
-        routeHandler('getting current user', { req, res, database, notifier }, config =>
+        routeHandler('getting current user', { req, res, db, notifier }, config =>
             getCurrentUser(config)
         )
     );
     api.post('/users', (req, res) =>
-        routeHandler('updating user', { req, res, database, notifier }, config =>
+        routeHandler('updating user', { req, res, db, notifier }, config =>
             updateUser(req.body, config)
         )
     );

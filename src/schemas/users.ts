@@ -1,5 +1,5 @@
 import { model, Schema } from 'mongoose';
-import { User, UserDocument, UserModel } from '../types';
+import { ObjectId, User, UserDocument, UserModel } from '../types';
 
 const UserSchema = new Schema<UserDocument>({
     google_id: {
@@ -71,9 +71,10 @@ const UserSchema = new Schema<UserDocument>({
     ]
 });
 
-UserSchema.methods.getLists = async function() {
-    await this.populate('lists').execPopulate();
-    return this.lists;
+UserSchema.statics.getLists = async function(userId: ObjectId) {
+    const user = await this.findById(userId);
+    await user.populate('lists').execPopulate();
+    return user.lists;
 };
 
 const User = model<UserDocument, UserModel>('User', UserSchema);

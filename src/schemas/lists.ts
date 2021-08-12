@@ -132,19 +132,18 @@ ListSchema.statics.getUserInbox = async function(user_id: ObjectId) {
     );
 };
 
-// schema.statics.getUserListById = async function(user_id: ObjectId, list_id: ObjectId) {
-//     try {
-//         const _list = await List.findOne({
-//             _id: list_id,
-//             members: user_id
-//         });
-//         if (_list) {
-//             return _List.populateList(_list);
-//         }
-//     } catch (err) {
-//         return null;
-//     }
-// };
+ListSchema.statics.getUserListById = async function(user_id: ObjectId, list_id: ObjectId) {
+    try {
+        return this.populateList(
+            await this.findOne({
+                _id: list_id,
+                members: user_id.toString()
+            })
+        );
+    } catch {
+        return null;
+    }
+};
 
 // schema.statics.addTaskToList = async function(task: Task, list_id: ObjectId) {
 //     // Find lists

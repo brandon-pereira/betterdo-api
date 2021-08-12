@@ -1,9 +1,7 @@
-import { connection } from 'mongoose';
 import { Application } from 'express';
-import { Document, Model } from 'mongoose';
-
+import { connection, Document, PopulatedDoc, Model } from 'mongoose';
 import mongodb from 'mongodb';
-
+import { Notifier } from 'web-notifier';
 export { ObjectId } from 'mongodb';
 
 export interface Database {
@@ -15,13 +13,20 @@ export interface Database {
 
 export interface App extends Application {}
 
+declare global {
+    declare namespace Express {
+        export interface Request {
+            user?: UserDocument;
+        }
+    }
+}
 export interface List {
     id: ObjectId;
     title: string;
-    tasks: Array<string>;
+    tasks: Array<PopulatedDoc<Task & Document>>;
     completedTasks: Array<string>;
     members: Array<string>;
-    owner: string;
+    owner: PopulatedDoc<User & Document>;
 }
 
 export interface Task {
@@ -31,10 +36,11 @@ export interface Task {
 
 // User
 export interface User {
+    id: String;
     email: string;
     firstName: string;
     lastName: string;
-    lists: Array<string>;
+    lists: Array<PopulatedDoc<List & Document>>;
     isPushEnabled: boolean;
     pushSubscriptions: Array<string>;
 }
