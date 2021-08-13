@@ -12,9 +12,8 @@ mongoose.connect(`mongodb://localhost/${process.env.DATABASE_NAME || 'betterdo'}
 
 const db: Database = {
     connection: mongoose.connection,
-    // Lists: {},
     Lists: require('./schemas/lists').default,
-    // Tasks: require('./schemas/tasks')(),
+    // Tasks: require('./schemas/tasks').default,
     Users: require('./schemas/users').default
 };
 
