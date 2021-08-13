@@ -1,5 +1,38 @@
-import { Model, model, Schema } from 'mongoose';
-import { List, ObjectId, ListDocument, ListModel } from '../types';
+import { model, Schema, ValidatorProps, Document, PopulatedDoc, Model } from 'mongoose';
+import { ObjectId } from 'mongodb';
+import { User } from './users';
+import { Task, TaskDocument } from './tasks';
+export interface List {
+    // id: ObjectId;
+    title: string;
+    tasks: Array<PopulatedDoc<Task & Document>>;
+    completedTasks: Array<string>;
+    members: Array<string>;
+    owner: PopulatedDoc<User & Document>;
+}
+
+export interface ListDocument extends Document, List {
+    getLists(): Promise<Array<List | string>>;
+    removeListFromUser?(listId: ObjectId, user: User): Promise<User>;
+    addListToUser?(listId: ObjectId, user: User): Promise<User>;
+}
+
+export interface ListModel extends Model<ListDocument> {
+    getList(userId: ObjectId, listId: ObjectId): Promise<ListDocument>;
+    removeListFromUser(listId: ObjectId, user: User): Promise<User>;
+    addListToUser(listId: ObjectId, user: User): Promise<User>;
+    getUserInbox(userId: ObjectId): Promise<ListDocument>;
+    getUserListById(userId: ObjectId, listId: ObjectId): Promise<ListDocument>;
+    populateList(list: ListDocument | null): Promise<ListDocument>;
+    addTaskToList(task: TaskDocument, listId: ObjectId): Promise<ListDocument>;
+    removeTaskFromList(task: TaskDocument, listId: ObjectId): Promise<ListDocument>;
+    setTaskComplete(task: TaskDocument, listId: ObjectId): Promise<ListDocument>;
+    setTaskIncomplete(task: TaskDocument, listId: ObjectId): Promise<ListDocument>;
+    removeTaskFromCompletedTasksList(taskId: ObjectId, list: ListDocument): ListDocument;
+    removeTaskFromTasksList(taskId: ObjectId, list: ListDocument): ListDocument;
+    addTaskToCompletedTasksList(taskId: ObjectId, list: ListDocument): void;
+    addTaskToTasksList(taskId: ObjectId, list: ListDocument): void;
+}
 
 const ListSchema = new Schema<ListDocument, ListModel>(
     {
@@ -42,7 +75,7 @@ const ListSchema = new Schema<ListDocument, ListModel>(
             default: '#666666',
             validate: {
                 validator: (value: string) => /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(value),
-                message: (props: any) => `${props.value} is not a hex color code!`
+                message: (props: ValidatorProps) => `${props.value} is not a hex color code!`
             }
         }
     },

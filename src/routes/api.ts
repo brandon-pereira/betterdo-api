@@ -1,12 +1,20 @@
-import express from 'express';
+import express, { Application } from 'express';
 import { Notifier } from 'web-notifier';
+import { Database } from '../database';
 const { getLists, createList, updateList, deleteList } = require('../controllers/lists');
 const { getTask, createTask, updateTask, deleteTask } = require('../controllers/tasks');
 const { updateUser, getCurrentUser, getUser } = require('../controllers/users');
 import routeHandler from '../helpers/routeHandler';
-import { App, Database } from '../types';
 
-export default ({ db, notifier, app }: { app: App; db: Database; notifier: Notifier }) => {
+export default ({
+    db,
+    notifier,
+    app
+}: {
+    app: Application;
+    db: Database;
+    notifier: Notifier;
+}): void => {
     /* Initialize a router, anything behind `/api` requires authentication. */
     const api = express.Router();
     api.use('/', (req, res, next) => {

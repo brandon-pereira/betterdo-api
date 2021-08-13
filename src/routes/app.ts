@@ -1,11 +1,9 @@
-import express from 'express';
+import express, { Application } from 'express';
 import url from 'url';
-import { App } from '../types';
 
 const serverUrl = process.env.SERVER_URL || '';
-const appFolder = process.env.APP_FOLDER || '';
 
-export default ({ app }: { app: App }) => {
+export default ({ app }: { app: Application }): void => {
     // Force /app to redirect to /app/
     app.all('/app', (_, res) => {
         res.redirect(url.resolve(serverUrl || '', 'app/'));

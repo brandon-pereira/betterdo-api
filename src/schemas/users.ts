@@ -1,5 +1,30 @@
 import { model, Schema } from 'mongoose';
-import { ObjectId, User, UserDocument, UserModel } from '../types';
+import { Document, PopulatedDoc, Model } from 'mongoose';
+import { ObjectId } from 'mongodb';
+import { List } from './lists';
+
+export interface User {
+    email: string;
+    firstName: string;
+    lastName: string;
+    lists: Array<PopulatedDoc<List & Document>>;
+    isPushEnabled: boolean;
+    pushSubscriptions: Array<string>;
+    customLists: {
+        highPriority: boolean;
+        today: boolean;
+        tomorrow: boolean;
+    };
+    pushSubscription?: string;
+}
+export interface UserDocument extends Document, User {
+    getLists(): Promise<Array<List>>;
+    removeListFromUser?(listId: ObjectId, user: User): Promise<User>;
+    addListToUser?(listId: ObjectId, user: User): Promise<User>;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface UserModel extends Model<UserDocument> {}
 
 const UserSchema = new Schema<UserDocument>({
     google_id: {

@@ -1,10 +1,11 @@
-import { App, Database, User } from './types';
-
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const session = require('express-session');
-const MongoStore = require('connect-mongo')(session);
-const url = require('url');
+import { Application } from 'express';
+import { Database } from './database';
+import passport from 'passport';
+import { Profile, Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import session from 'express-session';
+import connectMongo from 'connect-mongo';
+import url from 'url';
+import { User } from './schemas/users';
 
 interface GoogleUser {
     google_id: string;
@@ -14,22 +15,27 @@ interface GoogleUser {
     profilePicture: string;
 }
 
-export default (app: App, db: Database) => {
+const MongoStore = connectMongo(session);
+
+export default (app: Application, db: Database): void => {
     passport.use(
         new GoogleStrategy(
             {
-                clientID: process.env.GOOGLE_CLIENT_ID,
-                clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-                callbackURL: url.resolve(process.env.SERVER_URL, 'auth/google/callback')
+                clientID: process.env.GOOGLE_CLIENT_ID || '',
+                clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+                callbackURL: url.resolve(process.env.SERVER_URL || '', 'auth/google/callback')
             },
-            async (accessToken: string, refreshToken: string, profile: any, cb: Function) => {
+            async (accessToken: string, refreshToken: string, profile: Profile, cb) => {
+                if (!profile) {
+                    cb('AuthError');
+                }
                 const googleId = profile.id;
                 const googleInfo = {
                     google_id: googleId,
-                    firstName: profile.name.givenName,
-                    lastName: profile.name.familyName,
-                    email: profile.emails[0].value,
-                    profilePicture: profile.photos[0].value
+                    firstName: profile?.name?.givenName,
+                    lastName: profile?.name?.familyName,
+                    email: profile?.emails[0].value,
+                    profilePicture: profile?.photos[0].value
                 } as GoogleUser;
                 let user = await db.Users.findOne({
                     google_id: googleId
@@ -71,24 +77,24 @@ export default (app: App, db: Database) => {
         )
     );
 
-    passport.serializeUser((user: User, done: Function) => done(null, user.id));
+    passport.serializeUser((user: User, done): void => done(null, user.id));
 
-    passport.deserializeUser(async (id: string, done: Function) => {
+    passport.deserializeUser(async (id: string, done) => {
         const user = await db.Users.findOne({ _id: id });
         if (user) {
             return done(null, user);
         }
-        return done(null, null, { message: 'AuthenticationRequired' });
+        return done({ message: 'AuthenticationRequired' });
     });
 
     app.use(
         session({
-            secret: process.env.SESSION_SECRET,
+            secret: process.env.SESSION_SECRET || '',
             resave: false,
             saveUninitialized: true,
             store: new MongoStore({ mongooseConnection: db.connection }),
-            sameSite: 'none',
             cookie: {
+                // sameSite: 'none',
                 maxAge: 1000 * 60 * 60 * 24 * 31 * 6 // ms * sec * mins * hours * days * 6 = ~ 6 months
             }
         })
@@ -97,7 +103,7 @@ export default (app: App, db: Database) => {
     app.use(passport.session());
     app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
     app.get('/auth/google/callback', passport.authenticate('google'), (req, res) => {
-        res.redirect(url.resolve(process.env.APP_URL, '/app'));
+        res.redirect(url.resolve(process.env.APP_URL || '', '/app'));
     });
     app.get('/auth/logout', (req, res) => {
         req.logout();

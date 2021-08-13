@@ -1,17 +1,19 @@
-import { App, Database } from './types';
+import { Application } from 'express';
 import { WebNotifier, MongoAdapter } from 'web-notifier';
+import { Database } from './database';
 
-export default (app: App, db: Database) => {
-    const getUserPushSubscription = async (userId: String) => {
+export default (app: Application, db: Database): WebNotifier => {
+    const getUserPushSubscription = async (userId: string) => {
         const user = await db.Users.findById(userId);
-        if (user.isPushEnabled) {
+        if (user && user.isPushEnabled) {
             return user.pushSubscriptions;
         }
         return [];
     };
 
-    const removeUserPushSubscription = async (userId: String, subscription: String) => {
+    const removeUserPushSubscription = async (userId: string, subscription: string) => {
         const user = await db.Users.findById(userId);
+        if (!user) return [];
         const index = user.pushSubscriptions.indexOf(subscription);
         if (index !== -1) {
             user.pushSubscriptions.splice(index, 1);

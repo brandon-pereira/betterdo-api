@@ -27,7 +27,7 @@ passportMiddleware(app, db);
  */
 require('./routes/app').default({ app, db });
 require('./routes/api').default({ app, db });
-//  require('./routes/root')(app, db);
+require('./routes/root').default({ app, db });
 
 app.listen(process.env.SERVER_PORT || 8080, () => {
     console.info('Server started on port', process.env.SERVER_PORT || 8080);

@@ -1,5 +1,14 @@
 import mongoose from 'mongoose';
-import { Database } from './types';
+import { connection } from 'mongoose';
+import { UserModel } from './schemas/users';
+import { ListModel } from './schemas/lists';
+
+export interface Database {
+    connection: typeof connection;
+    Users: UserModel;
+    Lists: ListModel;
+    // Tasks: any;
+}
 
 // mongoose.Promise = Promise;
 mongoose.connection.on('error', err => console.error('connection error:', err));

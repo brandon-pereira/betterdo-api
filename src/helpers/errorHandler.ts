@@ -7,7 +7,7 @@ import { Response } from 'express';
  * @param {Response} res response
  * @param {Error} err error stack
  */
-export function handleUncaughtError(taskName: string, res: Response, err: Error) {
+export function handleUncaughtError(taskName: string, res: Response, err: Error): void {
     // ValidationError comes from Mongoose
     if (err.name === 'ValidationError') {
         res.status(500).json({
@@ -30,7 +30,7 @@ export function handleUncaughtError(taskName: string, res: Response, err: Error)
     }
 }
 
-export function throwError(msg: string, code = 'AccessError') {
+export function throwError(msg: string, code = 'AccessError'): void {
     const error = new Error(msg);
     error.name = code;
     throw error;
