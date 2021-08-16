@@ -24,13 +24,14 @@ export default async function(
 ): Promise<void> {
     try {
         const user = req.user;
-        if (!user) {
+        if (!user || !req.isUnauthenticated()) {
             throwError('User is not authorized to make this call.');
         }
         const json = await taskFn({
             notifier,
             db,
-            user
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            user: req.user! // we know its authenticated at this point
         });
         // We assume that if the taskFn function resolves, then we have a valid 200 response
         res.json(json);

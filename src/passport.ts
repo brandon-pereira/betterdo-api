@@ -5,8 +5,6 @@ import { Profile, Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import session from 'express-session';
 import connectMongo from 'connect-mongo';
 import url from 'url';
-import { User } from './schemas/users';
-
 interface GoogleUser {
     google_id: string;
     firstName: string;
@@ -30,12 +28,19 @@ export default (app: Application, db: Database): void => {
                     cb('AuthError');
                 }
                 const googleId = profile.id;
+
                 const googleInfo = {
                     google_id: googleId,
                     firstName: profile?.name?.givenName,
                     lastName: profile?.name?.familyName,
-                    email: profile?.emails[0].value,
-                    profilePicture: profile?.photos[0].value
+                    email:
+                        profile && profile.emails && profile.emails[0]
+                            ? profile.emails[0].value
+                            : 'N/A',
+                    profilePicture:
+                        profile && profile.photos && profile.photos[0]
+                            ? profile.photos[0].value
+                            : 'N/A'
                 } as GoogleUser;
                 let user = await db.Users.findOne({
                     google_id: googleId
@@ -53,12 +58,13 @@ export default (app: Application, db: Database): void => {
                 } else {
                     // TODO: Fix this
                     // Existing user
-                    const hasGoogleAccountUpdated = Object.keys(googleInfo).find(key => {
-                        // if (googleInfo[key]) {
-                        //     googleInfo[key] !== user[key];
-                        // }
-                        return false;
-                    });
+                    const hasGoogleAccountUpdated = false;
+                    // const hasGoogleAccountUpdated = Object.keys(googleInfo).find(key => {
+                    //     if (googleInfo[key]) {
+                    //         googleInfo[key] !== user[key];
+                    //     }
+                    //     return false;
+                    // });
                     if (hasGoogleAccountUpdated) {
                         console.log('user info updated', hasGoogleAccountUpdated);
                         user.set(googleInfo);
@@ -77,10 +83,11 @@ export default (app: Application, db: Database): void => {
         )
     );
 
-    passport.serializeUser((user: User, done): void => done(null, user.id));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    passport.serializeUser((user: any, done): void => done(null, user._id));
 
-    passport.deserializeUser(async (id: string, done) => {
-        const user = await db.Users.findOne({ _id: id });
+    passport.deserializeUser(async (_id: string, done) => {
+        const user = await db.Users.findById(_id);
         if (user) {
             return done(null, user);
         }
