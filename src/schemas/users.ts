@@ -18,13 +18,14 @@ export interface User {
     pushSubscription?: string;
 }
 export interface UserDocument extends Document, User {
-    getLists(): Promise<Array<List>>;
     removeListFromUser?(listId: ObjectId, user: User): Promise<User>;
     addListToUser?(listId: ObjectId, user: User): Promise<User>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface UserModel extends Model<UserDocument> {}
+export interface UserModel extends Model<UserDocument> {
+    getLists(userId: ObjectId): Promise<Array<List>>;
+}
 
 const UserSchema = new Schema<UserDocument>({
     google_id: {

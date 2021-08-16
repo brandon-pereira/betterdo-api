@@ -1,7 +1,10 @@
 import express, { Application } from 'express';
 import { Notifier } from 'web-notifier';
 import { Database } from '../database';
-const { getLists, createList, updateList, deleteList } = require('../controllers/lists');
+import {
+    getLists
+    // createList, updateList, deleteList
+} from '../controllers/lists';
 const { getTask, createTask, updateTask, deleteTask } = require('../controllers/tasks');
 const { updateUser, getCurrentUser, getUser } = require('../controllers/users');
 import routeHandler from '../helpers/routeHandler';
@@ -32,28 +35,31 @@ export default ({
      */
     api.get(['/lists', '/lists/:listId'], (req, res) =>
         routeHandler('getting lists', { req, res, db, notifier }, config =>
-            getLists(req.params.listId, {
-                ...config,
-                includeCompleted: Boolean(req.query.includeCompleted === 'true')
-            })
+            getLists(
+                req.params.listId,
+                {
+                    includeCompleted: Boolean(req.query.includeCompleted === 'true')
+                },
+                config
+            )
         )
     );
 
-    api.put('/lists', (req, res) =>
-        routeHandler('create list', { req, res, db, notifier }, config =>
-            createList(req.body, config)
-        )
-    );
-    api.post('/lists/:listId', (req, res) =>
-        routeHandler('update list', { req, res, db, notifier }, config =>
-            updateList(req.params.listId, req.body, config)
-        )
-    );
-    api.delete('/lists/:listId', (req, res) =>
-        routeHandler('delete list', { req, res, db, notifier }, config =>
-            deleteList(req.params.listId, config)
-        )
-    );
+    // api.put('/lists', (req, res) =>
+    //     routeHandler('create list', { req, res, db, notifier }, config =>
+    //         createList(req.body, config)
+    //     )
+    // );
+    // api.post('/lists/:listId', (req, res) =>
+    //     routeHandler('update list', { req, res, db, notifier }, config =>
+    //         updateList(req.params.listId, req.body, config)
+    //     )
+    // );
+    // api.delete('/lists/:listId', (req, res) =>
+    //     routeHandler('delete list', { req, res, db, notifier }, config =>
+    //         deleteList(req.params.listId, config)
+    //     )
+    // );
 
     /**
      * Tasks

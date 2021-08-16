@@ -4,9 +4,9 @@ function isCustomList(listId) {
     return CUSTOM_LISTS.includes(listId);
 }
 
-async function fetchUserCustomLists({ database, user }) {
+async function fetchUserCustomLists({ db, user }) {
     const listsPromise = Object.entries(user.customLists).map(([key, value]) =>
-        value ? fetchCustomList(key, false, { database, user }) : null
+        value ? fetchCustomList(key, false, { db, user }) : null
     );
     return (await Promise.all(listsPromise)).filter(list => list);
 }
@@ -30,9 +30,9 @@ async function fetchCustomList(listId, includeCompleted = false, opts) {
     return list;
 }
 
-async function fetchHighPriority({ database, user }) {
-    const { completedTasks, tasks } = await fetchHighPriorityTasks({ database, user });
-    const list = new database.Lists({
+async function fetchHighPriority({ db, user }) {
+    const { completedTasks, tasks } = await fetchHighPriorityTasks({ db, user });
+    const list = new db.Lists({
         title: 'High Priority',
         type: 'highPriority',
         completedTasks,
@@ -44,9 +44,9 @@ async function fetchHighPriority({ database, user }) {
     list.id = 'highPriority';
     return list;
 }
-async function fetchTomorrow({ database, user }) {
-    const { completedTasks, tasks } = await fetchTomorrowTasks({ database, user });
-    const list = new database.Lists({
+async function fetchTomorrow({ db, user }) {
+    const { completedTasks, tasks } = await fetchTomorrowTasks({ db, user });
+    const list = new db.Lists({
         title: 'Tomorrow',
         type: 'tomorrow',
         completedTasks,
@@ -58,9 +58,9 @@ async function fetchTomorrow({ database, user }) {
     list.id = 'tomorrow';
     return list;
 }
-async function fetchToday({ database, user }) {
-    const { completedTasks, tasks } = await fetchTodayTasks({ database, user });
-    const list = new database.Lists({
+async function fetchToday({ db, user }) {
+    const { completedTasks, tasks } = await fetchTodayTasks({ db, user });
+    const list = new db.Lists({
         title: 'Today',
         type: 'today',
         tasks,
@@ -73,8 +73,8 @@ async function fetchToday({ database, user }) {
     return list;
 }
 
-async function fetchHighPriorityTasks({ database, user }) {
-    const tasks = await database.Tasks.find({
+async function fetchHighPriorityTasks({ db, user }) {
+    const tasks = await db.Tasks.find({
         priority: 'high'
     })
         .populate({
@@ -84,7 +84,7 @@ async function fetchHighPriorityTasks({ database, user }) {
         })
         .exec();
     // Populate all created by
-    await Promise.all(tasks.map(task => database.Tasks.populateTask(task)));
+    await Promise.all(tasks.map(task => db.Tasks.populateTask(task)));
     return sortTasks(tasks);
 }
 
@@ -104,31 +104,31 @@ function modifyTaskForCustomList(listId, taskObj) {
     return taskObj;
 }
 
-async function fetchTasksWithinDates(lowest, highest, { user, database }) {
-    const tasks = await database.Tasks.find({ dueDate: { $gte: lowest, $lt: highest } })
+async function fetchTasksWithinDates(lowest, highest, { user, db }) {
+    const tasks = await db.Tasks.find({ dueDate: { $gte: lowest, $lt: highest } })
         .populate({ path: 'list', select: 'members', match: { members: { $in: [user._id] } } })
         .exec();
     // Populate all created by
-    await Promise.all(tasks.map(task => database.Tasks.populateTask(task)));
+    await Promise.all(tasks.map(task => db.Tasks.populateTask(task)));
     return sortTasks(tasks);
 }
 
-async function fetchTomorrowTasks({ user, database }) {
+async function fetchTomorrowTasks({ user, db }) {
     const start = new Date();
     start.setDate(start.getDate() + 1);
     start.setHours(0, 0, 0, 0);
     const end = new Date();
     end.setDate(end.getDate() + 1);
     end.setHours(23, 59, 59, 999);
-    return fetchTasksWithinDates(start, end, { user, database });
+    return fetchTasksWithinDates(start, end, { user, db });
 }
 
-function fetchTodayTasks({ user, database }) {
+function fetchTodayTasks({ user, db }) {
     const start = new Date();
     start.setHours(0, 0, 0, 0);
     const end = new Date();
     end.setHours(23, 59, 59, 999);
-    return fetchTasksWithinDates(start, end, { user, database });
+    return fetchTasksWithinDates(start, end, { user, db });
 }
 
 function sortTasks(unsortedTasks) {

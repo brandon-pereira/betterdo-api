@@ -20,11 +20,12 @@ interface RouteHandlerOptions {
 export default async function(
     taskName = 'performing task',
     { res, req, db, notifier }: RouteHandlerOptions,
-    taskFn: (cb: RouterOptions) => Promise<void>
+    taskFn: (cb: RouterOptions) => Promise<unknown>
 ): Promise<void> {
     try {
         const user = req.user;
-        if (!user || !req.isUnauthenticated()) {
+        console.log(user);
+        if (!user || req.isUnauthenticated()) {
             throwError('User is not authorized to make this call.');
         }
         const json = await taskFn({

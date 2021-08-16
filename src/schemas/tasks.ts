@@ -12,8 +12,9 @@ export interface Task {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TaskDocument extends Document<Task> {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface TaskModel extends Model<TaskDocument> {}
+export interface TaskModel extends Model<TaskDocument> {
+    populateTask(task: TaskDocument): TaskDocument;
+}
 
 const TaskSchema = new Schema<TaskDocument, TaskModel>({
     title: {
@@ -71,11 +72,11 @@ TaskSchema.pre('validate', function() {
     });
 });
 
-const Task: TaskModel = model<TaskDocument, TaskModel>('Task', TaskSchema);
+TaskSchema.statics.populateTask = async function(taskRef) {
+    const userQueryData = ['_id', 'firstName', 'lastName', 'profilePicture'];
+    return taskRef.populate('createdBy', userQueryData).execPopulate();
+};
 
-// model.populateTask = async function(taskRef) {
-//     const userQueryData = ['_id', 'firstName', 'lastName', 'profilePicture'];
-//     return taskRef.populate('createdBy', userQueryData).execPopulate();
-// };
+const Task: TaskModel = model<TaskDocument, TaskModel>('Task', TaskSchema);
 
 export default Task;

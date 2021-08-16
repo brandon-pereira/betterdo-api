@@ -9,6 +9,9 @@ export interface List {
     completedTasks: Array<string>;
     members: Array<string>;
     owner: PopulatedDoc<User & Document>;
+    type: 'inbox' | 'today' | 'tomorrow' | 'highPriority' | 'default';
+    additionalTasks?: number;
+    color: string;
 }
 
 export interface ListDocument extends Document, List {
