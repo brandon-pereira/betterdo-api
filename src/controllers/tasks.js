@@ -2,7 +2,7 @@ const { throwError } = require('../helpers/errorHandler');
 const { isCustomList, modifyTaskForCustomList } = require('../helpers/customLists');
 const { notifyAboutSharedList } = require('../helpers/notify');
 
-async function createTask(listId, taskObj = {}, { database, user, notifier }) {
+async function createTask(listId, taskObj = {}, { db, user, notifier }) {
     // Ensure list id is passed
     if (!listId) throwError('Invalid List ID');
     // If the list is a custom list, modify task with new settings
@@ -11,7 +11,7 @@ async function createTask(listId, taskObj = {}, { database, user, notifier }) {
         listId = 'inbox';
     }
     // Ensure list exists and user has permissions
-    const list = await database.Lists.getList(user._id, listId);
+    const list = await db.Lists.getList(user._id, listId);
     // If no results, throw error
     if (!list) throwError('Invalid List ID');
     // Remove potentially harmful properties
@@ -19,13 +19,13 @@ async function createTask(listId, taskObj = {}, { database, user, notifier }) {
     delete taskObj.createdBy;
     delete taskObj.creationDate;
     // Attempt to create the list
-    const task = await database.Tasks.create({
+    const task = await db.Tasks.create({
         ...taskObj,
         createdBy: user._id,
         list: list._id
     });
     // Add task to list
-    await database.Lists.addTaskToList(task, list._id);
+    await db.Lists.addTaskToList(task, list._id);
     // Notify about shared list task addition
     notifyAboutSharedList(`${user.firstName} added ${task.title} to ${list.title}.`, {
         notifier,
@@ -33,21 +33,21 @@ async function createTask(listId, taskObj = {}, { database, user, notifier }) {
         user
     });
     // Populate task fields
-    await database.Tasks.populateTask(task);
+    await db.Tasks.populateTask(task);
     // Return new list to front-end
     return task;
 }
 
-async function updateTask(taskId, updatedTask = {}, { database, user, notifier }) {
+async function updateTask(taskId, updatedTask = {}, { db, user, notifier }) {
     let notificationSent = false;
     // Ensure list id is passed
     if (!taskId) throwError('Invalid Task ID');
     // Get task
-    const task = await database.Tasks.findOne({ _id: taskId });
+    const task = await db.Tasks.findOne({ _id: taskId });
     // If no results, throw error
     if (!task) throwError('Invalid Task ID');
     // Get List
-    let list = await database.Lists.getUserListById(user._id, task.list);
+    let list = await db.Lists.getUserListById(user._id, task.list);
     // Ensure valid permissions
     if (!list) {
         throwError('User is not authorized to access task', 'PermissionsError');
@@ -55,15 +55,15 @@ async function updateTask(taskId, updatedTask = {}, { database, user, notifier }
     // Code for handling change of list
     if (updatedTask.list && !task.list.equals(updatedTask.list)) {
         // Get new list
-        let newList = await database.Lists.getUserListById(user._id, updatedTask.list);
+        let newList = await db.Lists.getUserListById(user._id, updatedTask.list);
         // Verify updatedTask.list is valid list
         if (!newList) {
             throwError('User is not authorized to access list', 'PermissionsError');
         }
         // Remove from this list
-        await database.Lists.removeTaskFromList(task, list._id);
+        await db.Lists.removeTaskFromList(task, list._id);
         // Add to new list
-        await database.Lists.addTaskToList(task, newList._id);
+        await db.Lists.addTaskToList(task, newList._id);
         // Set to new list so that later code doesn't need to process
         task.list = updatedTask.list;
         list = newList;
@@ -78,9 +78,9 @@ async function updateTask(taskId, updatedTask = {}, { database, user, notifier }
                 list,
                 user
             });
-            await database.Lists.setTaskCompleted(task._id, list._id);
+            await db.Lists.setTaskCompleted(task._id, list._id);
         } else {
-            await database.Lists.setTaskIncompleted(task._id, list._id);
+            await db.Lists.setTaskIncompleted(task._id, list._id);
         }
     }
     // Merge the tasks.. validation on the model will handle errors
@@ -96,43 +96,43 @@ async function updateTask(taskId, updatedTask = {}, { database, user, notifier }
         });
     }
     // Populate task fields
-    await database.Tasks.populateTask(task);
+    await db.Tasks.populateTask(task);
     // Return list to front-end
     return task;
 }
 
-async function getTask(taskId, { database, user }) {
+async function getTask(taskId, { db, user }) {
     // Ensure list id is passed
     if (!taskId) throwError('Invalid Task ID');
     // Get task
-    const task = await database.Tasks.findById(taskId);
+    const task = await db.Tasks.findById(taskId);
     // Ensure task id is valid
     if (!task) throwError('Invalid Task ID');
     // Get parent list
-    const list = await database.Lists.getUserListById(user._id, task.list);
+    const list = await db.Lists.getUserListById(user._id, task.list);
     // Ensure valid permissions
     if (!list) throwError('User is not authorized to access task', 'PermissionsError');
     // Populate task fields
-    await database.Tasks.populateTask(task);
+    await db.Tasks.populateTask(task);
     // Return task to front-end
     return task;
 }
 
-async function deleteTask(taskId, { database, user, notifier }) {
+async function deleteTask(taskId, { db, user, notifier }) {
     // Ensure list id is passed
     if (!taskId) throwError('Invalid Task ID');
     // Get task
-    const task = await database.Tasks.findById(taskId);
+    const task = await db.Tasks.findById(taskId);
     // Ensure task id is valid
     if (!task) throwError('Invalid Task ID');
     // Get parent list
-    const list = await database.Lists.getUserListById(user._id, task.list);
+    const list = await db.Lists.getUserListById(user._id, task.list);
     // Ensure valid permissions
     if (!list) throwError('User is not authorized to access task', 'PermissionsError');
     // Remove task from list
-    await database.Lists.removeTaskFromList(task._id, task.list);
+    await db.Lists.removeTaskFromList(task._id, task.list);
     // Delete task
-    await database.Tasks.deleteOne({ _id: task._id });
+    await db.Tasks.deleteOne({ _id: task._id });
     // Notify about shared list task deletion
     notifyAboutSharedList(`${user.firstName} deleted ${task.title} from ${list.title}.`, {
         notifier,

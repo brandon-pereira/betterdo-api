@@ -190,7 +190,7 @@ export async function deleteList(
         await Promise.all(
             list.members.map(async member => {
                 const _user = await db.Users.findById(member);
-                await db.Users.removeListFromUser(new mongoose.Types.ObjectId(listId), _user);
+                await db.Users.removeListFromUser(new ObjectId(listId), _user);
             })
         );
         // Return success message

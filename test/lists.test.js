@@ -1,30 +1,46 @@
-const { teardown, database, createUser } = require('./setup');
-const ListSchema = database.Lists;
-const { getLists, createList, updateList, deleteList } = require('../src/controllers/lists');
-const { createTask } = require('../src/controllers/tasks');
+import { db, createUser } from './utils';
+import { getLists, createList, updateList, deleteList } from '../src/controllers/lists';
+import { createTask } from '../src/controllers/tasks';
 
-afterAll(teardown);
+const { Lists } = db;
 
 describe('Lists API', () => {
     test('Can be created with valid data', async () => {
         expect.assertions(2);
         const user = await createUser();
-        const list = await createList({ title: 'Test' }, { database, user });
+        const list = await createList({ title: 'Test' }, { db, user });
         expect(list.title).toBe('Test');
         expect(list.members[0]._id).toMatchId(user._id);
     });
 
     test('Can fetch single list ', async () => {
         const user = await createUser();
-        const list = await createList({ title: 'Test' }, { database, user });
-        expect(list).toMatchSnapshot();
+        const list = await createList({ title: 'Test' }, { db, user });
+        console.log({
+            userId: user._id,
+            listId: list._id
+        });
+        expect(list).toHaveProperty('_id');
+        expect(list).toHaveProperty('id');
+        expect(list.additionalTasks).toBe(0);
+        expect(list.color).toBe('#666666');
+        expect(list.completedTasks).toHaveLength(0);
+        expect(list.members).toHaveLength(1);
+        expect(list.members[0]).toMatchObject({
+            _id: user._id,
+            firstName: user.firstName
+        });
+        expect(list.owner).toBe(user._id);
+        expect(list.tasks).toHaveLength(0);
+        expect(list.title).toBe('Test');
+        expect(list.type).toBe('default');
     });
 
     test('Provides clear error messages when invalid data provided', async () => {
         expect.assertions(2);
         const user = await createUser();
         try {
-            await createList({ title: '' }, { database, user });
+            await createList({ title: '' }, { db, user });
         } catch (err) {
             expect(err.name).toBe('ValidationError');
             expect(err.message).toBe('List validation failed: title: Path `title` is required.');
@@ -34,7 +50,7 @@ describe('Lists API', () => {
     test('Protects sensitive fields', async () => {
         expect.assertions(1);
         const user = await createUser();
-        const list = await createList({ title: 'Evil Task', type: 'inbox' }, { database, user });
+        const list = await createList({ title: 'Evil Task', type: 'inbox' }, { db, user });
         expect(list.type).toBe('default');
     });
 
@@ -42,9 +58,9 @@ describe('Lists API', () => {
         expect.assertions(2);
         const user1 = await createUser();
         const user2 = await createUser();
-        const list = await createList({ title: 'Good List' }, { database, user: user1 });
+        const list = await createList({ title: 'Good List' }, { db, user: user1 });
         try {
-            await updateList(list._id, { title: 'Malicious List' }, { database, user: user2 });
+            await updateList(list._id, { title: 'Malicious List' }, { db, user: user2 });
         } catch (err) {
             expect(err.name).toBe('AccessError');
             expect(err.message).toBe('Invalid List ID');
@@ -55,7 +71,7 @@ describe('Lists API', () => {
         expect.assertions(2);
         const user = await createUser();
         try {
-            await createTask('INVALID_ID', { title: 'Good List' }, { database, user });
+            await createTask('INVALID_ID', { title: 'Good List' }, { db, user });
         } catch (err) {
             expect(err.name).toBe('AccessError');
             expect(err.message).toBe('Invalid List ID');
@@ -65,16 +81,16 @@ describe('Lists API', () => {
     test('Allows list to be modified', async () => {
         expect.assertions(1);
         const user = await createUser();
-        const list = await createList({ title: 'OK List' }, { database, user });
-        const updatedList = await updateList(list._id, { title: 'Good List' }, { database, user });
+        const list = await createList({ title: 'OK List' }, { db, user });
+        const updatedList = await updateList(list._id, { title: 'Good List' }, { db, user });
         expect(updatedList.title).toBe('Good List');
     });
 
     test('Allows list to be deleted', async () => {
         expect.assertions(1);
         const user = await createUser();
-        const list = await createList({ title: 'Temp List' }, { database, user });
-        const deletedList = await deleteList(list._id, { database, user });
+        const list = await createList({ title: 'Temp List' }, { db, user });
+        const deletedList = await deleteList(list._id, { db, user });
         expect(deletedList.success).toBeTruthy();
     });
 
@@ -82,14 +98,14 @@ describe('Lists API', () => {
         expect.assertions(2);
         const user1 = await createUser();
         const user2 = await createUser();
-        let list = await createList({ title: 'Temp List' }, { database, user: user1 });
+        let list = await createList({ title: 'Temp List' }, { db, user: user1 });
         // Add user 2 to the list
-        await updateList(list._id, { members: [user1._id, user2._id] }, { database, user: user1 });
+        await updateList(list._id, { members: [user1._id, user2._id] }, { db, user: user1 });
         // Delete the list
-        await deleteList(list._id, { database, user: user1 });
+        await deleteList(list._id, { db, user: user1 });
         // We query db directly because .populate removes invalid ids
-        const lists1 = await database.Users.findById(user1._id);
-        const lists2 = await database.Users.findById(user2._id);
+        const lists1 = await db.Users.findById(user1._id);
+        const lists2 = await db.Users.findById(user2._id);
         // Ensure removed from all users
         expect(lists1.lists).toHaveLength(0);
         expect(lists2.lists).toHaveLength(0);
@@ -100,9 +116,9 @@ describe('Lists API', () => {
         const user = await createUser();
         const randomNumber = Math.floor(Math.random() * 10) + 1; // random between 1 and 10
         for (let i of [...Array(randomNumber).keys()]) {
-            await createList({ title: `List ${i}` }, { database, user });
+            await createList({ title: `List ${i}` }, { db, user });
         }
-        const fetchedLists = await getLists(null, { database, user });
+        const fetchedLists = await getLists(null, {}, { db, user });
         expect(fetchedLists).toHaveLength(randomNumber + 1); // all created lists and inbox
     });
 
@@ -110,9 +126,9 @@ describe('Lists API', () => {
         expect.assertions(2);
         const user1 = await createUser();
         const user2 = await createUser();
-        const list = await createList({ title: 'Good List' }, { database, user: user1 });
+        const list = await createList({ title: 'Good List' }, { db, user: user1 });
         try {
-            await getLists(list._id, { database, user: user2 });
+            await getLists(list._id, {}, { db, user: user2 });
         } catch (err) {
             expect(err.name).toBe('AccessError');
             expect(err.message).toBe('Invalid List ID');
@@ -123,9 +139,9 @@ describe('Lists API', () => {
         expect.assertions(2);
         const user1 = await createUser();
         const user2 = await createUser();
-        const list = await createList({ title: 'Good List' }, { database, user: user1 });
+        const list = await createList({ title: 'Good List' }, { db, user: user1 });
         try {
-            await deleteList(list._id, { database, user: user2 });
+            await deleteList(list._id, { db, user: user2 });
         } catch (err) {
             expect(err.name).toBe('AccessError');
             expect(err.message).toBe('Invalid List ID');
@@ -136,9 +152,9 @@ describe('Lists API', () => {
         expect.assertions(1);
         const user1 = await createUser();
         const user2 = await createUser();
-        let list = await createList({ title: 'Title' }, { database, user: user1 });
-        await updateList(list._id, { members: [user1._id, user2._id] }, { database, user: user1 });
-        list = await getLists(list._id, { database, user: user1 });
+        let list = await createList({ title: 'Title' }, { db, user: user1 });
+        await updateList(list._id, { members: [user1._id, user2._id] }, { db, user: user1 });
+        list = await getLists(list._id, {}, { db, user: user1 });
         expect(list.members.map(m => m._id)).toEqual(
             expect.arrayContaining([user1._id, user2._id])
         );
@@ -148,10 +164,10 @@ describe('Lists API', () => {
         expect.assertions(2);
         const user1 = await createUser();
         const user2 = await createUser();
-        let list = await createList({ title: 'Title' }, { database, user: user1 });
-        await updateList(list._id, { members: [user1._id, user2._id] }, { database, user: user1 });
+        let list = await createList({ title: 'Title' }, { db, user: user1 });
+        await updateList(list._id, { members: [user1._id, user2._id] }, { db, user: user1 });
         try {
-            await updateList(list._id, { members: [user2._id] }, { database, user: user2 });
+            await updateList(list._id, { members: [user2._id] }, { db, user: user2 });
         } catch (err) {
             expect(err.name).toBe('ValidationError');
             expect(err.message).toBe(
@@ -162,11 +178,11 @@ describe('Lists API', () => {
 
     test('Allows lists tasks to be reordered', async () => {
         const user = await createUser();
-        let list = await createList({ title: 'Test' }, { database, user });
-        const task1 = await createTask(list.id, { title: 'Test 1' }, { database, user });
-        const task2 = await createTask(list.id, { title: 'Test 2' }, { database, user });
-        const task3 = await createTask(list.id, { title: 'Test 3' }, { database, user });
-        list = await getLists(list.id, { database, user });
+        let list = await createList({ title: 'Test' }, { db, user });
+        const task1 = await createTask(list.id, { title: 'Test 1' }, { db, user });
+        const task2 = await createTask(list.id, { title: 'Test 2' }, { db, user });
+        const task3 = await createTask(list.id, { title: 'Test 3' }, { db, user });
+        list = await getLists(list.id, {}, { db, user });
         const sanitizeId = task => task._id.toString();
         expect(list.tasks.map(sanitizeId)).toMatchObject([task3, task2, task1].map(sanitizeId));
         list = await updateList(
@@ -174,33 +190,33 @@ describe('Lists API', () => {
             {
                 tasks: [task1, task2, task3].map(sanitizeId)
             },
-            { database, user }
+            { db, user }
         );
-        list = await getLists(list.id, { database, user });
+        list = await getLists(list.id, {}, { db, user });
         expect(list.tasks.map(sanitizeId)).toMatchObject([task1, task2, task3].map(sanitizeId));
     });
 
     test('Prevents tasks from being injected during reorder', async () => {
         const user = await createUser();
-        let list = await createList({ title: 'Test' }, { database, user });
-        const task1 = await createTask(list._id, { title: 'Good Task' }, { database, user });
-        const task2 = await createTask(list._id, { title: 'Good Task' }, { database, user });
+        let list = await createList({ title: 'Test' }, { db, user });
+        const task1 = await createTask(list._id, { title: 'Good Task' }, { db, user });
+        const task2 = await createTask(list._id, { title: 'Good Task' }, { db, user });
         const badTask = await createTask(
-            (await createList({ title: 'Test' }, { database, user }))._id,
+            (await createList({ title: 'Test' }, { db, user }))._id,
             { title: 'Bad Task' },
-            { database, user }
+            { db, user }
         );
         try {
             await updateList(
                 list._id,
                 { tasks: [badTask._id.toString(), task1._id.toString()] },
-                { database, user }
+                { db, user }
             );
         } catch (err) {
             expect(err.name).toBe('AccessError');
             expect(err.message).toBe('Invalid modification of tasks');
         }
-        list = await getLists(list._id, { database, user });
+        list = await getLists(list._id, {}, { db, user });
         expect(list.tasks).toHaveLength(2);
         expect(list.tasks[1]._id).toMatchId(task1._id);
         expect(list.tasks[0]._id).toMatchId(task2._id);
@@ -208,16 +224,16 @@ describe('Lists API', () => {
 
     test('Prevents tasks from being removed during reorder', async () => {
         const user = await createUser();
-        let list = await createList({ title: 'Test' }, { database, user });
-        const task1 = (await createTask(list._id, { title: 'Good Task' }, { database, user }))._id;
-        const task2 = (await createTask(list._id, { title: 'Good Task' }, { database, user }))._id;
+        let list = await createList({ title: 'Test' }, { db, user });
+        const task1 = (await createTask(list._id, { title: 'Good Task' }, { db, user }))._id;
+        const task2 = (await createTask(list._id, { title: 'Good Task' }, { db, user }))._id;
         try {
-            await updateList(list._id, { tasks: [task2] }, { database, user });
+            await updateList(list._id, { tasks: [task2] }, { db, user });
         } catch (err) {
             expect(err.name).toBe('AccessError');
             expect(err.message).toBe('Invalid modification of tasks');
         }
-        list = await getLists(list._id, { database, user });
+        list = await getLists(list._id, {}, { db, user });
         expect(list.tasks).toHaveLength(2);
         expect(list.tasks[1]._id).toMatchId(task1._id);
         expect(list.tasks[0]._id).toMatchId(task2._id);
@@ -226,7 +242,7 @@ describe('Lists API', () => {
     test('Requires that the colour be a valid hex code', async () => {
         expect.assertions(6);
         const user = await createUser();
-        const props = { database, user };
+        const props = { db, user };
         const badColors = ['red', '#SSSSSS'];
         const goodColors = ['#FFF', '#FF00AA'];
         for (let color of goodColors) {
@@ -247,7 +263,7 @@ describe('Lists Schema', () => {
     test('Requires the `owner` property to be set', async () => {
         expect.assertions(1);
         try {
-            await ListSchema.create({
+            await Lists.create({
                 title: 'Test',
                 owner: 'invalid_id'
             });
@@ -259,7 +275,7 @@ describe('Lists Schema', () => {
     test(`Doesn't allow modification of the 'owners' property`, async () => {
         expect.assertions(1);
         try {
-            const list = await ListSchema.findOne({});
+            const list = await Lists.findOne({});
             list.owner = '5b99d4d74a6df02dbddf9097'; // random valid id
             await list.save();
         } catch (err) {

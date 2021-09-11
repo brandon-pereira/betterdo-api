@@ -181,84 +181,90 @@ ListSchema.statics.getUserListById = async function(user_id: ObjectId, list_id: 
     }
 };
 
-// schema.statics.addTaskToList = async function(task: Task, list_id: ObjectId) {
-//     // Find lists
-//     const _list = await List.findOne({ _id: list_id });
-//     // Add task to appropriate list
-//     if (!task.isCompleted) {
-//         List.addTaskToTasksList(task.id, _list);
-//     } else {
-//         List.addTaskToCompletedTasksList(task.id, _list);
-//     }
-//     // Save/return
-//     await _List.save();
-//     return _list;
-// };
+ListSchema.statics.addTaskToList = async function(task: Task, list_id: ObjectId) {
+    // Find lists
+    const _list = await List.findOne({ _id: list_id });
+    if (!_list) {
+        throw new Error('BAD LIST');
+    }
+    // Add task to appropriate list
+    if (!task.isCompleted) {
+        List.addTaskToTasksList(task._id, _list);
+    } else {
+        List.addTaskToCompletedTasksList(task.id, _list);
+    }
+    // Save/return
+    await _list.save();
+    return _list;
+};
 
-// schema.statics.removeTaskFromList = async function(task: Task, list_id: ObjectId) {
-//     // Find list
-//     const _list = await List.findOne({ _id: list_id });
-//     // Remove from lists
-//     _List.removeTaskFromTasksList(task.id, list);
-//     _List.removeTaskFromCompletedTasksList(task.id, list);
-//     // Save/return
-//     await _List.save();
-//     return _list;
-// };
+ListSchema.statics.removeTaskFromList = async function(task: Task, list_id: ObjectId) {
+    // Find list
+    const _list = await List.findOne({ _id: list_id });
+    // Remove from lists
+    _List.removeTaskFromTasksList(task.id, list);
+    _List.removeTaskFromCompletedTasksList(task.id, list);
+    // Save/return
+    await _List.save();
+    return _list;
+};
 
-// schema.statics.setTaskComplete = async function(task: Task, list_id: ObjectId) {
-//     // Find list
-//     const _list: ListDocument = await List.findOne({ _id: list_id });
-//     // Remove from lists
-//     List.removeTaskFromTasksList(task.id, list);
-//     List.addTaskToCompletedTasksList(task.id, list);
-//     // Save/return
-//     await _List.save();
-//     return _list;
-// };
+ListSchema.statics.setTaskComplete = async function(task: Task, list_id: ObjectId) {
+    // Find list
+    const _list: ListDocument = await List.findOne({ _id: list_id });
+    // Remove from lists
+    List.removeTaskFromTasksList(task.id, list);
+    List.addTaskToCompletedTasksList(task.id, list);
+    // Save/return
+    await _List.save();
+    return _list;
+};
 
-// schema.statics.setTaskIncomplete = async function(task: Task, list_id: ObjectId) {
-//     // Find list
-//     const _list = await List.findOne({
-//         _id: list_id
-//     });
-//     // Remove from lists
-//     _list.removeTaskFromCompletedTasksList(task.id, list);
-//     _list.addTaskToTasksList(task.id, list);
-//     // Save/return
-//     await _list.save();
-//     return _list;
-// };
+ListSchema.statics.setTaskIncomplete = async function(task: Task, list_id: ObjectId) {
+    // Find list
+    const _list = await List.findOne({
+        _id: list_id
+    });
+    // Remove from lists
+    _list.removeTaskFromCompletedTasksList(task.id, list);
+    _list.addTaskToTasksList(task.id, list);
+    // Save/return
+    await _list.save();
+    return _list;
+};
 
-// schema.statics.removeTaskFromCompletedTasksList = function(task_id: ObjectId, _list: ListDocument) {
-//     let index = _List.completedTasks.findIndex((id: string) => task_id.equals(id));
-//     // Remove from completed tasks
-//     if (index >= 0) {
-//         _List.completedTasks.splice(index, 1);
-//     }
-//     return _list;
-// };
+ListSchema.statics.removeTaskFromCompletedTasksList = function(
+    task_id: ObjectId,
+    _list: ListDocument
+) {
+    let index = _List.completedTasks.findIndex((id: string) => task_id.equals(id));
+    // Remove from completed tasks
+    if (index >= 0) {
+        _List.completedTasks.splice(index, 1);
+    }
+    return _list;
+};
 
-// schema.statics.removeTaskFromTasksList = function(task_id: ObjectId, list: ListDocument) {
-//     let index = List.tasks.findIndex((id: string) => task_id.equals(id));
-//     // Remove from tasks
-//     if (index >= 0) {
-//         List.tasks.splice(index, 1);
-//     }
-//     return list;
-// };
+ListSchema.statics.removeTaskFromTasksList = function(task_id: ObjectId, list: ListDocument) {
+    let index = List.tasks.findIndex((id: string) => task_id.equals(id));
+    // Remove from tasks
+    if (index >= 0) {
+        List.tasks.splice(index, 1);
+    }
+    return list;
+};
 
-// schema.statics.addTaskToCompletedTasksList = function(task_id: ObjectId, list: ListDocument) {
-//     if (!List.completedTasks.find((id: string) => task_id.equals(id))) {
-//         List.completedTasks.unshift((task_id as unknown) as string);
-//     }
-// };
+ListSchema.statics.addTaskToCompletedTasksList = function(task_id: ObjectId, list: ListDocument) {
+    if (!list.completedTasks.find((id: string) => task_id.equals(id))) {
+        list.completedTasks.unshift((task_id as unknown) as string);
+    }
+};
 
-// schema.statics.addTaskToTasksList = function(task_id: ObjectId, list: ListDocument) {
-//     if (!List.tasks.find((id: string) => task_id.equals(id))) {
-//         List.tasks.unshift((task_id as unknown) as string);
-//     }
-// };
+ListSchema.statics.addTaskToTasksList = function(task_id: ObjectId, list: ListDocument) {
+    if (!list.tasks.find((id: string) => task_id.equals(id))) {
+        list.tasks.unshift((task_id as unknown) as string);
+    }
+};
 
 const List: ListModel = model<ListDocument, ListModel>('List', ListSchema);
 
