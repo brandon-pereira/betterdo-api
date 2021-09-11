@@ -1,10 +1,8 @@
-import { database, createUser } from './setup';
+import { db, createUser } from './utils';
 import { updateUser, getUser, getCurrentUser } from '../src/controllers/users';
 import { createList, updateList } from '../src/controllers/lists';
 
-const { Users } = database;
-const db = database;
-
+const { Users } = db;
 let userCache = null;
 
 describe('Users Schema', () => {
@@ -117,7 +115,7 @@ describe('Users API', () => {
                     tomorrow: true
                 }
             },
-            { database, user: userCache }
+            { db, user: userCache }
         );
         userCache = await Users.findById(userCache._id);
         expect(userCache.customLists).toMatchObject({
@@ -139,7 +137,7 @@ describe('Users API', () => {
             {
                 lists: [list3, list2, list1].map(sanitizeId)
             },
-            { database, user }
+            { db, user }
         );
         user = await Users.findById(user._id);
         expect(user.lists.map(sanitizeId)).toMatchObject([list3, list2, list1].map(sanitizeId));

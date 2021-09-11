@@ -12,5 +12,6 @@ module.exports = {
         '!src/passport.js',
         '!src/routes/*.js'
     ],
-    globalTeardown: './test/teardown.js'
+    globalTeardown: './test/globalTeardown.js',
+    globalSetup: './test/globalSetup.js'
 };

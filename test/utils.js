@@ -1,5 +1,4 @@
-process.env.DATABASE_NAME = 'betterdo-unitTests';
-const database = require('../src/database').default;
+import db from '../src/database';
 
 expect.extend({
     toMatchId(received, id) {
@@ -12,7 +11,7 @@ expect.extend({
 });
 
 const createUser = async () => {
-    const user = await database.Users.create({
+    const user = await db.Users.create({
         firstName: 'unitTest',
         email: `${Date.now()}-${Math.random()}@unitTests.com`,
         customLists: {
@@ -20,7 +19,7 @@ const createUser = async () => {
             today: false
         }
     });
-    await database.Lists.create({
+    await db.Lists.create({
         title: 'Inbox',
         type: 'inbox',
         owner: user._id
@@ -28,12 +27,4 @@ const createUser = async () => {
     return user;
 };
 
-async function teardown() {
-    // await database.connection.db.dropDatabase();
-}
-
-module.exports = {
-    teardown,
-    database,
-    createUser
-};
+export { db, createUser };
