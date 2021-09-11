@@ -2,6 +2,8 @@ import { model, Schema, ValidatorProps, Document, PopulatedDoc, Model } from 'mo
 import { ObjectId } from 'mongodb';
 import { User } from './users';
 import { Task, TaskDocument } from './tasks';
+import { type } from 'os';
+import { throwError } from '../helpers/errorHandler';
 export interface List {
     id: ObjectId;
     title: string;
@@ -119,7 +121,7 @@ ListSchema.pre('validate', function() {
 ListSchema.statics.getList = async function(user_id: ObjectId, list_id: ObjectId | string) {
     if (list_id === 'inbox') {
         return this.getUserInbox(user_id);
-    } else if (list_id) {
+    } else if (list_id && typeof list_id === 'object') {
         try {
             const _list = await this.findOne({
                 _id: list_id,
@@ -128,14 +130,13 @@ ListSchema.statics.getList = async function(user_id: ObjectId, list_id: ObjectId
             if (_list) {
                 return this.populateList(_list);
             } else {
-                throw new Error('Invalid List ID');
+                throwError('Invalid List ID');
             }
         } catch (err) {
-            console.log(err);
             return null;
         }
     } else {
-        throw new Error('Missing List ID');
+        throwError('Invalid List ID');
     }
 };
 

@@ -16,10 +16,6 @@ describe('Lists API', () => {
     test('Can fetch single list ', async () => {
         const user = await createUser();
         const list = await createList({ title: 'Test' }, { db, user });
-        console.log({
-            userId: user._id,
-            listId: list._id
-        });
         expect(list).toHaveProperty('_id');
         expect(list).toHaveProperty('id');
         expect(list.additionalTasks).toBe(0);
@@ -73,8 +69,8 @@ describe('Lists API', () => {
         try {
             await createTask('INVALID_ID', { title: 'Good List' }, { db, user });
         } catch (err) {
-            expect(err.name).toBe('AccessError');
             expect(err.message).toBe('Invalid List ID');
+            expect(err.name).toBe('AccessError');
         }
     });
 

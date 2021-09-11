@@ -30,7 +30,7 @@ export function handleUncaughtError(taskName: string, res: Response, err: Error)
     }
 }
 
-export function throwError(msg: string, code = 'AccessError'): void {
+export function throwError(msg: string, code = 'AccessError'): never {
     const error = new Error(msg);
     error.name = code;
     throw error;

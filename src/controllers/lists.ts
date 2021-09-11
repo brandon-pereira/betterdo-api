@@ -36,7 +36,7 @@ export async function getLists(
                     }
                 })
                 .execPopulate();
-            // list: List = list.toObject<List>();
+            list = list.toObject();
             list.additionalTasks = 0;
         }
         return {

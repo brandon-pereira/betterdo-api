@@ -1,6 +1,6 @@
 const CUSTOM_LISTS = ['highPriority', 'today', 'tomorrow'];
 
-function isCustomList(listId) {
+function isCustomList(listId: string): boolean {
     return CUSTOM_LISTS.includes(listId);
 }
 

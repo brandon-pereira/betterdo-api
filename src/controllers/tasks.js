@@ -1,6 +1,7 @@
-const { throwError } = require('../helpers/errorHandler');
-const { isCustomList, modifyTaskForCustomList } = require('../helpers/customLists');
-const { notifyAboutSharedList } = require('../helpers/notify');
+import { throwError } from '../helpers/errorHandler';
+import { parseObjectID } from '../helpers/objectIds';
+import { isCustomList, modifyTaskForCustomList } from '../helpers/customLists';
+import { notifyAboutSharedList } from '../helpers/notify';
 
 async function createTask(listId, taskObj = {}, { db, user, notifier }) {
     // Ensure list id is passed
@@ -11,7 +12,7 @@ async function createTask(listId, taskObj = {}, { db, user, notifier }) {
         listId = 'inbox';
     }
     // Ensure list exists and user has permissions
-    const list = await db.Lists.getList(user._id, listId);
+    const list = await db.Lists.getList(user._id, parseObjectID(listId));
     // If no results, throw error
     if (!list) throwError('Invalid List ID');
     // Remove potentially harmful properties
