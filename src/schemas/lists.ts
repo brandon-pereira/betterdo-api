@@ -3,7 +3,7 @@ import { ObjectId } from 'mongodb';
 import { User } from './users';
 import { Task, TaskDocument } from './tasks';
 export interface List {
-    // id: ObjectId;
+    id: ObjectId;
     title: string;
     tasks: Array<PopulatedDoc<Task & Document>>;
     completedTasks: Array<string>;
@@ -15,6 +15,7 @@ export interface List {
 }
 
 export interface ListDocument extends Document, List {
+    id: ObjectId;
     getLists(): Promise<Array<List | string>>;
     removeListFromUser?(listId: ObjectId, user: User): Promise<User>;
     addListToUser?(listId: ObjectId, user: User): Promise<User>;
@@ -88,32 +89,32 @@ const ListSchema = new Schema<ListDocument, ListModel>(
     }
 );
 
-// schema.virtual('additionalTasks').get(function(this: any) {
-//     return this.completedTasks ? this.completedTasks.length : 0;
-// });
+ListSchema.virtual('additionalTasks').get(function() {
+    return this.completedTasks ? this.completedTasks.length : 0;
+});
 
-// schema.pre('save', function(this: any) {
-//     if (this.isNew) {
-//         this.members = [this.owner];
-//     }
-// });
+ListSchema.pre('save', function() {
+    if (this.isNew) {
+        this.members = [this.owner];
+    }
+});
 
-// schema.pre('validate', function(this: any) {
-//     const nonEditableFields = ['owner', 'type'];
-//     nonEditableFields.forEach(field => {
-//         if (!this.isNew && this.isModified(field)) {
-//             this.invalidate(field, `Not permitted to modify ${field}!`);
-//         }
-//     });
+ListSchema.pre('validate', function() {
+    const nonEditableFields = ['owner', 'type'];
+    nonEditableFields.forEach(field => {
+        if (!this.isNew && this.isModified(field)) {
+            this.invalidate(field, `Not permitted to modify ${field}!`);
+        }
+    });
 
-//     if (
-//         !this.isNew &&
-//         this.isModified('members') &&
-//         !this.members.find(member => member._id.equals(this.owner))
-//     ) {
-//         this.invalidate('members', `Not permitted to remove owner!`);
-//     }
-// });
+    if (
+        !this.isNew &&
+        this.isModified('members') &&
+        !this.members.find(member => member._id.equals(this.owner))
+    ) {
+        this.invalidate('members', `Not permitted to remove owner!`);
+    }
+});
 
 ListSchema.statics.getList = async function(user_id: ObjectId, list_id: ObjectId | string) {
     if (list_id === 'inbox') {
@@ -125,7 +126,6 @@ ListSchema.statics.getList = async function(user_id: ObjectId, list_id: ObjectId
                 members: user_id.toString()
             });
             if (_list) {
-                console.log(this.getList);
                 return this.populateList(_list);
             } else {
                 throw new Error('Invalid List ID');

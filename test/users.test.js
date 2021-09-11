@@ -1,7 +1,9 @@
-const { database, createUser } = require('./setup');
+import { database, createUser } from './setup';
+import { updateUser, getUser, getCurrentUser } from '../src/controllers/users';
+import { createList, updateList } from '../src/controllers/lists';
+
 const { Users } = database;
-const { updateUser, getUser, getCurrentUser } = require('../src/controllers/users');
-const { createList, updateList } = require('../src/controllers/lists');
+const db = database;
 
 let userCache = null;
 
@@ -44,28 +46,28 @@ describe('Users Schema', () => {
 describe('Users API', () => {
     test('Can be updated with valid data', async () => {
         userCache = await createUser();
-        await updateUser({ firstName: 'John' }, { database, user: userCache });
+        await updateUser({ firstName: 'John' }, { db, user: userCache });
         userCache = await Users.findById(userCache._id);
         expect(userCache.firstName).toBe('John');
     });
 
     test('Allows finding users with valid email', async () => {
         userCache = await createUser();
-        const returnedUsers = await getUser(userCache.email, { database, user: userCache });
+        const returnedUsers = await getUser(userCache.email, { db, user: userCache });
         userCache = await Users.findById(userCache._id);
         expect(returnedUsers._id).toMatchId(userCache._id);
     });
 
     test('Allows finding current user', async () => {
         userCache = await createUser();
-        const returnedUsers = await getCurrentUser({ database, user: userCache });
+        const returnedUsers = await getCurrentUser({ db, user: userCache });
         userCache = await Users.findById(userCache._id);
         expect(returnedUsers._id).toMatchId(userCache._id);
     });
 
     test('Prevents getting current user when not logged in', async () => {
         try {
-            await getCurrentUser({ database, user: undefined });
+            await getCurrentUser({ db, user: undefined });
         } catch (err) {
             expect(err.name).toBe('AccessError');
             expect(err.message).toBe('Not Authenticated');
@@ -76,7 +78,7 @@ describe('Users API', () => {
         userCache = await createUser();
         userCache = await Users.findById(userCache._id);
         expect(userCache.isPushEnabled).toBe(true);
-        await updateUser({ isPushEnabled: false }, { database, user: userCache });
+        await updateUser({ isPushEnabled: false }, { db, user: userCache });
         userCache = await Users.findById(userCache._id);
         expect(userCache.isPushEnabled).toBe(false);
     });
@@ -86,11 +88,11 @@ describe('Users API', () => {
         userCache = await createUser();
         userCache = await Users.findById(userCache._id);
         expect(userCache.pushSubscriptions).toHaveLength(0);
-        await updateUser({ pushSubscription: 'test1' }, { database, notifier, user: userCache });
+        await updateUser({ pushSubscription: 'test1' }, { db, notifier, user: userCache });
         userCache = await Users.findById(userCache._id);
         expect(userCache.pushSubscriptions).toEqual(expect.arrayContaining(['test1']));
-        await updateUser({ pushSubscription: 'test2' }, { database, notifier, user: userCache });
-        await updateUser({ pushSubscription: 'test1' }, { database, notifier, user: userCache });
+        await updateUser({ pushSubscription: 'test2' }, { db, notifier, user: userCache });
+        await updateUser({ pushSubscription: 'test1' }, { db, notifier, user: userCache });
         userCache = await Users.findById(userCache._id);
         expect(userCache.pushSubscriptions).toEqual(expect.arrayContaining(['test1', 'test2']));
         expect(notifier.send.mock.calls.length).toBe(2);
@@ -100,7 +102,7 @@ describe('Users API', () => {
         expect.assertions(2);
         userCache = await createUser();
         try {
-            await getUser('fake@email.com', { database, user: userCache });
+            await getUser('fake@email.com', { db, user: userCache });
         } catch (err) {
             expect(err.name).toBe('AccessError');
             expect(err.message).toBe('Invalid User Email');
@@ -127,9 +129,9 @@ describe('Users API', () => {
 
     test('Allows users lists to be reordered', async () => {
         let user = await createUser();
-        const list1 = await createList({ title: 'Test 1' }, { database, user });
-        const list2 = await createList({ title: 'Test 2' }, { database, user });
-        const list3 = await createList({ title: 'Test 3' }, { database, user });
+        const list1 = await createList({ title: 'Test 1' }, { db, user });
+        const list2 = await createList({ title: 'Test 2' }, { db, user });
+        const list3 = await createList({ title: 'Test 3' }, { db, user });
         user = await Users.findById(user._id);
         const sanitizeId = task => task._id.toString();
         expect(user.lists.map(sanitizeId)).toMatchObject([list1, list2, list3].map(sanitizeId));
@@ -146,13 +148,13 @@ describe('Users API', () => {
     test('Prevents lists from being injected during reorder', async () => {
         let user1 = await createUser();
         const user2 = await createUser();
-        const list1 = await createList({ title: 'Good' }, { database, user: user1 });
-        const list2 = await createList({ title: 'Good' }, { database, user: user1 });
-        const list3 = await createList({ title: 'BAD!' }, { database, user: user2 });
+        const list1 = await createList({ title: 'Good' }, { db, user: user1 });
+        const list2 = await createList({ title: 'Good' }, { db, user: user1 });
+        const list3 = await createList({ title: 'BAD!' }, { db, user: user2 });
         try {
             await updateUser(
                 { lists: [list1._id.toString(), list3._id.toString()] },
-                { database, user: user1 }
+                { db, user: user1 }
             );
         } catch (err) {
             expect(err.name).toBe('AccessError');
@@ -166,10 +168,10 @@ describe('Users API', () => {
 
     test('Prevents lists from being removed during reorder', async () => {
         let user = await createUser();
-        const list1 = await createList({ title: 'Good' }, { database, user });
-        const list2 = await createList({ title: 'Good' }, { database, user });
+        const list1 = await createList({ title: 'Good' }, { db, user });
+        const list2 = await createList({ title: 'Good' }, { db, user });
         try {
-            await updateUser({ lists: [list2] }, { database, user });
+            await updateUser({ lists: [list2] }, { db, user });
         } catch (err) {
             expect(err.name).toBe('AccessError');
             expect(err.message).toBe('Invalid modification of lists');
@@ -183,8 +185,8 @@ describe('Users API', () => {
     test('Allows members to be added to shared lists', async () => {
         let user1 = await createUser();
         let user2 = await createUser();
-        const list = await createList({ title: 'Test' }, { database, user: user1 });
-        await updateList(list._id, { members: [user1._id, user2._id] }, { database, user: user1 });
+        const list = await createList({ title: 'Test' }, { db, user: user1 });
+        await updateList(list._id, { members: [user1._id, user2._id] }, { db, user: user1 });
         user1 = await Users.findById(user1._id);
         user2 = await Users.findById(user2._id);
         expect(user1.lists).toHaveLength(1);
@@ -194,9 +196,9 @@ describe('Users API', () => {
     test('Allows members to be removed from shared lists', async () => {
         let user1 = await createUser();
         let user2 = await createUser();
-        const list = await createList({ title: 'Test' }, { database, user: user1 });
-        await updateList(list._id, { members: [user1._id, user2._id] }, { database, user: user1 });
-        await updateList(list._id, { members: [user1._id] }, { database, user: user1 });
+        const list = await createList({ title: 'Test' }, { db, user: user1 });
+        await updateList(list._id, { members: [user1._id, user2._id] }, { db, user: user1 });
+        await updateList(list._id, { members: [user1._id] }, { db, user: user1 });
         user1 = await Users.findById(user1._id);
         user2 = await Users.findById(user2._id);
         expect(user1.lists).toHaveLength(1);

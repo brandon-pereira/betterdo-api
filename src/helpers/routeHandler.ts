@@ -24,7 +24,6 @@ export default async function(
 ): Promise<void> {
     try {
         const user = req.user;
-        console.log(user);
         if (!user || req.isUnauthenticated()) {
             throwError('User is not authorized to make this call.');
         }

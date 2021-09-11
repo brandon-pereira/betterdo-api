@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongoose';
 import { throwError } from '../helpers/errorHandler';
 import { RouterOptions } from '../helpers/routeHandler';
 
@@ -54,7 +55,7 @@ async function updateUser(
     await userRef.save();
     // Send push notification
     if (didUpdatePushSubscription) {
-        await notifier.send(user._id, {
+        await notifier.send(userRef._id, {
             title: "You're subscribed!",
             body: 'Time to party!'
         });
@@ -71,13 +72,21 @@ async function getCurrentUser({ user }) {
     }
 }
 
-async function getUser(email, { database }) {
-    let user = await database.Users.findOne({ email: email });
+async function getUser(email: string, { db }: RouterOptions): OtherUser {
+    const user = await db.Users.findOne({ email: email });
     if (user) {
         return sanitizeOtherUser(user);
     } else {
         throwError('Invalid User Email');
     }
+}
+
+interface OtherUser {
+    id: ObjectId;
+    firstName: string;
+    lastName?: string;
+    email: string;
+    profilePicture?: string;
 }
 
 function sanitizeCurrentUser(user) {
@@ -95,7 +104,7 @@ function sanitizeCurrentUser(user) {
     return currentUser;
 }
 
-function sanitizeOtherUser(user) {
+function sanitizeOtherUser(user): OtherUser {
     return {
         _id: user._id,
         firstName: user.firstName,
