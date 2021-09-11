@@ -1,5 +1,5 @@
 process.env.DATABASE_NAME = 'betterdo-unitTests';
-const database = require('../src/database');
+const database = require('../src/database').default;
 
 expect.extend({
     toMatchId(received, id) {
