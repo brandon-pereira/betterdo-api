@@ -36,13 +36,11 @@ export async function getLists(
                     }
                 })
                 .execPopulate();
-            list = list.toObject();
-            list.additionalTasks = 0;
         }
         return {
             type: list.type,
             owner: list.owner,
-            additionalTasks: list.additionalTasks,
+            additionalTasks: includeCompleted ? 0 : list.additionalTasks,
             completedTasks: includeCompleted ? list.completedTasks : [],
             color: list.color,
             id: list.id,

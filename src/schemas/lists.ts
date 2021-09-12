@@ -91,7 +91,6 @@ const ListSchema = new Schema<ListDocument, ListModel>(
 );
 
 ListSchema.virtual('additionalTasks').get(function() {
-    console.log(this, this.completedTasks);
     return this.completedTasks ? this.completedTasks.length : 0;
 });
 
@@ -230,8 +229,8 @@ ListSchema.statics.setTaskIncomplete = async function(task: Task, list_id: Objec
     });
     if (!_list) return null;
     // Remove from lists
-    this.removeTaskFromCompletedTasksList(task.id, _list);
-    this.addTaskToTasksList(task.id, _list);
+    this.removeTaskFromCompletedTasksList(task._id, _list);
+    this.addTaskToTasksList(task._id, _list);
     // Save/return
     await _list.save();
     return _list;
