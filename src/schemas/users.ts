@@ -17,14 +17,13 @@ export interface User {
     };
     pushSubscription?: string;
 }
-export interface UserDocument extends Document, User {
-    removeListFromUser?(listId: ObjectId, user: User): Promise<User>;
-    addListToUser?(listId: ObjectId, user: User): Promise<User>;
-}
+export interface UserDocument extends Document, User {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UserModel extends Model<UserDocument> {
     getLists(userId: ObjectId): Promise<Array<List>>;
+    removeListFromUser(listId: ObjectId, user: User): Promise<User>;
+    addListToUser(listId: ObjectId, user: User): Promise<User>;
 }
 
 const UserSchema = new Schema<UserDocument>({

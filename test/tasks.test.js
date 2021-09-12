@@ -1,7 +1,8 @@
 import { db, createUser } from './utils';
-const ListSchema = db.Lists;
-const { createTask, updateTask, deleteTask, getTask } = require('../src/controllers/tasks');
-const { createList, getLists } = require('../src/controllers/lists');
+import { createTask, updateTask, deleteTask, getTask } from '../src/controllers/tasks';
+import { createList, getLists } from '../src/controllers/lists';
+
+const { Lists } = db;
 
 let user;
 let validList;
@@ -28,12 +29,12 @@ describe('Tasks API', () => {
     test('Adds/removes tasks to list object on relevant task', async () => {
         let list = await createList({ title: 'New List' }, { db, user });
         const task = await createTask(list._id, { title: 'Test' }, { db, user });
-        await ListSchema.addTaskToList(task._id, list._id); // ensure no duplicates
-        list = await ListSchema.findById(list._id);
+        await Lists.addTaskToList(task._id, list._id); // ensure no duplicates
+        list = await Lists.findById(list._id);
         expect(list.tasks).toContainEqual(task._id);
         expect(list.tasks).toHaveLength(1); // if 2, not deduping
         await deleteTask(task._id, { db, user });
-        list = await ListSchema.findById(list._id);
+        list = await Lists.findById(list._id);
         expect(list.tasks).toHaveLength(0);
     });
 
@@ -41,9 +42,9 @@ describe('Tasks API', () => {
         let list1 = await createList({ title: 'New List 1' }, { db, user });
         let list2 = await createList({ title: 'New List 2' }, { db, user });
         const task = await createTask(list1._id, { title: 'Test' }, { db, user });
-        await updateTask(task._id, { list: list2._id }, { db, user });
-        list1 = await ListSchema.findById(list1._id);
-        list2 = await ListSchema.findById(list2._id);
+        await updateTask(task.id, { list: list2._id }, { db, user });
+        list1 = await Lists.findById(list1._id);
+        list2 = await Lists.findById(list2._id);
         expect(list1.tasks).not.toContainEqual(task._id);
         expect(list2.tasks).toContainEqual(task._id);
     });
@@ -53,19 +54,19 @@ describe('Tasks API', () => {
         expect(list.additionalTasks).toBe(0);
         expect(list.tasks).toHaveLength(0);
         const task = await createTask(list._id, { title: 'Test' }, { db, user });
-        list = await getLists(list._id, { db, user });
+        list = await getLists(list._id, {}, { db, user });
         expect(list.additionalTasks).toBe(0);
         expect(list.tasks).toHaveLength(1);
-        await updateTask(task.id, { isCompleted: true }, { db, user });
-        list = await getLists(list.id, { db, user });
+        await updateTask(task._id, { isCompleted: true }, { db, user });
+        list = await getLists(list.id, {}, { db, user });
         expect(list.additionalTasks).toBe(1);
         expect(list.tasks).toHaveLength(0);
-        list = await getLists(list.id, { db, user, includeCompleted: true });
+        list = await getLists(list.id, {}, { db, user, includeCompleted: true });
         expect(list.additionalTasks).toBe(0);
         expect(list.completedTasks).toHaveLength(1);
         expect(list.tasks).toHaveLength(0);
         await updateTask(task.id, { isCompleted: false }, { db, user });
-        list = await getLists(list.id, { db, user });
+        list = await getLists(list.id, {}, { db, user });
         expect(list.additionalTasks).toBe(0);
         expect(list.tasks).toHaveLength(1);
         list = await getLists(list.id, { db, user, includeCompleted: true });

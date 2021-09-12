@@ -79,9 +79,9 @@ async function updateTask(taskId, updatedTask = {}, { db, user, notifier }) {
                 list,
                 user
             });
-            await db.Lists.setTaskCompleted(task._id, list._id);
+            await db.Lists.setTaskComplete(task._id, list._id);
         } else {
-            await db.Lists.setTaskIncompleted(task._id, list._id);
+            await db.Lists.setTaskIncomplete(task._id, list._id);
         }
     }
     // Merge the tasks.. validation on the model will handle errors

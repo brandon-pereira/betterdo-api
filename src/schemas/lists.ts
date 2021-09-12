@@ -2,7 +2,6 @@ import { model, Schema, ValidatorProps, Document, PopulatedDoc, Model } from 'mo
 import { ObjectId } from 'mongodb';
 import { User } from './users';
 import { Task, TaskDocument } from './tasks';
-import { type } from 'os';
 import { throwError } from '../helpers/errorHandler';
 export interface List {
     id: ObjectId;
@@ -92,6 +91,7 @@ const ListSchema = new Schema<ListDocument, ListModel>(
 );
 
 ListSchema.virtual('additionalTasks').get(function() {
+    console.log(this, this.completedTasks);
     return this.completedTasks ? this.completedTasks.length : 0;
 });
 
@@ -112,7 +112,7 @@ ListSchema.pre('validate', function() {
     if (
         !this.isNew &&
         this.isModified('members') &&
-        !this.members.find(member => member._id.equals(this.owner))
+        !this.members.find(member => member.id.equals(this.owner))
     ) {
         this.invalidate('members', `Not permitted to remove owner!`);
     }
@@ -190,9 +190,9 @@ ListSchema.statics.addTaskToList = async function(task: Task, list_id: ObjectId)
     }
     // Add task to appropriate list
     if (!task.isCompleted) {
-        List.addTaskToTasksList(task._id, _list);
+        this.addTaskToTasksList(task._id, _list);
     } else {
-        List.addTaskToCompletedTasksList(task.id, _list);
+        this.addTaskToCompletedTasksList(task.id, _list);
     }
     // Save/return
     await _list.save();
@@ -202,22 +202,24 @@ ListSchema.statics.addTaskToList = async function(task: Task, list_id: ObjectId)
 ListSchema.statics.removeTaskFromList = async function(task: Task, list_id: ObjectId) {
     // Find list
     const _list = await List.findOne({ _id: list_id });
+    if (!_list) return null;
     // Remove from lists
-    _List.removeTaskFromTasksList(task.id, list);
-    _List.removeTaskFromCompletedTasksList(task.id, list);
+    this.removeTaskFromTasksList(task._id, _list);
+    this.removeTaskFromCompletedTasksList(task._id, _list);
     // Save/return
-    await _List.save();
+    await _list.save();
     return _list;
 };
 
 ListSchema.statics.setTaskComplete = async function(task: Task, list_id: ObjectId) {
     // Find list
-    const _list: ListDocument = await List.findOne({ _id: list_id });
+    const _list = await List.findOne({ _id: list_id });
+    if (!_list) return null;
     // Remove from lists
-    List.removeTaskFromTasksList(task.id, list);
-    List.addTaskToCompletedTasksList(task.id, list);
+    this.removeTaskFromTasksList(task._id, _list);
+    this.addTaskToCompletedTasksList(task._id, _list);
     // Save/return
-    await _List.save();
+    await _list.save();
     return _list;
 };
 
@@ -226,9 +228,10 @@ ListSchema.statics.setTaskIncomplete = async function(task: Task, list_id: Objec
     const _list = await List.findOne({
         _id: list_id
     });
+    if (!_list) return null;
     // Remove from lists
-    _list.removeTaskFromCompletedTasksList(task.id, list);
-    _list.addTaskToTasksList(task.id, list);
+    this.removeTaskFromCompletedTasksList(task.id, _list);
+    this.addTaskToTasksList(task.id, _list);
     // Save/return
     await _list.save();
     return _list;
@@ -238,25 +241,25 @@ ListSchema.statics.removeTaskFromCompletedTasksList = function(
     task_id: ObjectId,
     _list: ListDocument
 ) {
-    let index = _List.completedTasks.findIndex((id: string) => task_id.equals(id));
+    const index = _list.completedTasks.findIndex((id: string) => task_id.equals(id));
     // Remove from completed tasks
     if (index >= 0) {
-        _List.completedTasks.splice(index, 1);
+        _list.completedTasks.splice(index, 1);
     }
     return _list;
 };
 
 ListSchema.statics.removeTaskFromTasksList = function(task_id: ObjectId, list: ListDocument) {
-    let index = List.tasks.findIndex((id: string) => task_id.equals(id));
+    const index = list.tasks.findIndex((id: ObjectId) => task_id.equals(id));
     // Remove from tasks
     if (index >= 0) {
-        List.tasks.splice(index, 1);
+        list.tasks.splice(index, 1);
     }
     return list;
 };
 
 ListSchema.statics.addTaskToCompletedTasksList = function(task_id: ObjectId, list: ListDocument) {
-    if (!list.completedTasks.find((id: string) => task_id.equals(id))) {
+    if (!list.completedTasks.find((id: string) => task_id.equals(id.toString()))) {
         list.completedTasks.unshift((task_id as unknown) as string);
     }
 };
