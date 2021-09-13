@@ -23,7 +23,7 @@ export interface ListDocument extends Document, List {
 }
 
 export interface ListModel extends Model<ListDocument> {
-    getList(userId: ObjectId, listId: ObjectId): Promise<ListDocument>;
+    getList(userId: ObjectId, listId: ObjectId | string): Promise<ListDocument>;
     removeListFromUser(listId: ObjectId, user: User): Promise<User>;
     addListToUser(listId: ObjectId, user: User): Promise<User>;
     getUserInbox(userId: ObjectId): Promise<ListDocument>;
@@ -111,7 +111,7 @@ ListSchema.pre('validate', function() {
     if (
         !this.isNew &&
         this.isModified('members') &&
-        !this.members.find(member => member.id.equals(this.owner))
+        !this.members.find(member => member._id.equals(this.owner))
     ) {
         this.invalidate('members', `Not permitted to remove owner!`);
     }
@@ -191,7 +191,7 @@ ListSchema.statics.addTaskToList = async function(task: Task, list_id: ObjectId)
     if (!task.isCompleted) {
         this.addTaskToTasksList(task._id, _list);
     } else {
-        this.addTaskToCompletedTasksList(task.id, _list);
+        this.addTaskToCompletedTasksList(task._id, _list);
     }
     // Save/return
     await _list.save();

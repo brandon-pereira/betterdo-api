@@ -17,16 +17,16 @@ beforeAll(async () => {
 
 describe('Custom Lists API', () => {
     test("Inbox shouldn't allow modification", async () => {
-        await updateList(inbox.id, { title: 'Malicious' }, { db, user: user1 });
+        await updateList(inbox._id, { title: 'Malicious' }, { db, user: user1 });
         inbox = await getLists('inbox', {}, { user: user1, db });
-        const result = await db(inbox.id, { db, user: user1 });
+        const result = await getLists(inbox._id, {}, { db, user: user1 });
         expect(result.title).toBe('Inbox');
     });
 
     test("Inbox shouldn't allow deletion", async () => {
         expect.assertions(2);
         try {
-            await deleteList(inbox.id, { db, user: user1 });
+            await deleteList(inbox._id, { db, user: user1 });
         } catch (err) {
             expect(err.message).toBe('Invalid List ID');
             expect(err.name).toBe('AccessError');
@@ -37,7 +37,7 @@ describe('Custom Lists API', () => {
         let today = await getLists('today', {}, { db, user: user1 });
         expect(today.tasks).toHaveLength(0);
         await createTask(
-            validList1.id,
+            validList1._id,
             { title: 'Todo today!', dueDate: new Date() },
             { db, user: user1 }
         );
@@ -52,7 +52,7 @@ describe('Custom Lists API', () => {
         tomorrow.setDate(tomorrow.getDate() + 1);
         tomorrow.setHours(12, 30, 0, 0);
         await createTask(
-            validList1.id,
+            validList1._id,
             { title: 'Todo tomorrow!', dueDate: tomorrow },
             { db, user: user1 }
         );
@@ -62,16 +62,16 @@ describe('Custom Lists API', () => {
 
     test('High priority list should only return valid tasks', async () => {
         await createTask(
-            validList1.id,
+            validList1._id,
             { title: 'Invalid because not high-priority' },
             { db, user: user1 }
         );
         await createTask(
-            validList2.id,
+            validList2._id,
             { title: 'Invalid because wrong user', priority: 'high' },
             { db, user: user2 }
         );
-        await createTask(validList1.id, { title: 'Valid', priority: 'high' }, { db, user: user1 });
+        await createTask(validList1._id, { title: 'Valid', priority: 'high' }, { db, user: user1 });
         const user1lists = await getLists('highPriority', {}, { db, user: user1 });
         expect(user1lists.tasks).toHaveLength(1);
     });

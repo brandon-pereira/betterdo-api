@@ -2,6 +2,7 @@ import { throwError } from '../helpers/errorHandler';
 import { parseObjectID } from '../helpers/objectIds';
 import { isCustomList, modifyTaskForCustomList } from '../helpers/customLists';
 import { notifyAboutSharedList } from '../helpers/notify';
+import { List, ListDocument } from '../schemas/lists';
 
 async function createTask(listId, taskObj = {}, { db, user, notifier }) {
     // Ensure list id is passed
@@ -11,8 +12,13 @@ async function createTask(listId, taskObj = {}, { db, user, notifier }) {
         taskObj = modifyTaskForCustomList(listId, taskObj);
         listId = 'inbox';
     }
-    // Ensure list exists and user has permissions
-    const list = await db.Lists.getList(user._id, parseObjectID(listId));
+    let list: ListDocument;
+    if (listId === 'inbox') {
+        list = await db.Lists.getUserInbox(user._id);
+    } else {
+        // Ensure list exists and user has permissions
+        list = await db.Lists.getList(user._id, parseObjectID(listId));
+    }
     // If no results, throw error
     if (!list) throwError('Invalid List ID');
     // Remove potentially harmful properties

@@ -2,7 +2,8 @@ import { throwError } from '../helpers/errorHandler';
 import { ObjectId } from 'mongodb';
 import { RouterOptions } from '../helpers/routeHandler';
 import { List } from '../schemas/lists';
-const { isCustomList, fetchCustomList, fetchUserCustomLists } = require('../helpers/customLists');
+import { createObject } from '../helpers/objectIds';
+import { isCustomList, fetchCustomList, fetchUserCustomLists } from '../helpers/customLists';
 
 interface LooseObject {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -18,10 +19,7 @@ export async function getLists(
     if (listId && isCustomList(listId)) {
         return await fetchCustomList(listId, includeCompleted, { db, user });
     } else if (listId) {
-        if (typeof listId === 'string') {
-            listId = new ObjectId(listId);
-        }
-        let list = await db.Lists.getList(user._id, listId);
+        const list = await db.Lists.getList(user._id, listId);
         if (!list) {
             throwError('Invalid List ID');
         }
@@ -43,7 +41,7 @@ export async function getLists(
             additionalTasks: includeCompleted ? 0 : list.additionalTasks,
             completedTasks: includeCompleted ? list.completedTasks : [],
             color: list.color,
-            id: list.id,
+            id: list._id,
             title: list.title,
             tasks: list.tasks,
             members: list.members
@@ -66,7 +64,7 @@ export async function getLists(
             tasks: list.tasks,
             members: list.members,
             owner: list.owner,
-            id: list.id,
+            id: list._id,
             title: list.title
         }));
     }

@@ -175,20 +175,21 @@ describe('Lists API', () => {
     test('Allows lists tasks to be reordered', async () => {
         const user = await createUser();
         let list = await createList({ title: 'Test' }, { db, user });
-        const task1 = await createTask(list.id, { title: 'Test 1' }, { db, user });
-        const task2 = await createTask(list.id, { title: 'Test 2' }, { db, user });
-        const task3 = await createTask(list.id, { title: 'Test 3' }, { db, user });
-        list = await getLists(list.id, {}, { db, user });
+        const task1 = await createTask(list._id, { title: 'Test 1' }, { db, user });
+        const task2 = await createTask(list._id, { title: 'Test 2' }, { db, user });
+        const task3 = await createTask(list._id, { title: 'Test 3' }, { db, user });
+        list = await getLists(list._id, {}, { db, user });
+        console.log(list);
         const sanitizeId = task => task._id.toString();
         expect(list.tasks.map(sanitizeId)).toMatchObject([task3, task2, task1].map(sanitizeId));
         list = await updateList(
-            list.id,
+            list._id,
             {
                 tasks: [task1, task2, task3].map(sanitizeId)
             },
             { db, user }
         );
-        list = await getLists(list.id, {}, { db, user });
+        list = await getLists(list._id, {}, { db, user });
         expect(list.tasks.map(sanitizeId)).toMatchObject([task1, task2, task3].map(sanitizeId));
     });
 
