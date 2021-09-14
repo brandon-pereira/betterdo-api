@@ -3,14 +3,14 @@ import { ObjectId } from 'mongodb';
 import { List } from './lists';
 
 export interface Task {
-    id: ObjectId;
+    _id?: ObjectId;
     title: string;
     isCompleted: boolean;
     list: PopulatedDoc<List & Document>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface TaskDocument extends Document<Task> {}
+export interface TaskDocument extends Document, Task {}
 
 export interface TaskModel extends Model<TaskDocument> {
     populateTask(task: TaskDocument): TaskDocument;

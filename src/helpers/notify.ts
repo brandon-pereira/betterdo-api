@@ -1,10 +1,13 @@
-module.exports.notifyAboutSharedList = (title, { notifier, user, list }) => {
+import { List } from '../schemas/lists';
+import { RouterOptions } from './routeHandler';
+
+function notifyAboutSharedList(title: string, list: List, { notifier, user }: RouterOptions): void {
     const members = list.members;
     const listId = list._id;
     const isSharedList = members.length > 1;
 
     if (isSharedList) {
-        members.forEach(async member => {
+        members.map(async member => {
             if (!member._id.equals(user._id)) {
                 await notifier.send(member._id, {
                     title,
@@ -18,4 +21,6 @@ module.exports.notifyAboutSharedList = (title, { notifier, user, list }) => {
             }
         });
     }
-};
+}
+
+export { notifyAboutSharedList };

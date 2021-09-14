@@ -1,17 +1,27 @@
+import { ObjectId } from 'mongodb';
+import { ListDocument } from '../schemas/lists';
+import { Task, TaskDocument } from '../schemas/tasks';
+import { RouterOptions } from './routeHandler';
+
 const CUSTOM_LISTS = ['highPriority', 'today', 'tomorrow'];
 
-function isCustomList(listId: string): boolean {
+function isCustomList(listId: ObjectId | string): boolean {
+    if (typeof listId !== 'string') return false;
     return CUSTOM_LISTS.includes(listId);
 }
 
-async function fetchUserCustomLists({ db, user }) {
+async function fetchUserCustomLists({ db, user }: RouterOptions): Promise<Array<ListDocument>> {
     const listsPromise = Object.entries(user.customLists).map(([key, value]) =>
         value ? fetchCustomList(key, false, { db, user }) : null
     );
     return (await Promise.all(listsPromise)).filter(list => list);
 }
 
-async function fetchCustomList(listId, includeCompleted = false, opts) {
+async function fetchCustomList(
+    listId: string,
+    includeCompleted = false,
+    opts: RouterOptions
+): Promise<List | null> {
     // fetch list
     let list = null;
     if (listId === 'highPriority') {
@@ -30,7 +40,7 @@ async function fetchCustomList(listId, includeCompleted = false, opts) {
     return list;
 }
 
-async function fetchHighPriority({ db, user }) {
+async function fetchHighPriority({ db, user }: RouterOptions): Promise<ListDocument> {
     const { completedTasks, tasks } = await fetchHighPriorityTasks({ db, user });
     const list = new db.Lists({
         title: 'High Priority',
@@ -44,7 +54,7 @@ async function fetchHighPriority({ db, user }) {
     list.id = 'highPriority';
     return list;
 }
-async function fetchTomorrow({ db, user }) {
+async function fetchTomorrow({ db, user }: RouterOptions): Promise<ListDocument> {
     const { completedTasks, tasks } = await fetchTomorrowTasks({ db, user });
     const list = new db.Lists({
         title: 'Tomorrow',
@@ -58,7 +68,7 @@ async function fetchTomorrow({ db, user }) {
     list.id = 'tomorrow';
     return list;
 }
-async function fetchToday({ db, user }) {
+async function fetchToday({ db, user }: RouterOptions): Promise<ListDocument> {
     const { completedTasks, tasks } = await fetchTodayTasks({ db, user });
     const list = new db.Lists({
         title: 'Today',
@@ -73,7 +83,7 @@ async function fetchToday({ db, user }) {
     return list;
 }
 
-async function fetchHighPriorityTasks({ db, user }) {
+async function fetchHighPriorityTasks({ db, user }: RouterOptions): Promise<ListDocument> {
     const tasks = await db.Tasks.find({
         priority: 'high'
     })
@@ -104,16 +114,7 @@ function modifyTaskForCustomList(listId, taskObj) {
     return taskObj;
 }
 
-async function fetchTasksWithinDates(lowest, highest, { user, db }) {
-    const tasks = await db.Tasks.find({ dueDate: { $gte: lowest, $lt: highest } })
-        .populate({ path: 'list', select: 'members', match: { members: { $in: [user._id] } } })
-        .exec();
-    // Populate all created by
-    await Promise.all(tasks.map(task => db.Tasks.populateTask(task)));
-    return sortTasks(tasks);
-}
-
-async function fetchTomorrowTasks({ user, db }) {
+async function fetchTomorrowTasks({ user, db }: RouterOptions): Promise<ListDocument> {
     const start = new Date();
     start.setDate(start.getDate() + 1);
     start.setHours(0, 0, 0, 0);
@@ -123,7 +124,7 @@ async function fetchTomorrowTasks({ user, db }) {
     return fetchTasksWithinDates(start, end, { user, db });
 }
 
-function fetchTodayTasks({ user, db }) {
+function fetchTodayTasks({ user, db }: RouterOptions): Promise<ListDocument> {
     const start = new Date();
     start.setHours(0, 0, 0, 0);
     const end = new Date();
@@ -131,7 +132,20 @@ function fetchTodayTasks({ user, db }) {
     return fetchTasksWithinDates(start, end, { user, db });
 }
 
-function sortTasks(unsortedTasks) {
+async function fetchTasksWithinDates(
+    lowest: Date,
+    highest: Date,
+    { user, db }: RouterOptions
+): Promise<Array<TaskDocument>> {
+    const tasks = await db.Tasks.find({ dueDate: { $gte: lowest, $lt: highest } })
+        .populate({ path: 'list', select: 'members', match: { members: { $in: [user._id] } } })
+        .exec();
+    // Populate all created by
+    await Promise.all(tasks.map(task => db.Tasks.populateTask(task)));
+    return sortTasks(tasks);
+}
+
+function sortTasks(unsortedTasks: Task[]): Task[] {
     return unsortedTasks
         .filter(tasks => tasks.list) // remove others lists
         .reduce(
@@ -147,8 +161,7 @@ function sortTasks(unsortedTasks) {
             { completedTasks: [], tasks: [] }
         );
 }
-
-module.exports = {
+export {
     isCustomList,
     fetchCustomList,
     fetchUserCustomLists,

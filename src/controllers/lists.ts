@@ -1,9 +1,9 @@
 import { throwError } from '../helpers/errorHandler';
 import { ObjectId } from 'mongodb';
 import { RouterOptions } from '../helpers/routeHandler';
-import { List } from '../schemas/lists';
-import { createObject } from '../helpers/objectIds';
+import { List, ListDocument } from '../schemas/lists';
 import { isCustomList, fetchCustomList, fetchUserCustomLists } from '../helpers/customLists';
+import { parseObjectID } from '../helpers/objectIds';
 
 interface LooseObject {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -13,11 +13,11 @@ interface LooseObject {
 export async function getLists(
     listId: ObjectId | string,
     { includeCompleted } = { includeCompleted: false },
-    { db, user }: RouterOptions
+    { db, user, notifier }: RouterOptions
 ): Promise<List | Array<List>> {
     // Get lists based on query data
     if (listId && isCustomList(listId)) {
-        return await fetchCustomList(listId, includeCompleted, { db, user });
+        return await fetchCustomList(listId as string, includeCompleted, { db, user, notifier });
     } else if (listId) {
         const list = await db.Lists.getList(user._id, listId);
         if (!list) {
@@ -41,7 +41,7 @@ export async function getLists(
             additionalTasks: includeCompleted ? 0 : list.additionalTasks,
             completedTasks: includeCompleted ? list.completedTasks : [],
             color: list.color,
-            id: list._id,
+            _id: list._id,
             title: list.title,
             tasks: list.tasks,
             members: list.members
@@ -49,13 +49,13 @@ export async function getLists(
     } else {
         const inbox = db.Lists.getUserInbox(user._id);
         const userLists = db.Users.getLists(user._id);
-        const customLists = fetchUserCustomLists({ db, user });
+        const customLists = fetchUserCustomLists({ db, user, notifier });
         const [_inbox, _userLists, _customLists] = await Promise.all([
             inbox,
             customLists,
             userLists
         ]);
-        const lists: Array<List> = [_inbox, ..._userLists, ..._customLists];
+        const lists: Array<ListDocument> = [_inbox, ..._userLists, ..._customLists];
         return lists.map(list => ({
             type: list.type,
             additionalTasks: list.additionalTasks,
@@ -64,13 +64,16 @@ export async function getLists(
             tasks: list.tasks,
             members: list.members,
             owner: list.owner,
-            id: list._id,
+            _id: list._id,
             title: list.title
         }));
     }
 }
 
-export async function createList(listObj: LooseObject, { db, user }: RouterOptions): Promise<List> {
+export async function createList(
+    listObj: LooseObject,
+    { db, user }: RouterOptions
+): Promise<ListDocument> {
     // Remove potentially harmful properties
     delete listObj.owner;
     delete listObj.members;
@@ -97,7 +100,7 @@ export async function updateList(
     if (!listId) throwError('Invalid List ID');
     // Convert ListId to object if not
     if (typeof listId === 'string') {
-        listId = new ObjectId(listId);
+        listId = parseObjectID(listId);
     }
     // Get list
     const list = await db.Lists.getUserListById(user._id, listId);
@@ -127,12 +130,14 @@ export async function updateList(
     if (updatedList.members && Array.isArray(updatedList.members)) {
         const currentMembers = list.members.map(member => member._id.toString());
         updatedList.members = updatedList.members.map(member => member.toString());
-        const newMembers = updatedList.members.filter(member => !currentMembers.includes(member));
+        const newMembers = updatedList.members.filter(
+            (member: string) => !currentMembers.includes(member)
+        );
         const removedMembers = currentMembers.filter(
             member => !updatedList.members.includes(member)
         );
         const addMembersPromise = Promise.all(
-            newMembers.map(async member => {
+            newMembers.map(async (member: string) => {
                 const user = await db.Users.findById(member);
                 await db.Users.addListToUser(list._id, user);
             })
@@ -181,7 +186,7 @@ export async function deleteList(
     }
     // await list.populate('members').execPopulate();
     const status = await db.Lists.deleteOne({ _id: list._id });
-    if (status && status.n > 0) {
+    if (status && status.n && status.n > 0) {
         // Remove list to users array
         await Promise.all(
             list.members.map(async member => {

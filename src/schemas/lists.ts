@@ -4,7 +4,7 @@ import { User } from './users';
 import { Task, TaskDocument } from './tasks';
 import { throwError } from '../helpers/errorHandler';
 export interface List {
-    id: ObjectId;
+    _id: ObjectId;
     title: string;
     tasks: Array<PopulatedDoc<Task & Document>>;
     completedTasks: Array<string>;
@@ -15,12 +15,8 @@ export interface List {
     color: string;
 }
 
-export interface ListDocument extends Document, List {
-    id: ObjectId;
-    getLists(): Promise<Array<List | string>>;
-    removeListFromUser?(listId: ObjectId, user: User): Promise<User>;
-    addListToUser?(listId: ObjectId, user: User): Promise<User>;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ListDocument extends Document, List {}
 
 export interface ListModel extends Model<ListDocument> {
     getList(userId: ObjectId, listId: ObjectId | string): Promise<ListDocument>;
@@ -90,7 +86,7 @@ const ListSchema = new Schema<ListDocument, ListModel>(
     }
 );
 
-ListSchema.virtual('additionalTasks').get(function() {
+ListSchema.virtual('additionalTasks').get(function(this: ListDocument) {
     return this.completedTasks ? this.completedTasks.length : 0;
 });
 

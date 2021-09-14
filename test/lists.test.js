@@ -179,7 +179,6 @@ describe('Lists API', () => {
         const task2 = await createTask(list._id, { title: 'Test 2' }, { db, user });
         const task3 = await createTask(list._id, { title: 'Test 3' }, { db, user });
         list = await getLists(list._id, {}, { db, user });
-        console.log(list);
         const sanitizeId = task => task._id.toString();
         expect(list.tasks.map(sanitizeId)).toMatchObject([task3, task2, task1].map(sanitizeId));
         list = await updateList(

@@ -34,9 +34,8 @@ async function createTask(listId, taskObj = {}, { db, user, notifier }) {
     // Add task to list
     await db.Lists.addTaskToList(task, list._id);
     // Notify about shared list task addition
-    notifyAboutSharedList(`${user.firstName} added ${task.title} to ${list.title}.`, {
+    notifyAboutSharedList(`${user.firstName} added ${task.title} to ${list.title}.`, list, {
         notifier,
-        list,
         user
     });
     // Populate task fields
@@ -80,11 +79,15 @@ async function updateTask(taskId, updatedTask = {}, { db, user, notifier }) {
         if (updatedTask.isCompleted) {
             notificationSent = true;
             // Notify about shared list task deletion
-            notifyAboutSharedList(`${user.firstName} completed ${task.title} in ${list.title}.`, {
-                notifier,
+            notifyAboutSharedList(
+                `${user.firstName} completed ${task.title} in ${list.title}.`,
                 list,
-                user
-            });
+                {
+                    notifier,
+                    user,
+                    db
+                }
+            );
             await db.Lists.setTaskComplete(task._id, list._id);
         } else {
             await db.Lists.setTaskIncomplete(task._id, list._id);
@@ -96,10 +99,10 @@ async function updateTask(taskId, updatedTask = {}, { db, user, notifier }) {
     await task.save();
     // Notify about shared list update
     if (!notificationSent) {
-        notifyAboutSharedList(`${user.firstName} updated ${task.title} in ${list.title}.`, {
+        notifyAboutSharedList(`${user.firstName} updated ${task.title} in ${list.title}.`, list, {
             notifier,
-            list,
-            user
+            user,
+            db
         });
     }
     // Populate task fields
@@ -141,10 +144,10 @@ async function deleteTask(taskId, { db, user, notifier }) {
     // Delete task
     await db.Tasks.deleteOne({ _id: task._id });
     // Notify about shared list task deletion
-    notifyAboutSharedList(`${user.firstName} deleted ${task.title} from ${list.title}.`, {
+    notifyAboutSharedList(`${user.firstName} deleted ${task.title} from ${list.title}.`, list, {
         notifier,
-        list,
-        user
+        user,
+        db
     });
     return { success: true };
 }

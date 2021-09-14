@@ -1,9 +1,10 @@
 import { model, Schema } from 'mongoose';
 import { Document, PopulatedDoc, Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
-import { List } from './lists';
+import { List, ListDocument } from './lists';
 
 export interface User {
+    _id: ObjectId;
     email: string;
     firstName: string;
     lastName: string;
@@ -17,16 +18,17 @@ export interface User {
     };
     pushSubscription?: string;
 }
-export interface UserDocument extends Document, User {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface UserDocument extends Document, List {}
+
 export interface UserModel extends Model<UserDocument> {
-    getLists(userId: ObjectId): Promise<Array<List>>;
+    getLists(userId: ObjectId): Promise<Array<ListDocument>>;
     removeListFromUser(listId: ObjectId, user: User): Promise<User>;
     addListToUser(listId: ObjectId, user: User): Promise<User>;
 }
 
-const UserSchema = new Schema<UserDocument>({
+const UserSchema = new Schema<User, UserModel>({
     google_id: {
         type: String,
         unique: true,
@@ -96,13 +98,16 @@ const UserSchema = new Schema<UserDocument>({
     ]
 });
 
-UserSchema.statics.getLists = async function(userId: ObjectId) {
+UserSchema.statics.getLists = async function(userId: ObjectId): Promise<List[]> {
     const user = await this.findById(userId);
+    if (!user) {
+        return [];
+    }
     await user.populate('lists').execPopulate();
     return user.lists;
 };
 
-UserSchema.statics.addListToUser = async function(listId: ObjectId, _user: UserDocument) {
+UserSchema.statics.addListToUser = async function(listId: ObjectId, _user: User) {
     if (!_user.lists.find((id: string) => listId.equals(id))) {
         _user.lists.push((listId as unknown) as string);
         await _user.save();

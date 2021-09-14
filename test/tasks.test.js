@@ -77,7 +77,6 @@ describe('Tasks API', () => {
         await updateTask(task._id, { list: list2._id, isCompleted: true }, { db, user });
         list = await getLists(list._id, {}, { db, user });
         list2 = await getLists(list2._id, {}, { db, user });
-        console.log(list);
         expect(list.additionalTasks).toBe(0);
         expect(list.tasks).toHaveLength(0);
         expect(list2.additionalTasks).toBe(1);
