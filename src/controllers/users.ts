@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongoose';
 import { throwError } from '../helpers/errorHandler';
 import { RouterOptions } from '../helpers/routeHandler';
+import { User, UserDocument } from '../schemas/users';
 
 interface LooseObject {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -10,7 +11,7 @@ interface LooseObject {
 export async function updateUser(
     dirtyUserProps: LooseObject = {},
     { user: userRef, notifier }: RouterOptions
-) {
+): Promise<UserDocument> {
     // Get user
     // const userRef = await db.Users.findById(user._id);
 
@@ -47,8 +48,15 @@ export async function updateUser(
     }
     const stringsToCheck = ['firstName', 'lastName', 'email'];
     stringsToCheck.forEach(id => {
-        if (typeof dirtyUserProps[id] === 'string' && typeof userRef[id] !== 'undefined') {
-            userRef[id] = dirtyUserProps[id];
+        const idx = `${id}` as keyof User;
+        if (
+            dirtyUserProps[idx] &&
+            userRef[idx] &&
+            typeof dirtyUserProps[idx] === 'string' &&
+            typeof userRef[idx] !== 'undefined'
+        ) {
+            //https://stackoverflow.com/a/58657194/7033335
+            userRef[idx] = dirtyUserProps[idx] as never;
         }
     });
     // Save
@@ -64,7 +72,7 @@ export async function updateUser(
     return userRef;
 }
 
-export async function getCurrentUser({ user }) {
+export async function getCurrentUser({ user }: RouterOptions): Promise<CurrentUser> {
     if (user) {
         return sanitizeCurrentUser(user);
     } else {
@@ -72,7 +80,7 @@ export async function getCurrentUser({ user }) {
     }
 }
 
-export async function getUser(email: string, { db }: RouterOptions): OtherUser {
+export async function getUser(email: string, { db }: RouterOptions): Promise<OtherUser> {
     const user = await db.Users.findOne({ email: email });
     if (user) {
         return sanitizeOtherUser(user);
@@ -82,33 +90,44 @@ export async function getUser(email: string, { db }: RouterOptions): OtherUser {
 }
 
 interface OtherUser {
-    id: ObjectId;
-    firstName: string;
+    _id: ObjectId;
+    firstName?: string;
     lastName?: string;
     email: string;
     profilePicture?: string;
 }
 
-function sanitizeCurrentUser(user) {
-    // ALl the "otherUser" data plus additional
-    const currentUser = sanitizeOtherUser(user);
-    currentUser.customLists = user.customLists;
-    currentUser.isBeta = user.isBeta;
-    currentUser.isPushEnabled = user.isPushEnabled;
-    currentUser.lastLogin = user.lastLogin;
-    currentUser.creationDate = user.creationDate;
-    currentUser.lastName = user.lastName;
-    currentUser.config = {
-        vapidKey: process.env.VAPID_PUBLIC_KEY
-    };
-    return currentUser;
+interface CurrentUser extends OtherUser {
+    customLists: User['customLists'];
+    isBeta: User['isBeta'];
+    isPushEnabled: User['isPushEnabled'];
+    lastLogin: User['lastLogin'];
+    creationDate: User['creationDate'];
+    config: LooseObject;
 }
 
-function sanitizeOtherUser(user): OtherUser {
+function sanitizeCurrentUser(user: UserDocument): CurrentUser {
+    // All the "otherUser" data plus additional
+    const otherUser = sanitizeOtherUser(user);
+    return {
+        ...otherUser,
+        customLists: user.customLists,
+        isBeta: user.isBeta,
+        isPushEnabled: user.isPushEnabled,
+        lastLogin: user.lastLogin,
+        creationDate: user.creationDate,
+        lastName: user.lastName,
+        config: {
+            vapidKey: process.env.VAPID_PUBLIC_KEY
+        }
+    };
+}
+
+function sanitizeOtherUser(user: UserDocument): OtherUser {
     return {
         _id: user._id,
         firstName: user.firstName,
-        lastName: user.lastName ? user.lastName.charAt(0) : null,
+        lastName: user.lastName ? user.lastName.charAt(0) : undefined,
         email: user.email,
         profilePicture: user.profilePicture
     };

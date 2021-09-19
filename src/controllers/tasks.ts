@@ -5,7 +5,7 @@ import { isCustomList, modifyTaskForCustomList } from '../helpers/customLists';
 import { notifyAboutSharedList } from '../helpers/notify';
 import { ListDocument } from '../schemas/lists';
 import { RouterOptions } from '../helpers/routeHandler';
-
+import { TaskDocument } from '../schemas/tasks';
 interface LooseObject {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
@@ -15,7 +15,7 @@ export async function createTask(
     listId: ObjectId | string,
     taskObj: LooseObject = {},
     router: RouterOptions
-) {
+): Promise<TaskDocument> {
     const { db, user } = router;
     // Ensure list id is passed
     if (!listId) throwError('Invalid List ID');
@@ -57,7 +57,7 @@ export async function updateTask(
     taskId: ObjectId | string,
     updatedTask: LooseObject = {},
     { db, user, notifier }: RouterOptions
-) {
+): Promise<TaskDocument> {
     let notificationSent = false;
     // Ensure list id is passed
     if (!taskId) throwError('Invalid Task ID');
@@ -127,7 +127,7 @@ export async function updateTask(
 export async function getTask(
     taskId: ObjectId | string,
     { db, user }: RouterOptions
-): TaskDocument {
+): Promise<TaskDocument> {
     // Ensure list id is passed
     if (!taskId) throwError('Invalid Task ID');
     // Get task
@@ -144,7 +144,13 @@ export async function getTask(
     return task;
 }
 
-export async function deleteTask(taskId: ObjectId | string, { db, user, notifier }: RouterOptions):  {
+interface GenericStatus {
+    success: boolean;
+}
+export async function deleteTask(
+    taskId: ObjectId | string,
+    { db, user, notifier }: RouterOptions
+): Promise<GenericStatus> {
     // Ensure list id is passed
     if (!taskId) throwError('Invalid Task ID');
     // Get task

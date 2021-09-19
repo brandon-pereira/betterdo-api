@@ -52,7 +52,7 @@ export default (app: Application, db: Database): void => {
                     await db.Lists.create({
                         title: 'Inbox',
                         type: 'inbox',
-                        owner: user.id
+                        owner: user._id
                     });
                     return cb(null, user);
                 } else {

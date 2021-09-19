@@ -17,6 +17,10 @@ export interface User {
         tomorrow: boolean;
     };
     pushSubscription?: string;
+    profilePicture: string;
+    isBeta: boolean;
+    lastLogin: Date;
+    creationDate: Date;
 }
 
 export type UserDocument = User & Document;
