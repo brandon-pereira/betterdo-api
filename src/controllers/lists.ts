@@ -16,8 +16,8 @@ export async function getLists(
     { db, user, notifier }: RouterOptions
 ): Promise<List | Array<List>> {
     // Get lists based on query data
-    if (listId && isCustomList(listId)) {
-        const customList = await fetchCustomList(listId as string, includeCompleted, {
+    if (typeof listId === 'string' && isCustomList(listId)) {
+        const customList = await fetchCustomList(listId, includeCompleted, {
             db,
             user,
             notifier
@@ -25,6 +25,7 @@ export async function getLists(
         if (!customList) {
             throwError('Unknown error');
         }
+        return customList;
     } else if (listId) {
         const list = await db.Lists.getList(user._id, listId);
         if (!list) {
