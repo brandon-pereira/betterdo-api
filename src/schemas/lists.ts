@@ -8,16 +8,14 @@ export interface List {
     title: string;
     tasks: Array<PopulatedDoc<Task & Document>>;
     completedTasks: Array<string>;
-    members: Array<string>;
+    members: Array<PopulatedDoc<User & Document>>;
     owner: PopulatedDoc<User & Document>;
     type: 'inbox' | 'today' | 'tomorrow' | 'highPriority' | 'default';
     additionalTasks?: number;
     color: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ListDocument extends Document, List {}
-
+export type ListDocument = List & Document;
 export interface ListModel extends Model<ListDocument> {
     getList(userId: ObjectId, listId: ObjectId | string): Promise<ListDocument>;
     removeListFromUser(listId: ObjectId, user: User): Promise<User>;

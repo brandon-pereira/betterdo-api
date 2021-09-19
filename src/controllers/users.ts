@@ -7,7 +7,7 @@ interface LooseObject {
     [key: string]: any;
 }
 
-async function updateUser(
+export async function updateUser(
     dirtyUserProps: LooseObject = {},
     { user: userRef, notifier }: RouterOptions
 ) {
@@ -64,7 +64,7 @@ async function updateUser(
     return userRef;
 }
 
-async function getCurrentUser({ user }) {
+export async function getCurrentUser({ user }) {
     if (user) {
         return sanitizeCurrentUser(user);
     } else {
@@ -72,7 +72,7 @@ async function getCurrentUser({ user }) {
     }
 }
 
-async function getUser(email: string, { db }: RouterOptions): OtherUser {
+export async function getUser(email: string, { db }: RouterOptions): OtherUser {
     const user = await db.Users.findOne({ email: email });
     if (user) {
         return sanitizeOtherUser(user);
@@ -113,9 +113,3 @@ function sanitizeOtherUser(user): OtherUser {
         profilePicture: user.profilePicture
     };
 }
-
-module.exports = {
-    updateUser,
-    getCurrentUser,
-    getUser
-};

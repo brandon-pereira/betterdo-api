@@ -17,7 +17,14 @@ export async function getLists(
 ): Promise<List | Array<List>> {
     // Get lists based on query data
     if (listId && isCustomList(listId)) {
-        return await fetchCustomList(listId as string, includeCompleted, { db, user, notifier });
+        const customList = await fetchCustomList(listId as string, includeCompleted, {
+            db,
+            user,
+            notifier
+        });
+        if (!customList) {
+            throwError('Unknown error');
+        }
     } else if (listId) {
         const list = await db.Lists.getList(user._id, listId);
         if (!list) {
@@ -46,28 +53,23 @@ export async function getLists(
             tasks: list.tasks,
             members: list.members
         };
-    } else {
-        const inbox = db.Lists.getUserInbox(user._id);
-        const userLists = db.Users.getLists(user._id);
-        const customLists = fetchUserCustomLists({ db, user, notifier });
-        const [_inbox, _userLists, _customLists] = await Promise.all([
-            inbox,
-            customLists,
-            userLists
-        ]);
-        const lists: Array<ListDocument> = [_inbox, ..._userLists, ..._customLists];
-        return lists.map(list => ({
-            type: list.type,
-            additionalTasks: list.additionalTasks,
-            completedTasks: [],
-            color: list.color,
-            tasks: list.tasks,
-            members: list.members,
-            owner: list.owner,
-            _id: list._id,
-            title: list.title
-        }));
     }
+    const inbox = db.Lists.getUserInbox(user._id);
+    const userLists = db.Users.getLists(user._id);
+    const customLists = fetchUserCustomLists({ db, user, notifier });
+    const [_inbox, _userLists, _customLists] = await Promise.all([inbox, customLists, userLists]);
+    const lists: Array<ListDocument> = [_inbox, ..._userLists, ..._customLists];
+    return lists.map(list => ({
+        type: list.type,
+        additionalTasks: list.additionalTasks,
+        completedTasks: [],
+        color: list.color,
+        tasks: list.tasks,
+        members: list.members,
+        owner: list.owner,
+        _id: list._id,
+        title: list.title
+    }));
 }
 
 export async function createList(
@@ -139,12 +141,14 @@ export async function updateList(
         const addMembersPromise = Promise.all(
             newMembers.map(async (member: string) => {
                 const user = await db.Users.findById(member);
+                if (!user) throwError('Invalid modification of tasks');
                 await db.Users.addListToUser(list._id, user);
             })
         );
         const removeMembersPromise = Promise.all(
             removedMembers.map(async member => {
                 const user = await db.Users.findById(member);
+                if (!user) throwError('Invalid modification of tasks');
                 await db.Users.removeListFromUser(list._id, user);
             })
         );
@@ -191,6 +195,7 @@ export async function deleteList(
         await Promise.all(
             list.members.map(async member => {
                 const _user = await db.Users.findById(member);
+                if (!_user) return;
                 await db.Users.removeListFromUser(new ObjectId(listId), _user);
             })
         );

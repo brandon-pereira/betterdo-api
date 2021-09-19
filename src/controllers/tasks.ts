@@ -1,14 +1,26 @@
 import { throwError } from '../helpers/errorHandler';
 import { parseObjectID } from '../helpers/objectIds';
+import { ObjectId } from 'mongodb';
 import { isCustomList, modifyTaskForCustomList } from '../helpers/customLists';
 import { notifyAboutSharedList } from '../helpers/notify';
-import { List, ListDocument } from '../schemas/lists';
+import { ListDocument } from '../schemas/lists';
+import { RouterOptions } from '../helpers/routeHandler';
 
-async function createTask(listId, taskObj = {}, { db, user, notifier }) {
+interface LooseObject {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: any;
+}
+
+export async function createTask(
+    listId: ObjectId | string,
+    taskObj: LooseObject = {},
+    router: RouterOptions
+) {
+    const { db, user } = router;
     // Ensure list id is passed
     if (!listId) throwError('Invalid List ID');
     // If the list is a custom list, modify task with new settings
-    if (isCustomList(listId)) {
+    if (typeof listId === 'string' && isCustomList(listId)) {
         taskObj = modifyTaskForCustomList(listId, taskObj);
         listId = 'inbox';
     }
@@ -34,17 +46,18 @@ async function createTask(listId, taskObj = {}, { db, user, notifier }) {
     // Add task to list
     await db.Lists.addTaskToList(task, list._id);
     // Notify about shared list task addition
-    notifyAboutSharedList(`${user.firstName} added ${task.title} to ${list.title}.`, list, {
-        notifier,
-        user
-    });
+    notifyAboutSharedList(`${user.firstName} added ${task.title} to ${list.title}.`, list, router);
     // Populate task fields
     await db.Tasks.populateTask(task);
     // Return new list to front-end
     return task;
 }
 
-async function updateTask(taskId, updatedTask = {}, { db, user, notifier }) {
+export async function updateTask(
+    taskId: ObjectId | string,
+    updatedTask: LooseObject = {},
+    { db, user, notifier }: RouterOptions
+) {
     let notificationSent = false;
     // Ensure list id is passed
     if (!taskId) throwError('Invalid Task ID');
@@ -61,7 +74,7 @@ async function updateTask(taskId, updatedTask = {}, { db, user, notifier }) {
     // Code for handling change of list
     if (updatedTask.list && !task.list.equals(updatedTask.list)) {
         // Get new list
-        let newList = await db.Lists.getUserListById(user._id, updatedTask.list);
+        const newList = await db.Lists.getUserListById(user._id, updatedTask.list);
         // Verify updatedTask.list is valid list
         if (!newList) {
             throwError('User is not authorized to access list', 'PermissionsError');
@@ -75,7 +88,7 @@ async function updateTask(taskId, updatedTask = {}, { db, user, notifier }) {
         list = newList;
     }
     // If the task isCompleted state changed
-    if (updatedTask.isCompleted !== undefined && task.isCompleted !== updateTask.isCompleted) {
+    if (updatedTask.isCompleted !== undefined && task.isCompleted !== updatedTask.isCompleted) {
         if (updatedTask.isCompleted) {
             notificationSent = true;
             // Notify about shared list task deletion
@@ -111,7 +124,10 @@ async function updateTask(taskId, updatedTask = {}, { db, user, notifier }) {
     return task;
 }
 
-async function getTask(taskId, { db, user }) {
+export async function getTask(
+    taskId: ObjectId | string,
+    { db, user }: RouterOptions
+): TaskDocument {
     // Ensure list id is passed
     if (!taskId) throwError('Invalid Task ID');
     // Get task
@@ -128,7 +144,7 @@ async function getTask(taskId, { db, user }) {
     return task;
 }
 
-async function deleteTask(taskId, { db, user, notifier }) {
+export async function deleteTask(taskId: ObjectId | string, { db, user, notifier }: RouterOptions):  {
     // Ensure list id is passed
     if (!taskId) throwError('Invalid Task ID');
     // Get task
@@ -151,10 +167,3 @@ async function deleteTask(taskId, { db, user, notifier }) {
     });
     return { success: true };
 }
-
-module.exports = {
-    createTask,
-    updateTask,
-    deleteTask,
-    getTask
-};

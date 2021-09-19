@@ -19,8 +19,7 @@ export interface User {
     pushSubscription?: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface UserDocument extends Document, List {}
+export type UserDocument = User & Document;
 
 export interface UserModel extends Model<UserDocument> {
     getLists(userId: ObjectId): Promise<Array<ListDocument>>;
@@ -28,7 +27,7 @@ export interface UserModel extends Model<UserDocument> {
     addListToUser(listId: ObjectId, user: User): Promise<User>;
 }
 
-const UserSchema = new Schema<User, UserModel>({
+const UserSchema = new Schema<UserDocument, UserModel>({
     google_id: {
         type: String,
         unique: true,
@@ -107,7 +106,7 @@ UserSchema.statics.getLists = async function(userId: ObjectId): Promise<List[]> 
     return user.lists;
 };
 
-UserSchema.statics.addListToUser = async function(listId: ObjectId, _user: User) {
+UserSchema.statics.addListToUser = async function(listId: ObjectId, _user: UserDocument) {
     if (!_user.lists.find((id: string) => listId.equals(id))) {
         _user.lists.push((listId as unknown) as string);
         await _user.save();
@@ -124,6 +123,6 @@ UserSchema.statics.removeListFromUser = async function(listId: ObjectId, _user: 
     return _user;
 };
 
-const User = model<UserDocument, UserModel>('User', UserSchema);
+const User: UserModel = model<UserDocument, UserModel>('User', UserSchema);
 
 export default User;

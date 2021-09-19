@@ -2,16 +2,24 @@ import { model, Schema, Document, PopulatedDoc, Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { List } from './lists';
 
+export interface Subtask {
+    title: string;
+    isComplete: boolean;
+}
 export interface Task {
-    _id?: ObjectId;
+    _id: ObjectId;
     title: string;
     isCompleted: boolean;
     list: PopulatedDoc<List & Document>;
+    createdBy: ObjectId;
+    notes: string;
+    subtasks: Subtask[];
+    dueDate: Date;
+    creationDate: Date;
+    priority: 'low' | 'normal' | 'high';
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface TaskDocument extends Document, Task {}
-
+export type TaskDocument = Task & Document;
 export interface TaskModel extends Model<TaskDocument> {
     populateTask(task: TaskDocument): TaskDocument;
 }
