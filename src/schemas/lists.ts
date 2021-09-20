@@ -114,7 +114,7 @@ ListSchema.pre('validate', function() {
 ListSchema.statics.getList = async function(user_id: ObjectId, list_id: ObjectId | string) {
     if (list_id === 'inbox') {
         return this.getUserInbox(user_id);
-    } else if (list_id && typeof list_id === 'object') {
+    } else if (list_id) {
         try {
             const _list = await this.findOne({
                 _id: list_id,
@@ -138,19 +138,17 @@ ListSchema.statics.populateList = async function(list: ListDocument) {
         return null;
     }
     const userQueryData = ['_id', 'firstName', 'lastName', 'profilePicture'];
-    return (
-        list
-            // .populate({
-            //     path: 'tasks',
-            //     populate: {
-            //         path: 'createdBy',
-            //         model: 'User',
-            //         select: userQueryData
-            //     }
-            // })
-            .populate({ path: 'members', select: userQueryData })
-            .execPopulate()
-    );
+    return list
+        .populate({
+            path: 'tasks',
+            populate: {
+                path: 'createdBy',
+                model: 'User',
+                select: userQueryData
+            }
+        })
+        .populate({ path: 'members', select: userQueryData })
+        .execPopulate();
 };
 
 ListSchema.statics.getUserInbox = async function(user_id: ObjectId) {
