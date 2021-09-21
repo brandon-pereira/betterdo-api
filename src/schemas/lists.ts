@@ -1,15 +1,16 @@
 import { model, Schema, ValidatorProps, Document, PopulatedDoc, Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
-import { User } from './users';
+import { User, UserDocument } from './users';
 import { Task, TaskDocument } from './tasks';
 import { throwError } from '../helpers/errorHandler';
+
 export interface List {
     _id: ObjectId;
     title: string;
-    tasks: Array<PopulatedDoc<Task & Document>>;
+    tasks: Array<PopulatedDoc<TaskDocument>>;
     completedTasks: Array<string>;
-    members: Array<PopulatedDoc<User & Document>>;
-    owner: PopulatedDoc<User & Document>;
+    members: Array<PopulatedDoc<UserDocument>>;
+    owner: PopulatedDoc<UserDocument>;
     type: 'inbox' | 'today' | 'tomorrow' | 'highPriority' | 'default';
     additionalTasks?: number;
     color: string;
@@ -84,17 +85,17 @@ const ListSchema = new Schema<ListDocument, ListModel>(
     }
 );
 
-ListSchema.virtual('additionalTasks').get(function(this: ListDocument) {
+ListSchema.virtual('additionalTasks').get(function (this: ListDocument) {
     return this.completedTasks ? this.completedTasks.length : 0;
 });
 
-ListSchema.pre('save', function() {
+ListSchema.pre('save', function () {
     if (this.isNew) {
         this.members = [this.owner];
     }
 });
 
-ListSchema.pre('validate', function() {
+ListSchema.pre('validate', function () {
     const nonEditableFields = ['owner', 'type'];
     nonEditableFields.forEach(field => {
         if (!this.isNew && this.isModified(field)) {
@@ -111,7 +112,7 @@ ListSchema.pre('validate', function() {
     }
 });
 
-ListSchema.statics.getList = async function(user_id: ObjectId, list_id: ObjectId | string) {
+ListSchema.statics.getList = async function (user_id: ObjectId, list_id: ObjectId | string) {
     if (list_id === 'inbox') {
         return this.getUserInbox(user_id);
     } else if (list_id) {
@@ -133,25 +134,24 @@ ListSchema.statics.getList = async function(user_id: ObjectId, list_id: ObjectId
     }
 };
 
-ListSchema.statics.populateList = async function(list: ListDocument) {
+ListSchema.statics.populateList = async function (list: ListDocument) {
     if (!list) {
         return null;
     }
     const userQueryData = ['_id', 'firstName', 'lastName', 'profilePicture'];
-    return list
-        .populate({
-            path: 'tasks',
-            populate: {
-                path: 'createdBy',
-                model: 'User',
-                select: userQueryData
-            }
-        })
-        .populate({ path: 'members', select: userQueryData })
-        .execPopulate();
+    await list.populate({
+        path: 'tasks',
+        populate: {
+            path: 'createdBy',
+            model: 'User',
+            select: userQueryData
+        }
+    });
+    await list.populate({ path: 'members', select: userQueryData });
+    return list;
 };
 
-ListSchema.statics.getUserInbox = async function(user_id: ObjectId) {
+ListSchema.statics.getUserInbox = async function (user_id: ObjectId) {
     return this.populateList(
         await this.findOne({
             type: 'inbox',
@@ -160,7 +160,7 @@ ListSchema.statics.getUserInbox = async function(user_id: ObjectId) {
     );
 };
 
-ListSchema.statics.getUserListById = async function(user_id: ObjectId, list_id: ObjectId) {
+ListSchema.statics.getUserListById = async function (user_id: ObjectId, list_id: ObjectId) {
     try {
         return this.populateList(
             await this.findOne({
@@ -173,7 +173,7 @@ ListSchema.statics.getUserListById = async function(user_id: ObjectId, list_id: 
     }
 };
 
-ListSchema.statics.addTaskToList = async function(task: Task, list_id: ObjectId) {
+ListSchema.statics.addTaskToList = async function (task: Task, list_id: ObjectId) {
     // Find lists
     const _list = await List.findOne({ _id: list_id });
     if (!_list) {
@@ -190,7 +190,7 @@ ListSchema.statics.addTaskToList = async function(task: Task, list_id: ObjectId)
     return _list;
 };
 
-ListSchema.statics.removeTaskFromList = async function(task: Task, list_id: ObjectId) {
+ListSchema.statics.removeTaskFromList = async function (task: Task, list_id: ObjectId) {
     // Find list
     const _list = await List.findOne({ _id: list_id });
     if (!_list) return null;
@@ -202,7 +202,7 @@ ListSchema.statics.removeTaskFromList = async function(task: Task, list_id: Obje
     return _list;
 };
 
-ListSchema.statics.setTaskComplete = async function(task: Task, list_id: ObjectId) {
+ListSchema.statics.setTaskComplete = async function (task: Task, list_id: ObjectId) {
     // Find list
     const _list = await List.findOne({ _id: list_id });
     if (!_list) return null;
@@ -214,7 +214,7 @@ ListSchema.statics.setTaskComplete = async function(task: Task, list_id: ObjectI
     return _list;
 };
 
-ListSchema.statics.setTaskIncomplete = async function(task: Task, list_id: ObjectId) {
+ListSchema.statics.setTaskIncomplete = async function (task: Task, list_id: ObjectId) {
     // Find list
     const _list = await List.findOne({
         _id: list_id
@@ -228,7 +228,7 @@ ListSchema.statics.setTaskIncomplete = async function(task: Task, list_id: Objec
     return _list;
 };
 
-ListSchema.statics.removeTaskFromCompletedTasksList = function(
+ListSchema.statics.removeTaskFromCompletedTasksList = function (
     task_id: ObjectId,
     _list: ListDocument
 ) {
@@ -240,7 +240,7 @@ ListSchema.statics.removeTaskFromCompletedTasksList = function(
     return _list;
 };
 
-ListSchema.statics.removeTaskFromTasksList = function(task_id: ObjectId, list: ListDocument) {
+ListSchema.statics.removeTaskFromTasksList = function (task_id: ObjectId, list: ListDocument) {
     const index = list.tasks.findIndex((id: ObjectId) => task_id.equals(id));
     // Remove from tasks
     if (index >= 0) {
@@ -249,15 +249,15 @@ ListSchema.statics.removeTaskFromTasksList = function(task_id: ObjectId, list: L
     return list;
 };
 
-ListSchema.statics.addTaskToCompletedTasksList = function(task_id: ObjectId, list: ListDocument) {
+ListSchema.statics.addTaskToCompletedTasksList = function (task_id: ObjectId, list: ListDocument) {
     if (!list.completedTasks.find((id: string) => task_id.equals(id.toString()))) {
-        list.completedTasks.unshift((task_id as unknown) as string);
+        list.completedTasks.unshift(task_id as unknown as string);
     }
 };
 
-ListSchema.statics.addTaskToTasksList = function(task_id: ObjectId, list: ListDocument) {
+ListSchema.statics.addTaskToTasksList = function (task_id: ObjectId, list: ListDocument) {
     if (!list.tasks.find((id: string) => task_id.equals(id))) {
-        list.tasks.unshift((task_id as unknown) as string);
+        list.tasks.unshift(task_id as unknown as string);
     }
 };
 

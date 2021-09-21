@@ -13,7 +13,7 @@ describe('Lists API', () => {
         expect(list.members[0]._id).toMatchId(user._id);
     });
 
-    test('Can fetch single list ', async () => {
+    test('Can fetch single list', async () => {
         const user = await createUser();
         const list = await createList({ title: 'Test' }, { db, user });
         expect(list).toHaveProperty('_id');
@@ -198,7 +198,9 @@ describe('Lists API', () => {
         const task1 = await createTask(list._id, { title: 'Good Task' }, { db, user });
         const task2 = await createTask(list._id, { title: 'Good Task' }, { db, user });
         const badTask = await createTask(
-            (await createList({ title: 'Test' }, { db, user }))._id,
+            (
+                await createList({ title: 'Test' }, { db, user })
+            )._id,
             { title: 'Bad Task' },
             { db, user }
         );

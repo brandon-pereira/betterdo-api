@@ -8,7 +8,7 @@ export interface User {
     email: string;
     firstName: string;
     lastName: string;
-    lists: Array<PopulatedDoc<List & Document>>;
+    lists: Array<PopulatedDoc<ListDocument>>;
     isPushEnabled: boolean;
     pushSubscriptions: Array<string>;
     customLists: {
@@ -21,6 +21,7 @@ export interface User {
     isBeta: boolean;
     lastLogin: Date;
     creationDate: Date;
+    google_id: string;
 }
 
 export type UserDocument = User & Document;
@@ -54,16 +55,16 @@ const UserSchema = new Schema<UserDocument, UserModel>({
         unique: true,
         trim: true,
         index: true,
-        match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please fill a valid email address']
+        match: /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/
     },
     creationDate: {
         type: Date,
-        default: Date.now
+        default: new Date()
     },
     profilePicture: String,
     lastLogin: {
         type: Date,
-        default: Date.now
+        default: new Date()
     },
     isBeta: {
         type: Boolean,
@@ -101,24 +102,24 @@ const UserSchema = new Schema<UserDocument, UserModel>({
     ]
 });
 
-UserSchema.statics.getLists = async function(userId: ObjectId): Promise<List[]> {
+UserSchema.statics.getLists = async function (userId: ObjectId): Promise<List[]> {
     const user = await this.findById(userId);
     if (!user) {
         return [];
     }
-    await user.populate('lists').execPopulate();
+    await user.populate('lists');
     return user.lists;
 };
 
-UserSchema.statics.addListToUser = async function(listId: ObjectId, _user: UserDocument) {
+UserSchema.statics.addListToUser = async function (listId: ObjectId, _user: UserDocument) {
     if (!_user.lists.find((id: string) => listId.equals(id))) {
-        _user.lists.push((listId as unknown) as string);
+        _user.lists.push(listId as unknown as string);
         await _user.save();
     }
     return _user;
 };
 
-UserSchema.statics.removeListFromUser = async function(listId: ObjectId, _user: UserDocument) {
+UserSchema.statics.removeListFromUser = async function (listId: ObjectId, _user: UserDocument) {
     const index = _user.lists.findIndex((id: string) => listId.equals(id));
     if (index >= 0) {
         _user.lists.splice(index, 1);

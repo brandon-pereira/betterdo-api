@@ -17,7 +17,7 @@ interface RouteHandlerOptions {
     notifier: Notifier;
 }
 
-export default async function(
+export default async function (
     taskName = 'performing task',
     { res, req, db, notifier }: RouteHandlerOptions,
     taskFn: (cb: RouterOptions) => Promise<unknown>
@@ -35,7 +35,7 @@ export default async function(
         });
         // We assume that if the taskFn function resolves, then we have a valid 200 response
         res.json(json);
-    } catch (err) {
+    } catch (err: unknown) {
         handleUncaughtError(taskName, res, err);
     }
 }

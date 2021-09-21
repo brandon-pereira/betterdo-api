@@ -7,27 +7,32 @@ import { Response } from 'express';
  * @param {Response} res response
  * @param {Error} err error stack
  */
-export function handleUncaughtError(taskName: string, res: Response, err: Error): void {
-    // ValidationError comes from Mongoose
-    if (err.name === 'ValidationError') {
-        res.status(500).json({
-            error: `Error while ${taskName}`,
-            details: err.message
-        });
-    } else if (err.name === 'AccessError') {
-        res.status(404).json({
-            error: err.message
-        });
-    } else if (err.name === 'PermissionError') {
-        res.status(403).json({
-            error: err.message
-        });
-    } else {
-        console.error(`UnhandledError while ${taskName}`, err);
-        res.status(500).json({
-            error: `Unexpected error while ${taskName}`
-        });
+export function handleUncaughtError(taskName: string, res: Response, err: unknown): void {
+    if (err instanceof Error) {
+        // ValidationError comes from Mongoose
+        if (err.name === 'ValidationError') {
+            res.status(500).json({
+                error: `Error while ${taskName}`,
+                details: err.message
+            });
+            return;
+        } else if (err.name === 'AccessError') {
+            res.status(404).json({
+                error: err.message
+            });
+            return;
+        } else if (err.name === 'PermissionError') {
+            res.status(403).json({
+                error: err.message
+            });
+            return;
+        }
     }
+    console.error(`UnhandledError while ${taskName}`, err);
+    res.status(500).json({
+        error: `Unexpected error while ${taskName}`
+    });
+    return;
 }
 
 export function throwError(msg: string, code = 'AccessError'): never {

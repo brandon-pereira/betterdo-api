@@ -1,6 +1,6 @@
 import { model, Schema, Document, PopulatedDoc, Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
-import { List } from './lists';
+import { ListDocument } from './lists';
 
 export interface Subtask {
     title: string;
@@ -10,7 +10,7 @@ export interface Task {
     _id: ObjectId;
     title: string;
     isCompleted: boolean;
-    list: PopulatedDoc<List & Document>;
+    list: PopulatedDoc<ListDocument>;
     createdBy: ObjectId;
     notes: string;
     subtasks: Subtask[];
@@ -67,11 +67,11 @@ const TaskSchema = new Schema<TaskDocument, TaskModel>({
     },
     creationDate: {
         type: Date,
-        default: Date.now
+        default: new Date()
     }
 });
 
-TaskSchema.pre('validate', function() {
+TaskSchema.pre('validate', function () {
     const nonEditableFields = ['creationDate', 'createdBy'];
     nonEditableFields.forEach(field => {
         if (!this.isNew && this.isModified(field)) {
@@ -80,9 +80,9 @@ TaskSchema.pre('validate', function() {
     });
 });
 
-TaskSchema.statics.populateTask = async function(taskRef) {
+TaskSchema.statics.populateTask = async function (taskRef) {
     const userQueryData = ['_id', 'firstName', 'lastName', 'profilePicture'];
-    return taskRef.populate('createdBy', userQueryData).execPopulate();
+    return await taskRef.populate('createdBy', userQueryData);
 };
 
 const Task: TaskModel = model<TaskDocument, TaskModel>('Task', TaskSchema);

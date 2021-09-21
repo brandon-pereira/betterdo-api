@@ -32,16 +32,14 @@ export async function getLists(
             throwError('Invalid List ID');
         }
         if (includeCompleted) {
-            await list
-                .populate({
-                    path: 'completedTasks',
-                    populate: {
-                        path: 'createdBy',
-                        model: 'User',
-                        select: ['_id', 'firstName', 'lastName', 'profilePicture']
-                    }
-                })
-                .execPopulate();
+            await list.populate({
+                path: 'completedTasks',
+                populate: {
+                    path: 'createdBy',
+                    model: 'User',
+                    select: ['_id', 'firstName', 'lastName', 'profilePicture']
+                }
+            });
         }
         return {
             type: list.type,
@@ -82,10 +80,11 @@ export async function createList(
     delete listObj.members;
     delete listObj.type;
     // Attempt to create the list
-    const list = await db.Lists.create({
+    const list = new db.Lists({
         ...listObj,
         owner: user._id
     });
+    await list.save();
     // Add list to users array
     await db.Users.addListToUser(list._id, user);
     // Populate
@@ -191,7 +190,7 @@ export async function deleteList(
     }
     // await list.populate('members').execPopulate();
     const status = await db.Lists.deleteOne({ _id: list._id });
-    if (status && status.n && status.n > 0) {
+    if (status && status.deletedCount && status.deletedCount > 0) {
         // Remove list to users array
         await Promise.all(
             list.members.map(async member => {

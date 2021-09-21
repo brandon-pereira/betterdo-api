@@ -14,11 +14,10 @@ export interface Database {
 // mongoose.Promise = Promise;
 mongoose.connection.on('error', err => console.error('connection error:', err));
 
-mongoose.connect(`mongodb://localhost/${process.env.DATABASE_NAME || 'betterdo'}`, {
-    useCreateIndex: true,
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-});
+export const MONGO_CONNECTION_URL = `mongodb://localhost/${
+    process.env.DATABASE_NAME || 'betterdo'
+}`;
+mongoose.connect(MONGO_CONNECTION_URL);
 
 const db: Database = {
     connection: mongoose.connection,

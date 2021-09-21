@@ -1,9 +1,9 @@
 import { Application } from 'express';
-import { Database } from './database';
+import { Database, MONGO_CONNECTION_URL } from './database';
 import passport from 'passport';
 import { Profile, Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import session from 'express-session';
-import connectMongo from 'connect-mongo';
+import MongoStore from 'connect-mongo';
 import url from 'url';
 interface GoogleUser {
     google_id: string;
@@ -12,8 +12,6 @@ interface GoogleUser {
     email: string;
     profilePicture: string;
 }
-
-const MongoStore = connectMongo(session);
 
 export default (app: Application, db: Database): void => {
     passport.use(
@@ -49,11 +47,12 @@ export default (app: Application, db: Database): void => {
                     console.log('new user', googleInfo);
                     // Create User
                     user = await db.Users.create(googleInfo);
-                    await db.Lists.create({
+                    const inbox = new db.Lists({
                         title: 'Inbox',
                         type: 'inbox',
                         owner: user._id
                     });
+                    await inbox.save();
                     return cb(null, user);
                 } else {
                     // TODO: Fix this
@@ -72,7 +71,7 @@ export default (app: Application, db: Database): void => {
                     }
                     // Now ensure all lists are valid
                     const userListCount = user.lists.length;
-                    await user.populate('lists').execPopulate();
+                    await user.populate('lists');
                     if (user.lists.length !== userListCount) {
                         user.lists = user.lists.map(list => list.id);
                         await user.save();
@@ -99,7 +98,7 @@ export default (app: Application, db: Database): void => {
             secret: process.env.SESSION_SECRET || '',
             resave: false,
             saveUninitialized: true,
-            store: new MongoStore({ mongooseConnection: db.connection }),
+            store: new MongoStore({ mongoUrl: MONGO_CONNECTION_URL }),
             cookie: {
                 // sameSite: 'none',
                 maxAge: 1000 * 60 * 60 * 24 * 31 * 6 // ms * sec * mins * hours * days * 6 = ~ 6 months
