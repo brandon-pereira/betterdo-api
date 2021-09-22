@@ -34,5 +34,3 @@ export const createUser = async (): Promise<UserDocument> => {
     await inbox.save();
     return user;
 };
-
-export { db };

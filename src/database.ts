@@ -11,13 +11,17 @@ export interface Database {
     Tasks: TaskModel;
 }
 
-// mongoose.Promise = Promise;
-mongoose.connection.on('error', err => console.error('connection error:', err));
-
 export const MONGO_CONNECTION_URL = `mongodb://localhost/${
     process.env.DATABASE_NAME || 'betterdo'
 }`;
-mongoose.connect(MONGO_CONNECTION_URL);
+
+export async function connect(): Promise<void> {
+    await mongoose.connect(MONGO_CONNECTION_URL);
+}
+
+export async function disconnect(): Promise<void> {
+    await mongoose.disconnect();
+}
 
 const db: Database = {
     connection: mongoose.connection,

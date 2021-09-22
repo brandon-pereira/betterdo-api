@@ -8,7 +8,8 @@ import app from './express';
 /**
  * Get a reference to the database
  */
-import db from './database';
+import db, { connect } from './database';
+connect();
 
 /**
  * Get a reference to notifier
