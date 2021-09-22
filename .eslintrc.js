@@ -14,7 +14,6 @@ module.exports = {
         '@typescript-eslint/no-unused-vars': 'error',
         '@typescript-eslint/no-var-requires': 0,
         'prettier/prettier': 'error',
-        'no-console': 0,
-        'require-atomic-updates': 0
+        'no-console': 0
     }
 };

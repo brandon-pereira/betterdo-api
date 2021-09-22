@@ -1,5 +1,5 @@
 import { Application } from 'express';
-import { WebNotifier, MongoAdapter } from 'web-notifier';
+import { WebNotifier, MongoAdapter, Notifier } from 'web-notifier';
 import { Database } from './database';
 
 export default (app: Application, db: Database): WebNotifier => {
@@ -22,7 +22,7 @@ export default (app: Application, db: Database): WebNotifier => {
         return user.pushSubscriptions;
     };
 
-    const notifier = new WebNotifier({
+    const notifier: Notifier = new WebNotifier({
         vapidKeys: {
             publicKey: process.env.VAPID_PUBLIC_KEY,
             privateKey: process.env.VAPID_PRIVATE_KEY,

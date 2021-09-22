@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 import { connection } from 'mongoose';
-import { UserModel } from './schemas/users';
-import { ListModel } from './schemas/lists';
-import { TaskModel } from './schemas/tasks';
+import Users, { UserModel } from './schemas/users';
+import Lists, { ListModel } from './schemas/lists';
+import Tasks, { TaskModel } from './schemas/tasks';
 
 export interface Database {
     connection: typeof connection;
@@ -21,9 +21,9 @@ mongoose.connect(MONGO_CONNECTION_URL);
 
 const db: Database = {
     connection: mongoose.connection,
-    Lists: require('./schemas/lists').default,
-    Tasks: require('./schemas/tasks').default,
-    Users: require('./schemas/users').default
+    Lists,
+    Tasks,
+    Users
 };
 
 export default db;

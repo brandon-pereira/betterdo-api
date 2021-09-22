@@ -2,8 +2,8 @@ import express, { Application } from 'express';
 import { Notifier } from 'web-notifier';
 import { Database } from '../database';
 import { getLists, createList, updateList, deleteList } from '../controllers/lists';
-const { getTask, createTask, updateTask, deleteTask } = require('../controllers/tasks');
-const { updateUser, getCurrentUser, getUser } = require('../controllers/users');
+import { getTask, createTask, updateTask, deleteTask } from '../controllers/tasks';
+import { updateUser, getCurrentUser, getUser } from '../controllers/users';
 import routeHandler from '../helpers/routeHandler';
 
 export default ({

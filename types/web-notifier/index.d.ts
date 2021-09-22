@@ -1,16 +1,17 @@
 declare module 'web-notifier' {
-    function schedule(Date, String, any): Promise<null>;
-    function send(ObjectId, any): Promise<null>;
     interface Notifier {
-        schedule;
-        send;
+        schedule(Date, String, any): Promise<null>;
+        send(ObjectId, any): Promise<null>;
     }
     class WebNotifier {
-        constructor(any): Notifier;
+        // eslint-disable-next-line @typescript-eslint/no-misused-new
+        constructor(...args: any[]): WebNotifier;
+        schedule(Date, String, any): Promise<null>;
+        send(ObjectId, any): Promise<null>;
     }
 
     class MongoAdapter {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        constructor(any): any;
+        constructor(...args: any[]): MongoAdapter;
     }
 }

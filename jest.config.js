@@ -1,6 +1,6 @@
 /** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */
 module.exports = {
-    // preset: 'ts-jest',
+    preset: 'ts-jest',
     testEnvironment: 'node',
     collectCoverageFrom: [
         'src/**/*.js',
@@ -11,7 +11,5 @@ module.exports = {
         '!src/helpers/notify.js',
         '!src/passport.js',
         '!src/routes/*.js'
-    ],
-    globalTeardown: './test/globalTeardown.js',
-    globalSetup: './test/globalSetup.js'
+    ]
 };

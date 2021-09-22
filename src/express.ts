@@ -1,4 +1,5 @@
 import express from 'express';
+import { json, urlencoded } from 'body-parser';
 
 const app = express();
 app.set('strict routing', true);
@@ -15,7 +16,7 @@ if (process.env.NODE_ENV !== 'production') {
     );
 }
 
-app.use(require('body-parser').json({}));
-app.use(require('body-parser').urlencoded({ extended: true }));
+app.use(json({}));
+app.use(urlencoded({ extended: true }));
 
 export default app;
