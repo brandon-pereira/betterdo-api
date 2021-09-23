@@ -10,9 +10,23 @@ interface LooseObject {
     [key: string]: any;
 }
 
-export async function getLists(
+interface GetListOptions {
+    includeCompleted?: boolean;
+}
+
+export function getLists(
     listId: ObjectId | string,
-    { includeCompleted } = { includeCompleted: false },
+    { includeCompleted }: GetListOptions,
+    { db, user, notifier }: RouterOptions
+): Promise<List>;
+export function getLists(
+    listId: undefined,
+    { includeCompleted }: GetListOptions,
+    { db, user, notifier }: RouterOptions
+): Promise<Array<List>>;
+export async function getLists(
+    listId: ObjectId | string | undefined,
+    { includeCompleted }: GetListOptions = { includeCompleted: false },
     { db, user, notifier }: RouterOptions
 ): Promise<List | Array<List>> {
     // Get lists based on query data

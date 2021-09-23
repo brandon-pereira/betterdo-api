@@ -59,8 +59,37 @@ describe('Users', () => {
         });
     });
 
-    describe('REST API', () => {
-        describe('POST', () => {
+    describe('Controller', () => {
+        describe('getUser', () => {
+            test('Allows finding users with valid email', async () => {
+                const router = await createRouter();
+                const { user } = router;
+                const returnedUsers = await getUser(user.email, router);
+                const userCache = await Users.findById(user._id);
+                expect(returnedUsers._id).toMatchId(userCache?._id);
+            });
+
+            test('Allows finding current user', async () => {
+                const router = await createRouter();
+                const { user } = router;
+                const returnedUsers = await getCurrentUser(router);
+                const userCache = await Users.findById(user._id);
+                expect(returnedUsers._id).toMatchId(userCache?._id);
+            });
+
+            test('Throws error finding users with invalid email', async () => {
+                expect.assertions(2);
+                const router = await createRouter();
+                try {
+                    await getUser('fake@email.com', router);
+                } catch (err: any) {
+                    expect(err?.name).toBe('AccessError');
+                    expect(err?.message).toBe('Invalid User Email');
+                }
+            });
+        });
+
+        describe('updateUser', () => {
             test('Can be updated with valid data', async () => {
                 const router = await createRouter();
                 const { user } = router;
@@ -96,146 +125,117 @@ describe('Users', () => {
                 const notifier = router.notifier as any;
                 expect(notifier.send.mock.calls.length).toBe(2);
             });
-        });
 
-        describe('GET', () => {
-            test('Allows finding users with valid email', async () => {
+            test('Allows custom lists to be modified', async () => {
                 const router = await createRouter();
                 const { user } = router;
-                const returnedUsers = await getUser(user.email, router);
+                await updateUser(
+                    {
+                        customLists: {
+                            tomorrow: true
+                        }
+                    },
+                    router
+                );
                 const userCache = await Users.findById(user._id);
-                expect(returnedUsers._id).toMatchId(userCache?._id);
+                expect(userCache?.customLists).toMatchObject({
+                    highPriority: false,
+                    today: false,
+                    tomorrow: true
+                });
             });
 
-            test('Allows finding current user', async () => {
+            test('Allows users lists to be reordered', async () => {
                 const router = await createRouter();
                 const { user } = router;
-                const returnedUsers = await getCurrentUser(router);
-                const userCache = await Users.findById(user._id);
-                expect(returnedUsers._id).toMatchId(userCache?._id);
+                const list1 = await createList({ title: 'Test 1' }, router);
+                const list2 = await createList({ title: 'Test 2' }, router);
+                const list3 = await createList({ title: 'Test 3' }, router);
+                let userCache = await Users.findById(user._id);
+                const sanitizeId = (doc: Document) => doc._id.toString();
+                expect(userCache?.lists.map(sanitizeId)).toMatchObject(
+                    [list1, list2, list3].map(sanitizeId)
+                );
+                await updateUser(
+                    {
+                        lists: [list3, list2, list1].map(sanitizeId)
+                    },
+                    router
+                );
+                userCache = await Users.findById(user._id);
+                expect(userCache?.lists.map(sanitizeId)).toMatchObject(
+                    [list3, list2, list1].map(sanitizeId)
+                );
             });
 
-            test('Throws error finding users with invalid email', async () => {
-                expect.assertions(2);
-                const router = await createRouter();
+            test('Prevents lists from being injected during reorder', async () => {
+                const userRequest1 = await createRouter();
+                const userRequest2 = await createRouter();
+                const list1 = await createList({ title: 'Good' }, userRequest1);
+                const list2 = await createList({ title: 'Good' }, userRequest1);
+                const list3 = await createList({ title: 'BAD!' }, userRequest2);
                 try {
-                    await getUser('fake@email.com', router);
+                    await updateUser(
+                        { lists: [list1._id.toString(), list3._id.toString()] },
+                        userRequest1
+                    );
                 } catch (err: any) {
                     expect(err?.name).toBe('AccessError');
-                    expect(err?.message).toBe('Invalid User Email');
+                    expect(err?.message).toBe('Invalid modification of lists');
                 }
+                const userCache = await Users.findById(userRequest1.user._id);
+                expect(userCache?.lists).toHaveLength(2);
+                expect(userCache?.lists[0]._id).toMatchId(list1._id);
+                expect(userCache?.lists[1]._id).toMatchId(list2._id);
             });
-        });
 
-        test('Allows custom lists to be modified', async () => {
-            const router = await createRouter();
-            const { user } = router;
-            await updateUser(
-                {
-                    customLists: {
-                        tomorrow: true
-                    }
-                },
-                router
-            );
-            const userCache = await Users.findById(user._id);
-            expect(userCache?.customLists).toMatchObject({
-                highPriority: false,
-                today: false,
-                tomorrow: true
+            test('Prevents lists from being removed during reorder', async () => {
+                const router = await createRouter();
+                const { user } = router;
+                const list1 = await createList({ title: 'Good' }, router);
+                const list2 = await createList({ title: 'Good' }, router);
+                try {
+                    await updateUser({ lists: [list2] }, router);
+                } catch (err: any) {
+                    expect(err.name).toBe('AccessError');
+                    expect(err.message).toBe('Invalid modification of lists');
+                }
+                const userCache = await Users.findById(user._id);
+                expect(userCache?.lists).toHaveLength(2);
+                expect(userCache?.lists[0]._id).toMatchId(list1._id);
+                expect(userCache?.lists[1]._id).toMatchId(list2._id);
             });
-        });
 
-        test('Allows users lists to be reordered', async () => {
-            const router = await createRouter();
-            const { user } = router;
-            const list1 = await createList({ title: 'Test 1' }, router);
-            const list2 = await createList({ title: 'Test 2' }, router);
-            const list3 = await createList({ title: 'Test 3' }, router);
-            let userCache = await Users.findById(user._id);
-            const sanitizeId = (doc: Document) => doc._id.toString();
-            expect(userCache?.lists.map(sanitizeId)).toMatchObject(
-                [list1, list2, list3].map(sanitizeId)
-            );
-            await updateUser(
-                {
-                    lists: [list3, list2, list1].map(sanitizeId)
-                },
-                router
-            );
-            userCache = await Users.findById(user._id);
-            expect(userCache?.lists.map(sanitizeId)).toMatchObject(
-                [list3, list2, list1].map(sanitizeId)
-            );
-        });
-
-        test('Prevents lists from being injected during reorder', async () => {
-            const userRequest1 = await createRouter();
-            const userRequest2 = await createRouter();
-            const list1 = await createList({ title: 'Good' }, userRequest1);
-            const list2 = await createList({ title: 'Good' }, userRequest1);
-            const list3 = await createList({ title: 'BAD!' }, userRequest2);
-            try {
-                await updateUser(
-                    { lists: [list1._id.toString(), list3._id.toString()] },
+            test('Allows members to be added to shared lists', async () => {
+                const userRequest1 = await createRouter();
+                const userRequest2 = await createRouter();
+                const list = await createList({ title: 'Test' }, userRequest1);
+                await updateList(
+                    list._id,
+                    { members: [userRequest1.user._id, userRequest2.user._id] },
                     userRequest1
                 );
-            } catch (err: any) {
-                expect(err?.name).toBe('AccessError');
-                expect(err?.message).toBe('Invalid modification of lists');
-            }
-            const userCache = await Users.findById(userRequest1.user._id);
-            expect(userCache?.lists).toHaveLength(2);
-            expect(userCache?.lists[0]._id).toMatchId(list1._id);
-            expect(userCache?.lists[1]._id).toMatchId(list2._id);
-        });
+                const cache1 = await Users.findById(userRequest1.user._id);
+                const cache2 = await Users.findById(userRequest2.user._id);
+                expect(cache1?.lists).toHaveLength(1);
+                expect(cache2?.lists).toHaveLength(1);
+            });
 
-        test('Prevents lists from being removed during reorder', async () => {
-            const router = await createRouter();
-            const { user } = router;
-            const list1 = await createList({ title: 'Good' }, router);
-            const list2 = await createList({ title: 'Good' }, router);
-            try {
-                await updateUser({ lists: [list2] }, router);
-            } catch (err: any) {
-                expect(err.name).toBe('AccessError');
-                expect(err.message).toBe('Invalid modification of lists');
-            }
-            const userCache = await Users.findById(user._id);
-            expect(userCache?.lists).toHaveLength(2);
-            expect(userCache?.lists[0]._id).toMatchId(list1._id);
-            expect(userCache?.lists[1]._id).toMatchId(list2._id);
-        });
-
-        test('Allows members to be added to shared lists', async () => {
-            const userRequest1 = await createRouter();
-            const userRequest2 = await createRouter();
-            const list = await createList({ title: 'Test' }, userRequest1);
-            await updateList(
-                list._id,
-                { members: [userRequest1.user._id, userRequest2.user._id] },
-                userRequest1
-            );
-            const cache1 = await Users.findById(userRequest1.user._id);
-            const cache2 = await Users.findById(userRequest2.user._id);
-            expect(cache1?.lists).toHaveLength(1);
-            expect(cache2?.lists).toHaveLength(1);
-        });
-
-        test('Allows members to be removed from shared lists', async () => {
-            const userRequest1 = await createRouter();
-            const userRequest2 = await createRouter();
-            const list = await createList({ title: 'Test' }, userRequest1);
-            await updateList(
-                list._id,
-                { members: [userRequest1.user._id, userRequest2.user._id] },
-                userRequest1
-            );
-            await updateList(list._id, { members: [userRequest1.user._id] }, userRequest1);
-            const user1 = (await Users.findById(userRequest1.user._id))?.toObject();
-            const user2 = (await Users.findById(userRequest2.user._id))?.toObject();
-            expect(user1?.lists).toHaveLength(1);
-            expect(user2?.lists).toHaveLength(0);
+            test('Allows members to be removed from shared lists', async () => {
+                const userRequest1 = await createRouter();
+                const userRequest2 = await createRouter();
+                const list = await createList({ title: 'Test' }, userRequest1);
+                await updateList(
+                    list._id,
+                    { members: [userRequest1.user._id, userRequest2.user._id] },
+                    userRequest1
+                );
+                await updateList(list._id, { members: [userRequest1.user._id] }, userRequest1);
+                const user1 = (await Users.findById(userRequest1.user._id))?.toObject();
+                const user2 = (await Users.findById(userRequest2.user._id))?.toObject();
+                expect(user1?.lists).toHaveLength(1);
+                expect(user2?.lists).toHaveLength(0);
+            });
         });
     });
 });

@@ -26,7 +26,7 @@ export const createUser = async (): Promise<UserDocument> => {
         }
     });
     await user.save();
-    const inbox = await new db.Lists({
+    const inbox = new db.Lists({
         title: 'Inbox',
         type: 'inbox',
         owner: user._id
