@@ -11,5 +11,7 @@ module.exports = {
         '!src/helpers/notify.js',
         '!src/passport.js',
         '!src/routes/*.js'
-    ]
+    ],
+    globalSetup: './test/globalSetup.ts',
+    globalTeardown: './test/globalTeardown.ts'
 };

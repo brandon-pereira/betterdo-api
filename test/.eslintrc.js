@@ -3,6 +3,7 @@ module.exports = {
     extends: ['plugin:jest/recommended'],
     rules: {
         'jest/no-try-expect': 'warn',
-        'jest/no-conditional-expect': 'warn'
+        'jest/no-conditional-expect': 'warn',
+        '@typescript-eslint/no-explicit-any': 'off'
     }
 };
