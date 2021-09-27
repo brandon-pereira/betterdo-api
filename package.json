@@ -2,7 +2,6 @@
     "name": "betterdo-api",
     "version": "4.2.0",
     "description": "Back-end for BetterDo task manager",
-    "main": "index.js",
     "repository": "https://github.com/brandon-pereira/betterdo-api",
     "scripts": {
         "start:production": "node ./dist/index.js",

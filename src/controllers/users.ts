@@ -10,30 +10,27 @@ interface RawUserObject {
 
 export async function updateUser(
     dirtyUserProps: RawUserObject = {},
-    { user: userRef, notifier }: RouterOptions
+    { user, notifier }: RouterOptions
 ): Promise<UserDocument> {
-    // Get user
-    // const userRef = await db.Users.findById(user._id);
-
     // Remove potentially harmful stuff
     let didUpdatePushSubscription = false;
     if (dirtyUserProps.pushSubscription && typeof dirtyUserProps.pushSubscription === 'string') {
-        if (!userRef.pushSubscriptions.includes(dirtyUserProps.pushSubscription)) {
+        if (!user.pushSubscriptions.includes(dirtyUserProps.pushSubscription)) {
             didUpdatePushSubscription = true;
-            userRef.pushSubscriptions.push(dirtyUserProps.pushSubscription);
+            user.pushSubscriptions.push(dirtyUserProps.pushSubscription);
         }
     }
     // Ensure tasks length matches and no new tasks injected
     if (
         dirtyUserProps.lists &&
         (!Array.isArray(dirtyUserProps.lists) ||
-            dirtyUserProps.lists.length !== userRef.lists.length ||
-            dirtyUserProps.lists.find(_id => !userRef.lists.map(id => id.toString()).includes(_id)))
+            dirtyUserProps.lists.length !== user.lists.length ||
+            dirtyUserProps.lists.find(_id => !user.lists.map(id => id.toString()).includes(_id)))
     ) {
         throwError('Invalid modification of lists');
     } else if (dirtyUserProps.lists) {
         // Valid tasks, update order
-        userRef.lists = dirtyUserProps.lists;
+        user.lists = dirtyUserProps.lists;
         // Don't merge below
         delete dirtyUserProps.lists;
     }
@@ -41,35 +38,35 @@ export async function updateUser(
     //     userRef.isBeta = dirtyUserProps.isBeta;
     // }
     if (typeof dirtyUserProps.isPushEnabled === 'boolean') {
-        userRef.isPushEnabled = dirtyUserProps.isPushEnabled;
+        user.isPushEnabled = dirtyUserProps.isPushEnabled;
     }
     if (dirtyUserProps.customLists && typeof dirtyUserProps.customLists === 'object') {
-        Object.assign(userRef.customLists, dirtyUserProps.customLists);
+        Object.assign(user.customLists, dirtyUserProps.customLists);
     }
     const stringsToCheck = ['firstName', 'lastName', 'email'];
     stringsToCheck.forEach(id => {
         const idx = `${id}` as keyof User;
         if (
             dirtyUserProps[idx] &&
-            userRef[idx] &&
+            user[idx] &&
             typeof dirtyUserProps[idx] === 'string' &&
-            typeof userRef[idx] !== 'undefined'
+            typeof user[idx] !== 'undefined'
         ) {
             //https://stackoverflow.com/a/58657194/7033335
-            userRef[idx] = dirtyUserProps[idx] as never;
+            user[idx] = dirtyUserProps[idx] as never;
         }
     });
     // Save
-    await userRef.save();
+    await user.save();
     // Send push notification
     if (didUpdatePushSubscription) {
-        await notifier.send(userRef._id, {
+        await notifier.send(user._id, {
             title: "You're subscribed!",
             body: 'Time to party!'
         });
     }
     // Return to front-end
-    return userRef;
+    return user;
 }
 
 export async function getCurrentUser({ user }: RouterOptions): Promise<CurrentUser> {
@@ -103,8 +100,7 @@ interface CurrentUser extends OtherUser {
     isPushEnabled: User['isPushEnabled'];
     lastLogin: User['lastLogin'];
     creationDate: User['creationDate'];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    config: { [key: string]: any };
+    config: { [key: string]: string | undefined };
 }
 
 function sanitizeCurrentUser(user: UserDocument): CurrentUser {

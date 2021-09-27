@@ -1,9 +1,6 @@
-/* eslint-disable jest/no-conditional-expect */
-/* eslint-disable jest/no-try-expect */
 import './helpers/toMatchObject';
-import { createRouter } from './utils';
+import createRouter from './helpers/createRouter';
 import db, { connect, disconnect } from '../src/database';
-
 import { getLists, createList, updateList, deleteList } from '../src/controllers/lists';
 import { createTask } from '../src/controllers/tasks';
 import { List } from '../src/schemas/lists';
@@ -50,16 +47,10 @@ describe('Lists', () => {
         });
 
         test('Provides clear error messages when invalid data provided', async () => {
-            expect.assertions(2);
             const router = await createRouter();
-            try {
-                await createList({ title: '' }, router);
-            } catch (err: any) {
-                expect(err.name).toBe('ValidationError');
-                expect(err.message).toBe(
-                    'List validation failed: title: Path `title` is required.'
-                );
-            }
+            await expect(createList({ title: '' }, router)).rejects.toThrowError(
+                `List validation failed: title: Path \`title\` is required.`
+            );
         });
 
         test('Protects sensitive fields', async () => {
@@ -70,27 +61,19 @@ describe('Lists', () => {
         });
 
         test('Protects against non-member modification', async () => {
-            expect.assertions(2);
             const userRequest1 = await createRouter();
             const userRequest2 = await createRouter();
             const list = await createList({ title: 'Good List' }, userRequest1);
-            try {
-                await updateList(list._id, { title: 'Malicious List' }, userRequest2);
-            } catch (err: any) {
-                expect(err.name).toBe('AccessError');
-                expect(err.message).toBe('Invalid List ID');
-            }
+            await expect(
+                updateList(list._id, { title: 'Malicious List' }, userRequest2)
+            ).rejects.toThrowError('Invalid List ID');
         });
 
         test('Protects against fetching invalid list ID', async () => {
-            expect.assertions(2);
             const router = await createRouter();
-            try {
-                await createTask('INVALID_ID', { title: 'Good List' }, router);
-            } catch (err: any) {
-                expect(err.message).toBe('Invalid List ID');
-                expect(err.name).toBe('AccessError');
-            }
+            await expect(
+                createTask('INVALID_ID', { title: 'Good List' }, router)
+            ).rejects.toThrowError('Invalid List ID');
         });
 
         test('Allows list to be modified', async () => {
@@ -142,29 +125,21 @@ describe('Lists', () => {
         });
 
         test('Protects against fetching list non-member list', async () => {
-            expect.assertions(2);
             const userRequest1 = await createRouter();
             const userRequest2 = await createRouter();
             const list = await createList({ title: 'Good List' }, userRequest1);
-            try {
-                await getLists(list._id, {}, userRequest2);
-            } catch (err: any) {
-                expect(err.name).toBe('AccessError');
-                expect(err.message).toBe('Invalid List ID');
-            }
+            await expect(getLists(list._id, {}, userRequest2)).rejects.toThrowError(
+                'Invalid List ID'
+            );
         });
 
         test('Protects against non-member deletion', async () => {
-            expect.assertions(2);
             const userRequest1 = await createRouter();
             const userRequest2 = await createRouter();
             const list = await createList({ title: 'Good List' }, userRequest1);
-            try {
-                await deleteList(list._id, userRequest2);
-            } catch (err: any) {
-                expect(err.name).toBe('AccessError');
-                expect(err.message).toBe('Invalid List ID');
-            }
+            await expect(deleteList(list._id, userRequest2)).rejects.toThrowError(
+                'Invalid List ID'
+            );
         });
 
         test('Allows members to be added to list', async () => {
@@ -182,21 +157,17 @@ describe('Lists', () => {
         });
 
         test('Protects against removing owner from list', async () => {
-            expect.assertions(2);
             const userRequest1 = await createRouter();
             const userRequest2 = await createRouter();
             const user1 = userRequest1.user;
             const user2 = userRequest2.user;
             const list = await createList({ title: 'Title' }, userRequest1);
             await updateList(list._id, { members: [user1._id, user2._id] }, userRequest1);
-            try {
-                await updateList(list._id, { members: [user2._id] }, userRequest2);
-            } catch (err: any) {
-                expect(err.name).toBe('ValidationError');
-                expect(err.message).toBe(
-                    'List validation failed: members: Not permitted to remove owner!'
-                );
-            }
+            await expect(
+                updateList(list._id, { members: [user2._id] }, userRequest2)
+            ).rejects.toThrowError(
+                'List validation failed: members: Not permitted to remove owner!'
+            );
         });
 
         test('Allows lists tasks to be reordered', async () => {
@@ -231,16 +202,13 @@ describe('Lists', () => {
                 { title: 'Bad Task' },
                 router
             );
-            try {
-                await updateList(
+            await expect(
+                updateList(
                     newList._id,
                     { tasks: [badTask._id.toString(), task1._id.toString()] },
                     router
-                );
-            } catch (err: any) {
-                expect(err.name).toBe('AccessError');
-                expect(err.message).toBe('Invalid modification of tasks');
-            }
+                )
+            ).rejects.toThrowError('Invalid modification of tasks');
             const list: List = await getLists(newList._id, {}, router);
             expect(list?.tasks).toHaveLength(2);
             expect(list?.tasks[1]._id).toMatchId(task1._id);
@@ -252,12 +220,9 @@ describe('Lists', () => {
             const newList = await createList({ title: 'Test' }, router);
             const task1 = (await createTask(newList._id, { title: 'Good Task' }, router))._id;
             const task2 = (await createTask(newList._id, { title: 'Good Task' }, router))._id;
-            try {
-                await updateList(newList._id, { tasks: [task2] }, router);
-            } catch (err: any) {
-                expect(err.name).toBe('AccessError');
-                expect(err.message).toBe('Invalid modification of tasks');
-            }
+            await expect(updateList(newList._id, { tasks: [task2] }, router)).rejects.toThrowError(
+                'Invalid modification of tasks'
+            );
             const list = await getLists(newList._id, {}, router);
             expect(list?.tasks).toHaveLength(2);
             expect(list?.tasks[1]._id).toMatchId(task1._id);
@@ -265,7 +230,6 @@ describe('Lists', () => {
         });
 
         test('Requires that the colour be a valid hex code', async () => {
-            expect.assertions(6);
             const router = await createRouter();
             const props = router;
             const badColors = ['red', '#SSSSSS'];
@@ -276,44 +240,33 @@ describe('Lists', () => {
                 );
             }
             for (const color of badColors) {
-                await createList({ title: 'test', color }, props).catch((err: any) => {
-                    expect(err.name).toBe('ValidationError');
-                    expect(err.message).toContain('hex');
-                });
+                await expect(createList({ title: 'test', color }, props)).rejects.toThrowError(
+                    /hex/
+                );
             }
         });
     });
 
     describe('Lists Schema', () => {
         test('Requires the `owner` property to be set', async () => {
-            expect.assertions(1);
-            try {
-                const list = new Lists({
-                    title: 'Test',
-                    owner: 'invalid_id'
-                });
-                await list.save();
-            } catch (err: any) {
-                expect(err.message).toContain(
-                    'List validation failed: owner: Cast to ObjectId failed'
-                );
-            }
+            const list = new Lists({
+                title: 'Test',
+                owner: 'invalid_id'
+            });
+            await expect(list.save()).rejects.toThrow(
+                'List validation failed: owner: Cast to ObjectId failed'
+            );
         });
 
         test(`Doesn't allow modification of the 'owners' property`, async () => {
-            expect.assertions(1);
-            try {
-                const list = await Lists.findOne({});
-                if (!list) {
-                    return;
-                }
-                list.owner = '5b99d4d74a6df02dbddf9097'; // random valid id
-                await list?.save();
-            } catch (err: any) {
-                expect(err.message).toContain(
-                    'List validation failed: owner: Not permitted to modify owner!'
-                );
+            const list = await Lists.findOne({});
+            if (!list) {
+                return;
             }
+            list.owner = '5b99d4d74a6df02dbddf9097'; // random valid id
+            await expect(list.save()).rejects.toThrow(
+                'List validation failed: owner: Not permitted to modify owner!'
+            );
         });
     });
 });

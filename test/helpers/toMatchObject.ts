@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-namespace */
 // https://stackoverflow.com/a/43674912/7033335
 import { ObjectId } from 'mongoose';
 

@@ -1,8 +1,5 @@
-/* eslint-disable jest/no-conditional-expect */
-/* eslint-disable jest/no-try-expect */
 import './helpers/toMatchObject';
-import { createRouter } from './utils';
-import { Document } from 'mongoose';
+import createRouter from './helpers/createRouter';
 import { updateUser, getUser, getCurrentUser } from '../src/controllers/users';
 import { createList, updateList } from '../src/controllers/lists';
 import db, { connect, disconnect } from '../src/database';
@@ -35,27 +32,18 @@ describe('Users', () => {
         });
 
         test('Throws error if missing required fields', async () => {
-            expect.assertions(2);
-            try {
-                const user = new Users({
-                    email: `${Date.now()}-${Math.random()}@unitTests.com`
-                });
-                await user.save();
-            } catch (err: any) {
-                expect(err.message).toBe(
-                    'User validation failed: firstName: Path `firstName` is required.'
-                );
-            }
-            try {
-                const user = new Users({
-                    firstName: 'unitTest'
-                });
-                await user.save();
-            } catch (err: any) {
-                expect(err?.message).toBe(
-                    'User validation failed: email: Path `email` is required.'
-                );
-            }
+            const user1 = new Users({
+                email: `${Date.now()}-${Math.random()}@unitTests.com`
+            });
+            await expect(user1.save()).rejects.toThrow(
+                'User validation failed: firstName: Path `firstName` is required.'
+            );
+            const user2 = new Users({
+                firstName: 'unitTest'
+            });
+            await expect(user2.save()).rejects.toThrow(
+                'User validation failed: email: Path `email` is required.'
+            );
         });
     });
 
@@ -78,14 +66,10 @@ describe('Users', () => {
             });
 
             test('Throws error finding users with invalid email', async () => {
-                expect.assertions(2);
                 const router = await createRouter();
-                try {
-                    await getUser('fake@email.com', router);
-                } catch (err: any) {
-                    expect(err?.name).toBe('AccessError');
-                    expect(err?.message).toBe('Invalid User Email');
-                }
+                await expect(getUser('fake@email.com', router)).rejects.toThrow(
+                    'Invalid User Email'
+                );
             });
         });
 
@@ -152,7 +136,7 @@ describe('Users', () => {
                 const list2 = await createList({ title: 'Test 2' }, router);
                 const list3 = await createList({ title: 'Test 3' }, router);
                 let userCache = await Users.findById(user._id);
-                const sanitizeId = (doc: Document) => doc._id.toString();
+                const sanitizeId = (doc: any) => doc._id.toString();
                 expect(userCache?.lists.map(sanitizeId)).toMatchObject(
                     [list1, list2, list3].map(sanitizeId)
                 );
@@ -174,15 +158,12 @@ describe('Users', () => {
                 const list1 = await createList({ title: 'Good' }, userRequest1);
                 const list2 = await createList({ title: 'Good' }, userRequest1);
                 const list3 = await createList({ title: 'BAD!' }, userRequest2);
-                try {
-                    await updateUser(
+                await expect(
+                    updateUser(
                         { lists: [list1._id.toString(), list3._id.toString()] },
                         userRequest1
-                    );
-                } catch (err: any) {
-                    expect(err?.name).toBe('AccessError');
-                    expect(err?.message).toBe('Invalid modification of lists');
-                }
+                    )
+                ).rejects.toThrow('Invalid modification of lists');
                 const userCache = await Users.findById(userRequest1.user._id);
                 expect(userCache?.lists).toHaveLength(2);
                 expect(userCache?.lists[0]._id).toMatchId(list1._id);
@@ -194,12 +175,9 @@ describe('Users', () => {
                 const { user } = router;
                 const list1 = await createList({ title: 'Good' }, router);
                 const list2 = await createList({ title: 'Good' }, router);
-                try {
-                    await updateUser({ lists: [list2] }, router);
-                } catch (err: any) {
-                    expect(err.name).toBe('AccessError');
-                    expect(err.message).toBe('Invalid modification of lists');
-                }
+                await expect(updateUser({ lists: [list2] }, router)).rejects.toThrow(
+                    'Invalid modification of lists'
+                );
                 const userCache = await Users.findById(user._id);
                 expect(userCache?.lists).toHaveLength(2);
                 expect(userCache?.lists[0]._id).toMatchId(list1._id);

@@ -1,4 +1,4 @@
-import { createRouter } from './utils';
+import createRouter from './helpers/createRouter';
 import { connect, disconnect } from '../src/database';
 import { createTask } from '../src/controllers/tasks';
 import { createList, updateList, getLists, deleteList } from '../src/controllers/lists';
@@ -31,13 +31,9 @@ describe('Custom Lists API', () => {
     });
 
     test("Inbox shouldn't allow deletion", async () => {
-        expect.assertions(2);
-        try {
-            await deleteList(inbox._id, router1);
-        } catch (err: any) {
-            expect(err.message).toBe('Invalid List ID');
-            expect(err.name).toBe('AccessError');
-        }
+        await expect(deleteList(inbox._id, router1)).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Invalid List ID"`
+        );
     });
 
     test('Today list should only return valid tasks', async () => {

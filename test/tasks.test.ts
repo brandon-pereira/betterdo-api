@@ -1,7 +1,5 @@
-/* eslint-disable jest/no-conditional-expect */
-/* eslint-disable jest/no-try-expect */
 import './helpers/toMatchObject';
-import { createRouter } from './utils';
+import createRouter from './helpers/createRouter';
 import db, { connect, disconnect } from '../src/database';
 import { ListDocument } from '../src/schemas/lists';
 import { createTask, updateTask, deleteTask, getTask } from '../src/controllers/tasks';
@@ -103,14 +101,11 @@ describe('Tasks API', () => {
     });
 
     test('Provides clear error messages when invalid data provided', async () => {
-        try {
-            await createTask(validList._id, { title: 'Hello', priority: 'super-high' }, router);
-        } catch (err: any) {
-            expect(err.name).toBe('ValidationError');
-            expect(err.message).toBe(
-                'Task validation failed: priority: `super-high` is not a valid enum value for path `priority`.'
-            );
-        }
+        await expect(
+            createTask(validList._id, { title: 'Hello', priority: 'super-high' }, router)
+        ).rejects.toThrow(
+            'Task validation failed: priority: `super-high` is not a valid enum value for path `priority`.'
+        );
     });
 
     test('Protects sensitive fields', async () => {
@@ -125,46 +120,30 @@ describe('Tasks API', () => {
     });
 
     test('Protects against modifying protected fields', async () => {
-        expect.assertions(2);
         const task = await createTask(validList._id, { title: 'Test' }, router);
-        try {
-            await updateTask(task._id, { creationDate: new Date() }, router);
-        } catch (err: any) {
-            expect(err.name).toBe('ValidationError');
-            expect(err.message).toBe(
-                'Task validation failed: creationDate: Not permitted to modify creationDate!'
-            );
-        }
+        await expect(updateTask(task._id, { creationDate: new Date() }, router)).rejects.toThrow(
+            'Task validation failed: creationDate: Not permitted to modify creationDate!'
+        );
     });
 
     test('Protects against non-member modification', async () => {
         const badGuy = await createRouter();
         let task = await createTask(validList._id, { title: 'Good Task' }, router);
         task = await updateTask(task._id, { title: 'Good Update' }, router);
-        try {
-            await updateTask(task._id, { title: 'Bad Update' }, badGuy);
-        } catch (err: any) {
-            expect(err.name).toBe('PermissionsError');
-            expect(err.message).toBe('User is not authorized to access task');
-            expect(task.title).toBe('Good Update');
-        }
+        await expect(updateTask(task._id, { title: 'Bad Update' }, badGuy)).rejects.toThrow(
+            'User is not authorized to access task'
+        );
         const badGuysList = await createList({ title: 'Bad Guys List' }, badGuy);
-        try {
-            await updateTask(task._id, { list: badGuysList._id }, router);
-        } catch (err: any) {
-            expect(err.name).toBe('PermissionsError');
-            expect(err.message).toBe('User is not authorized to access list');
-        }
+        await expect(updateTask(task._id, { list: badGuysList._id }, router)).rejects.toThrow(
+            'User is not authorized to access list'
+        );
     });
 
     test('Protects against non-member deletion', async () => {
         const badGuy = await createRouter();
         const task = await createTask(validList._id, { title: 'Good Task' }, router);
-        try {
-            await deleteTask(task._id, badGuy);
-        } catch (err: any) {
-            expect(err.name).toBe('PermissionsError');
-            expect(err.message).toBe('User is not authorized to access task');
-        }
+        await expect(deleteTask(task._id, badGuy)).rejects.toThrow(
+            'User is not authorized to access task'
+        );
     });
 });

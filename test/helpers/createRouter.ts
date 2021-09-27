@@ -1,22 +1,13 @@
-import db from '../src/database';
-import { UserDocument } from '../src/schemas/users';
-import { RouterOptions } from '../src/helpers/routeHandler';
+import db from '../../src/database';
+import { UserDocument } from '../../src/schemas/users';
+import { RouterOptions } from '../../src/helpers/routeHandler';
 
 const createMockedNotifier = () => ({
     send: jest.fn(),
     schedule: jest.fn()
 });
 
-export const createRouter = async (): Promise<RouterOptions> => {
-    const _user = await createUser();
-    return {
-        user: _user,
-        db,
-        notifier: createMockedNotifier()
-    };
-};
-
-export const createUser = async (): Promise<UserDocument> => {
+const createUser = async (): Promise<UserDocument> => {
     const user = new db.Users({
         firstName: 'unitTest',
         email: `${Date.now()}-${Math.random()}@unitTests.com`,
@@ -34,3 +25,14 @@ export const createUser = async (): Promise<UserDocument> => {
     await inbox.save();
     return user;
 };
+
+const createRouter = async (): Promise<RouterOptions> => {
+    const _user = await createUser();
+    return {
+        user: _user,
+        db,
+        notifier: createMockedNotifier()
+    };
+};
+
+export default createRouter;
