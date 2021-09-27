@@ -115,7 +115,7 @@ ListSchema.pre('validate', function () {
 ListSchema.statics.getList = async function (user_id: ObjectId, list_id: ObjectId | string) {
     if (list_id === 'inbox') {
         return this.getUserInbox(user_id);
-    } else if (list_id) {
+    } else {
         try {
             const _list = await this.findOne({
                 _id: list_id,
@@ -129,8 +129,6 @@ ListSchema.statics.getList = async function (user_id: ObjectId, list_id: ObjectI
         } catch (err) {
             return null;
         }
-    } else {
-        throwError('Invalid List ID');
     }
 };
 
@@ -161,23 +159,20 @@ ListSchema.statics.getUserInbox = async function (user_id: ObjectId) {
 };
 
 ListSchema.statics.getUserListById = async function (user_id: ObjectId, list_id: ObjectId) {
-    try {
-        return this.populateList(
-            await this.findOne({
-                _id: list_id,
-                members: user_id.toString()
-            })
-        );
-    } catch {
-        return null;
-    }
+    return this.populateList(
+        await this.findOne({
+            _id: list_id,
+            members: user_id.toString()
+        })
+    );
 };
 
 ListSchema.statics.addTaskToList = async function (task: Task, list_id: ObjectId) {
     // Find lists
     const _list = await List.findOne({ _id: list_id });
+    // If not a list, return null
     if (!_list) {
-        throw new Error('BAD LIST');
+        return null;
     }
     // Add task to appropriate list
     if (!task.isCompleted) {
