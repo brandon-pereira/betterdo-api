@@ -6,14 +6,14 @@ import { notifyAboutSharedList } from '../helpers/notify';
 import { ListDocument } from '../schemas/lists';
 import { RouterOptions } from '../helpers/routeHandler';
 import { TaskDocument } from '../schemas/tasks';
-interface LooseObject {
+interface RawTaskObject {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
 }
 
 export async function createTask(
     listId: ObjectId | string,
-    taskObj: LooseObject = {},
+    taskObj: RawTaskObject = {},
     router: RouterOptions
 ): Promise<TaskDocument> {
     const { db, user } = router;
@@ -55,7 +55,7 @@ export async function createTask(
 
 export async function updateTask(
     taskId: ObjectId | string,
-    updatedTask: LooseObject = {},
+    updatedTask: RawTaskObject = {},
     { db, user, notifier }: RouterOptions
 ): Promise<TaskDocument> {
     let notificationSent = false;

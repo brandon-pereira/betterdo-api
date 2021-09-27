@@ -82,8 +82,7 @@ export default (app: Application, db: Database): void => {
         )
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    passport.serializeUser((user: any, done): void => done(null, user._id));
+    passport.serializeUser((user, done): void => done(null, user._id));
 
     passport.deserializeUser(async (_id: string, done) => {
         const user = await db.Users.findById(_id);

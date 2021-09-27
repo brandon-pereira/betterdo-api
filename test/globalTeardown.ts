@@ -1,12 +1,10 @@
 import database, { connect, disconnect } from '../src/database';
 
 export default async (): Promise<void> => {
-    // Connect, destroy, disconnect.
     await connect();
-    // TODO: not sure why but sleeping helps ensure deletion...
+    // Sleep for a second, fixes raise conditions :shrug:
     await sleep();
     await database.connection.db.dropDatabase();
-    // await database.connection.db.dropDatabase();
     await disconnect();
 };
 

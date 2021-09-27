@@ -5,7 +5,7 @@ import { List, ListDocument } from '../schemas/lists';
 import { isCustomList, fetchCustomList, fetchUserCustomLists } from '../helpers/customLists';
 import { parseObjectID } from '../helpers/objectIds';
 
-interface LooseObject {
+interface RawListObject {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
 }
@@ -86,7 +86,7 @@ export async function getLists(
 }
 
 export async function createList(
-    listObj: LooseObject,
+    listObj: RawListObject,
     { db, user }: RouterOptions
 ): Promise<ListDocument> {
     // Remove potentially harmful properties
@@ -109,7 +109,7 @@ export async function createList(
 
 export async function updateList(
     listId: ObjectId | string,
-    updatedList: LooseObject,
+    updatedList: RawListObject,
     { db, user }: RouterOptions
 ): Promise<List> {
     // Ensure list id is passed

@@ -5,11 +5,6 @@ import { RouterOptions } from './routeHandler';
 
 const CUSTOM_LISTS = ['highPriority', 'today', 'tomorrow'];
 
-interface LooseObject {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
-}
-
 function isCustomList(listId: ObjectId | string): boolean {
     if (typeof listId !== 'string') return false;
     return CUSTOM_LISTS.includes(listId);
@@ -107,7 +102,8 @@ async function fetchHighPriorityTasks({ db, user }: RouterOptions): Promise<Sort
     return sortTasks(tasks.map(task => task.toObject()));
 }
 
-function modifyTaskForCustomList(listId: string, taskObj: LooseObject): LooseObject {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
+function modifyTaskForCustomList(listId: string, taskObj: any): any {
     if (listId === 'highPriority') {
         taskObj.priority = 'high';
     } else if (listId === 'today') {

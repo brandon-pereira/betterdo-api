@@ -3,13 +3,13 @@ import { throwError } from '../helpers/errorHandler';
 import { RouterOptions } from '../helpers/routeHandler';
 import { User, UserDocument } from '../schemas/users';
 
-interface LooseObject {
+interface RawUserObject {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
 }
 
 export async function updateUser(
-    dirtyUserProps: LooseObject = {},
+    dirtyUserProps: RawUserObject = {},
     { user: userRef, notifier }: RouterOptions
 ): Promise<UserDocument> {
     // Get user
@@ -103,7 +103,8 @@ interface CurrentUser extends OtherUser {
     isPushEnabled: User['isPushEnabled'];
     lastLogin: User['lastLogin'];
     creationDate: User['creationDate'];
-    config: LooseObject;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    config: { [key: string]: any };
 }
 
 function sanitizeCurrentUser(user: UserDocument): CurrentUser {
