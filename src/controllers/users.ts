@@ -37,7 +37,11 @@ export async function updateUser(
     // if (typeof dirtyUserProps.isBeta === 'boolean') {
     //     userRef.isBeta = dirtyUserProps.isBeta;
     // }
-    if (typeof dirtyUserProps.isPushEnabled === 'boolean') {
+    if (
+        typeof dirtyUserProps.isPushEnabled === 'boolean' &&
+        dirtyUserProps.isPushEnabled !== user.isPushEnabled
+    ) {
+        didUpdatePushSubscription = true;
         user.isPushEnabled = dirtyUserProps.isPushEnabled;
     }
     if (dirtyUserProps.customLists && typeof dirtyUserProps.customLists === 'object') {
@@ -62,7 +66,7 @@ export async function updateUser(
     if (didUpdatePushSubscription) {
         await notifier.send(user._id, {
             title: "You're subscribed!",
-            body: 'Time to party!'
+            body: "We'll notify you with updates!"
         });
     }
     // Return to front-end
