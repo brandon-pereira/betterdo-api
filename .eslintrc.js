@@ -1,20 +1,19 @@
-/**
- * Inspired by watson-developer-cloud/node-sdk
- */
 module.exports = {
     env: {
-        node: true,
-        es6: true
+        node: true
     },
-    plugins: ['prettier'],
-    extends: 'eslint:recommended',
+    parser: '@typescript-eslint/parser',
+    plugins: ['@typescript-eslint', 'prettier'],
+    extends: [
+        'eslint:recommended',
+        'plugin:@typescript-eslint/eslint-recommended',
+        'plugin:@typescript-eslint/recommended'
+    ],
     rules: {
+        'no-unused-vars': 'off',
+        '@typescript-eslint/no-unused-vars': 'error',
+        '@typescript-eslint/no-var-requires': 0,
         'prettier/prettier': 'error',
-        'no-console': 0,
-        'require-atomic-updates': 0
-    },
-    parserOptions: {
-        // Required for certain syntax usages
-        ecmaVersion: 2018
+        'no-console': 0
     }
 };
