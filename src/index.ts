@@ -6,22 +6,23 @@ import 'dotenv/config';
 import app from './express';
 
 /**
- * Get a reference to the database
+ * Get a reference to the database and connect
  */
 import db, { connect } from './database';
 connect();
+const internalRouter = { app, db };
 
 /**
  * Get a reference to notifier
  */
 import _notifier from './notifier';
-const notifier = _notifier(app, db);
+const notifier = _notifier(internalRouter);
 
 /**
  * Passport authentication middleware
  */
-import passportMiddleware from './passport';
-passportMiddleware(app, db);
+import authentication from './authentication';
+authentication(internalRouter);
 
 /**
  * Initialize Routes

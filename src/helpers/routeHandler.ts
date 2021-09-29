@@ -1,8 +1,13 @@
-import { Request, Response } from 'express';
+import { Application, Request, Response } from 'express';
 import { Database } from '../database';
 import { UserDocument } from '../schemas/users';
 import { Notifier } from 'web-notifier';
 import { throwError, handleUncaughtError } from './errorHandler';
+
+export interface InternalRouter {
+    app: Application;
+    db: Database;
+}
 
 export interface RouterOptions {
     db: Database;

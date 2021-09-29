@@ -1,10 +1,8 @@
-import { Application } from 'express';
-import { Database, MONGO_CONNECTION_URL } from './database';
 import passport from 'passport';
-import { Profile, Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import session from 'express-session';
-import MongoStore from 'connect-mongo';
+import { Strategy, Profile } from 'passport-google-oauth20';
 import url from 'url';
+import { InternalRouter } from '../helpers/routeHandler';
+
 interface GoogleUser {
     google_id: string;
     firstName: string;
@@ -13,15 +11,20 @@ interface GoogleUser {
     profilePicture: string;
 }
 
-export default (app: Application, db: Database): void => {
+export default ({ app, db }: InternalRouter): void => {
+    const clientID = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    if (!clientID || !clientSecret) {
+        throw new Error('Missing Google Auth Environment Variables.');
+    }
     passport.use(
-        new GoogleStrategy(
+        new Strategy(
             {
-                clientID: process.env.GOOGLE_CLIENT_ID || '',
-                clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+                clientID,
+                clientSecret,
                 callbackURL: url.resolve(process.env.SERVER_URL || '', 'auth/google/callback')
             },
-            async (accessToken: string, refreshToken: string, profile: Profile, cb) => {
+            async (_accessToken: string, _refreshToken: string, profile: Profile, cb) => {
                 if (!profile) {
                     cb('AuthError');
                 }
@@ -44,7 +47,7 @@ export default (app: Application, db: Database): void => {
                     google_id: googleId
                 });
                 if (!user) {
-                    console.log('new user', googleInfo);
+                    console.log('New User Sign-up', googleInfo);
                     // Create User
                     user = await db.Users.create(googleInfo);
                     const inbox = new db.Lists({
@@ -55,15 +58,15 @@ export default (app: Application, db: Database): void => {
                     await inbox.save();
                     return cb(null, user);
                 } else {
-                    // TODO: Fix this
                     // Existing user
-                    const hasGoogleAccountUpdated = false;
-                    // const hasGoogleAccountUpdated = Object.keys(googleInfo).find(key => {
-                    //     if (googleInfo[key]) {
-                    //         googleInfo[key] !== user[key];
-                    //     }
-                    //     return false;
-                    // });
+                    const hasGoogleAccountUpdated = (
+                        Object.keys(googleInfo) as Array<keyof typeof googleInfo>
+                    ).find(key => {
+                        if (googleInfo[key] && user) {
+                            googleInfo[key] !== user[key];
+                        }
+                        return false;
+                    });
                     if (hasGoogleAccountUpdated) {
                         console.log('user info updated', hasGoogleAccountUpdated);
                         user.set(googleInfo);
@@ -82,41 +85,8 @@ export default (app: Application, db: Database): void => {
         )
     );
 
-    passport.serializeUser((user, done): void => done(null, user._id));
-
-    passport.deserializeUser(async (_id: string, done) => {
-        const user = await db.Users.findById(_id);
-        if (user) {
-            return done(null, user);
-        }
-        return done({ message: 'AuthenticationRequired' });
-    });
-
-    app.use(
-        session({
-            secret: process.env.SESSION_SECRET || '',
-            resave: false,
-            saveUninitialized: true,
-            store: new MongoStore({ mongoUrl: MONGO_CONNECTION_URL }),
-            cookie: {
-                // sameSite: 'none',
-                maxAge: 1000 * 60 * 60 * 24 * 31 * 6 // ms * sec * mins * hours * days * 6 = ~ 6 months
-            }
-        })
-    );
-    app.use(passport.initialize());
-    app.use(passport.session());
     app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
     app.get('/auth/google/callback', passport.authenticate('google'), (req, res) => {
         res.redirect(url.resolve(process.env.APP_URL || '', '/app'));
-    });
-    app.get('/auth/logout', (req, res) => {
-        req.logout();
-        const referrer = req.header('referrer');
-        if (referrer) {
-            res.redirect(referrer);
-        } else {
-            res.redirect(process.env.SERVER_URL || '');
-        }
     });
 };

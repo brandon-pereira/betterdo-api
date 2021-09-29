@@ -1,8 +1,7 @@
-import { Application } from 'express';
 import { WebNotifier, MongoAdapter, Notifier } from 'web-notifier';
-import { Database } from './database';
+import { InternalRouter } from './helpers/routeHandler';
 
-export default (app: Application, db: Database): WebNotifier => {
+export default ({ db }: InternalRouter): WebNotifier => {
     const getUserPushSubscription = async (userId: string) => {
         const user = await db.Users.findById(userId);
         if (user && user.isPushEnabled) {
