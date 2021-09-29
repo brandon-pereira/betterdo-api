@@ -67,7 +67,7 @@ const TaskSchema = new Schema<TaskDocument, TaskModel>({
     },
     creationDate: {
         type: Date,
-        default: new Date()
+        default: () => new Date()
     }
 });
 

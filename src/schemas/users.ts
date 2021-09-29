@@ -59,12 +59,12 @@ const UserSchema = new Schema<UserDocument, UserModel>({
     },
     creationDate: {
         type: Date,
-        default: new Date()
+        default: () => new Date()
     },
     profilePicture: String,
     lastLogin: {
         type: Date,
-        default: new Date()
+        default: () => new Date()
     },
     isBeta: {
         type: Boolean,
