@@ -17,7 +17,7 @@ export default ({ db }: InternalRouter): WebNotifier => {
         if (index !== -1) {
             user.pushSubscriptions.splice(index, 1);
         }
-        user.save();
+        await user.save();
         return user.pushSubscriptions;
     };
 
