@@ -14,14 +14,10 @@ jobs:
             NODE_ENV: test
         steps:
             - uses: actions/checkout@v2
-            - name: Read .nvmrc
-              run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+            - run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
               id: nvm
             - uses: actions/setup-node@v2
               with:
                   node-version: '${{ steps.nvm.outputs.NVMRC }}'
-            - run: echo ${NVMRC}
-            - run: node --version
             - run: npm install
-            - run: npm install --only=dev
             - run: npm test
