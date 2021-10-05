@@ -1,7 +1,8 @@
 /** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */
+const { defaults: tsjPreset } = require('ts-jest/presets');
+
 module.exports = {
-    preset: 'ts-jest',
-    testEnvironment: 'node',
+    preset: '@shelf/jest-mongodb',
     collectCoverageFrom: [
         'src/**/*.ts',
         '!src/helpers/errorHandler.ts',
@@ -13,6 +14,5 @@ module.exports = {
         '!src/index.ts',
         '!src/routes/*.ts'
     ],
-    globalSetup: './test/globalSetup.ts',
-    globalTeardown: './test/globalTeardown.ts'
+    transform: tsjPreset.transform
 };

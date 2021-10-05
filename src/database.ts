@@ -11,12 +11,11 @@ export interface Database {
     Tasks: TaskModel;
 }
 
-export const MONGO_CONNECTION_URL = `mongodb://localhost/${
-    process.env.DATABASE_NAME || 'betterdo'
-}`;
+export const MONGO_CONNECTION_URL =
+    process.env.MONGO_URL || `mongodb://localhost/${process.env.DATABASE_NAME || 'betterdo'}`;
 
 export async function connect(): Promise<void> {
-    await mongoose.connect(MONGO_CONNECTION_URL);
+    await mongoose.connect(MONGO_CONNECTION_URL || '');
 }
 
 export async function disconnect(): Promise<void> {

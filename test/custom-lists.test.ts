@@ -1,3 +1,4 @@
+import './helpers/toMatchObject';
 import createRouter from './helpers/createRouter';
 import { connect, disconnect } from '../src/database';
 import { createTask } from '../src/controllers/tasks';
@@ -39,9 +40,11 @@ describe('Custom Lists API', () => {
     test('Today list should only return valid tasks', async () => {
         let today = await getLists('today', {}, router1);
         expect(today.tasks).toHaveLength(0);
-        await createTask(validList1._id, { title: 'Todo today!', dueDate: new Date() }, router1);
+        const title = `Todo today!`;
+        await createTask(validList1._id, { title, dueDate: new Date() }, router1);
         today = await getLists('today', {}, router1);
         expect(today.tasks).toHaveLength(1);
+        expect(today.tasks[0].title).toBe(title);
     });
 
     test('Tomorrow list should only return valid tasks', async () => {
@@ -50,9 +53,11 @@ describe('Custom Lists API', () => {
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         tomorrow.setHours(12, 30, 0, 0);
-        await createTask(validList1._id, { title: 'Todo tomorrow!', dueDate: tomorrow }, router1);
+        const title = `Todo tomorrow!`;
+        await createTask(validList1._id, { title, dueDate: tomorrow }, router1);
         today = await getLists('tomorrow', {}, router1);
         expect(today.tasks).toHaveLength(1);
+        expect(today.tasks[0].title).toBe(title);
     });
 
     test('High priority list should only return valid tasks', async () => {
@@ -62,18 +67,20 @@ describe('Custom Lists API', () => {
             { title: 'Invalid because wrong user', priority: 'high' },
             router2
         );
-        await createTask(validList1._id, { title: 'Valid', priority: 'high' }, router1);
+        const title = `Todo high priority!`;
+        await createTask(validList1._id, { title, priority: 'high' }, router1);
         const user1lists = await getLists('highPriority', {}, router1);
         expect(user1lists.tasks).toHaveLength(1);
+        expect(user1lists.tasks[0].title).toBe(title);
     });
 
     test('Should allow creating high priority tasks from highPriority list', async () => {
         const task = await createTask('highPriority', { title: 'title' }, router1);
         expect(task.priority).toBe('high');
         const hpList = await getLists('highPriority', {}, router1);
-        expect(hpList.tasks.map(t => t._id.toString())).toContain(task._id.toString());
+        expect(hpList.tasks.map(t => t._id)).toContainId(task._id);
         const inbox = await getLists('inbox', {}, router1);
-        expect(inbox.tasks.map(t => t._id.toString())).toContain(task._id.toString());
+        expect(inbox.tasks.map(t => t._id)).toContainId(task._id);
     });
 
     test('Should allow creating tasks due today from today list', async () => {
@@ -82,9 +89,9 @@ describe('Custom Lists API', () => {
         const task = await createTask('today', { title: 'title' }, router1);
         expect(task.dueDate.toString()).toBe(now.toString());
         const list = await getLists('today', {}, router1);
-        expect(list.tasks.map(t => t._id.toString())).toContain(task._id.toString());
+        expect(list.tasks.map(t => t._id)).toContainId(task._id);
         const inbox = await getLists('inbox', {}, router1);
-        expect(inbox.tasks.map(t => t._id.toString())).toContain(task._id.toString());
+        expect(inbox.tasks.map(t => t._id)).toContainId(task._id);
     });
 
     test('Should allow creating tasks due tomorrow from tomorrow list', async () => {
@@ -94,9 +101,9 @@ describe('Custom Lists API', () => {
         const task = await createTask('tomorrow', { title: 'title' }, router1);
         expect(task.dueDate.toString()).toBe(now.toString());
         const list = await getLists('tomorrow', {}, router1);
-        expect(list.tasks.map(t => t._id.toString())).toContain(task._id.toString());
+        expect(list.tasks.map(t => t._id)).toContainId(task._id);
         const inbox = await getLists('inbox', {}, router1);
-        expect(inbox.tasks.map(t => t._id.toString())).toContain(task._id.toString());
+        expect(inbox.tasks.map(t => t._id)).toContainId(task._id);
     });
 
     test('Should allow returning additional tasks', async () => {

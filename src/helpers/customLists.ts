@@ -99,7 +99,7 @@ async function fetchHighPriorityTasks({ db, user }: RouterOptions): Promise<Sort
         .exec();
     // Populate all created by
     await Promise.all(tasks.map(task => db.Tasks.populateTask(task)));
-    return sortTasks(tasks.map(task => task.toObject()));
+    return sortTasks(tasks);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
