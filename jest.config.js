@@ -14,6 +14,5 @@ module.exports = {
         '!src/index.ts',
         '!src/routes/*.ts'
     ],
-    globalTeardown: './test/globalTeardown.ts',
     transform: tsjPreset.transform
 };
