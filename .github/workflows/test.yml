@@ -23,4 +23,5 @@ jobs:
             - run: echo ${NVMRC}
             - run: node --version
             - run: npm install
+            - run: npm install --only=dev
             - run: npm test
