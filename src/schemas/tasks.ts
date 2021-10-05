@@ -21,7 +21,7 @@ export interface Task {
 
 export type TaskDocument = Task & Document;
 export interface TaskModel extends Model<TaskDocument> {
-    populateTask(task: TaskDocument): TaskDocument;
+    populateTask(task: TaskDocument): Promise<TaskDocument>;
 }
 
 const TaskSchema = new Schema<TaskDocument, TaskModel>({

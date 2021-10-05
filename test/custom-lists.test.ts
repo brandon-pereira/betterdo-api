@@ -39,9 +39,11 @@ describe('Custom Lists API', () => {
     test('Today list should only return valid tasks', async () => {
         let today = await getLists('today', {}, router1);
         expect(today.tasks).toHaveLength(0);
-        await createTask(validList1._id, { title: 'Todo today!', dueDate: new Date() }, router1);
+        const title = `Todo today!`;
+        await createTask(validList1._id, { title, dueDate: new Date() }, router1);
         today = await getLists('today', {}, router1);
         expect(today.tasks).toHaveLength(1);
+        expect(today.tasks[0].title).toBe(title);
     });
 
     test('Tomorrow list should only return valid tasks', async () => {
@@ -50,9 +52,11 @@ describe('Custom Lists API', () => {
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         tomorrow.setHours(12, 30, 0, 0);
-        await createTask(validList1._id, { title: 'Todo tomorrow!', dueDate: tomorrow }, router1);
+        const title = `Todo tomorrow!`;
+        await createTask(validList1._id, { title, dueDate: tomorrow }, router1);
         today = await getLists('tomorrow', {}, router1);
         expect(today.tasks).toHaveLength(1);
+        expect(today.tasks[0].title).toBe(title);
     });
 
     test('High priority list should only return valid tasks', async () => {
@@ -62,9 +66,11 @@ describe('Custom Lists API', () => {
             { title: 'Invalid because wrong user', priority: 'high' },
             router2
         );
-        await createTask(validList1._id, { title: 'Valid', priority: 'high' }, router1);
+        const title = `Todo high priority!`;
+        await createTask(validList1._id, { title, priority: 'high' }, router1);
         const user1lists = await getLists('highPriority', {}, router1);
         expect(user1lists.tasks).toHaveLength(1);
+        expect(user1lists.tasks[0].title).toBe(title);
     });
 
     test('Should allow creating high priority tasks from highPriority list', async () => {
