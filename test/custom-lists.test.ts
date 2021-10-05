@@ -1,3 +1,4 @@
+import './helpers/toMatchObject';
 import createRouter from './helpers/createRouter';
 import { connect, disconnect } from '../src/database';
 import { createTask } from '../src/controllers/tasks';
@@ -77,9 +78,9 @@ describe('Custom Lists API', () => {
         const task = await createTask('highPriority', { title: 'title' }, router1);
         expect(task.priority).toBe('high');
         const hpList = await getLists('highPriority', {}, router1);
-        expect(hpList.tasks.map(t => t._id.toString())).toContain(task._id.toString());
+        expect(hpList.tasks.map(t => t._id)).toContainId(task._id);
         const inbox = await getLists('inbox', {}, router1);
-        expect(inbox.tasks.map(t => t._id.toString())).toContain(task._id.toString());
+        expect(inbox.tasks.map(t => t._id)).toContainId(task._id);
     });
 
     test('Should allow creating tasks due today from today list', async () => {
@@ -88,9 +89,9 @@ describe('Custom Lists API', () => {
         const task = await createTask('today', { title: 'title' }, router1);
         expect(task.dueDate.toString()).toBe(now.toString());
         const list = await getLists('today', {}, router1);
-        expect(list.tasks.map(t => t._id.toString())).toContain(task._id.toString());
+        expect(list.tasks.map(t => t._id)).toContainId(task._id);
         const inbox = await getLists('inbox', {}, router1);
-        expect(inbox.tasks.map(t => t._id.toString())).toContain(task._id.toString());
+        expect(inbox.tasks.map(t => t._id)).toContainId(task._id);
     });
 
     test('Should allow creating tasks due tomorrow from tomorrow list', async () => {
@@ -100,9 +101,9 @@ describe('Custom Lists API', () => {
         const task = await createTask('tomorrow', { title: 'title' }, router1);
         expect(task.dueDate.toString()).toBe(now.toString());
         const list = await getLists('tomorrow', {}, router1);
-        expect(list.tasks.map(t => t._id.toString())).toContain(task._id.toString());
+        expect(list.tasks.map(t => t._id)).toContainId(task._id);
         const inbox = await getLists('inbox', {}, router1);
-        expect(inbox.tasks.map(t => t._id.toString())).toContain(task._id.toString());
+        expect(inbox.tasks.map(t => t._id)).toContainId(task._id);
     });
 
     test('Should allow returning additional tasks', async () => {
