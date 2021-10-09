@@ -28,9 +28,8 @@ export default ({ db }: InternalRouter): WebNotifier => {
             email: process.env.VAPID_EMAIL
         },
         notificationDefaults: {
-            badge: `${process.env.SERVER_URL}/app/notification-badge.png`,
-            icon: `${process.env.SERVER_URL}/app/android-chrome-192x192.png`,
-            url: `${process.env.SERVER_URL}/`
+            icon: `${process.env.SERVER_URL}/app/static/android-chrome-192x192.png`,
+            url: `${process.env.SERVER_URL}/app`
         },
         getUserPushSubscription,
         removeUserPushSubscription,
