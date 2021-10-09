@@ -4,7 +4,7 @@
     "description": "Back-end for BetterDo task manager",
     "repository": "https://github.com/brandon-pereira/betterdo-api",
     "scripts": {
-        "start:production": "node ./dist/index.js",
+        "start:production": "node ./dist/src/index.js",
         "build": "tsc",
         "start": "ts-node-dev  --respawn --rs  src/index.ts",
         "test": "eslint . && jest"
