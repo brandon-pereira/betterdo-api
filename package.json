@@ -1,6 +1,6 @@
 {
     "name": "betterdo-api",
-    "version": "4.2.0",
+    "version": "5.1.1",
     "description": "Back-end for BetterDo task manager",
     "repository": "https://github.com/brandon-pereira/betterdo-api",
     "scripts": {
