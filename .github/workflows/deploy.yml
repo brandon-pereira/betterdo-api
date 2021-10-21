@@ -1,4 +1,4 @@
-name: BetterDo API - Deploy
+name: Deploy
 
 on:
     push:
@@ -19,6 +19,6 @@ jobs:
                       cd www/betterdo-api
                       git checkout .
                       git pull
-                      npm install
+                      npm install --production=false
                       npm run build
                       pm2 restart betterdo
