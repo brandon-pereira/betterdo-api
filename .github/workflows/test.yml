@@ -1,4 +1,4 @@
-name: BetterDo API
+name: BetterDo API - Test
 
 on:
     push:
