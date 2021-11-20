@@ -87,6 +87,11 @@ export default ({ app, db }: InternalRouter): void => {
 
     app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
     app.get('/auth/google/callback', passport.authenticate('google'), (req, res) => {
-        res.redirect(url.resolve(process.env.APP_URL || '', '/app'));
+        res.redirect(
+            url.resolve(
+                process.env.APP_URL || '',
+                process.env.NODE_ENV === 'production' ? '/app' : ''
+            )
+        );
     });
 };
