@@ -3,6 +3,7 @@ const { defaults: tsjPreset } = require('ts-jest/presets');
 
 module.exports = {
     preset: '@shelf/jest-mongodb',
+    globalSetup: './test/global-setup.ts',
     collectCoverageFrom: [
         'src/**/*.ts',
         '!src/helpers/errorHandler.ts',
