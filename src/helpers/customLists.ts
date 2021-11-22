@@ -102,16 +102,19 @@ async function fetchHighPriorityTasks({ db, user }: RouterOptions): Promise<Sort
     return sortTasks(tasks);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-function modifyTaskForCustomList(listId: string, taskObj: any): any {
+function modifyTaskForCustomList(
+    listId: string,
+    taskObj: Partial<Task>,
+    router: RouterOptions
+): Partial<Task> {
     if (listId === 'highPriority') {
         taskObj.priority = 'high';
     } else if (listId === 'today') {
-        const today = new Date();
+        const today = timezone(new Date(), router.user.timeZone);
         today.setHours(0, 0, 0, 0);
         taskObj.dueDate = today;
     } else if (listId === 'tomorrow') {
-        const tomorrow = new Date();
+        const tomorrow = timezone(new Date(), router.user.timeZone);
         tomorrow.setHours(0, 0, 0, 0);
         tomorrow.setDate(tomorrow.getDate() + 1);
         taskObj.dueDate = tomorrow;
@@ -120,23 +123,26 @@ function modifyTaskForCustomList(listId: string, taskObj: any): any {
 }
 
 async function fetchTomorrowTasks(router: RouterOptions): Promise<SortedTasks> {
-    const start = new Date();
+    const start = timezone(new Date(), router.user.timeZone);
     start.setDate(start.getDate() + 1);
     start.setHours(0, 0, 0, 0);
-    const end = new Date();
+    const end = timezone(new Date(), router.user.timeZone);
     end.setDate(end.getDate() + 1);
     end.setHours(23, 59, 59, 999);
     return fetchTasksWithinDates(start, end, router);
 }
 
 function fetchTodayTasks(router: RouterOptions): Promise<SortedTasks> {
-    const start = new Date();
+    const start = timezone(new Date(), router.user.timeZone);
     start.setHours(0, 0, 0, 0);
-    const end = new Date();
+    const end = timezone(new Date(), router.user.timeZone);
     end.setHours(23, 59, 59, 999);
     return fetchTasksWithinDates(start, end, router);
 }
 
+function timezone(date: Date, timeZone: string) {
+    return new Date(date.toLocaleString('en-US', { timeZone }));
+}
 async function fetchTasksWithinDates(
     lowest: Date,
     highest: Date,

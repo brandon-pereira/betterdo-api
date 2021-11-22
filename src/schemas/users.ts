@@ -2,6 +2,7 @@ import { model, Schema } from 'mongoose';
 import { Document, PopulatedDoc, Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { List, ListDocument } from './lists';
+import { timeZonesNames } from '@vvo/tzdb';
 
 export interface User {
     _id: ObjectId;
@@ -11,6 +12,7 @@ export interface User {
     lists: Array<PopulatedDoc<ListDocument>>;
     isPushEnabled: boolean;
     pushSubscriptions: Array<string>;
+    timeZone: string;
     customLists: {
         highPriority: boolean;
         today: boolean;
@@ -65,6 +67,11 @@ const UserSchema = new Schema<UserDocument, UserModel>({
     lastLogin: {
         type: Date,
         default: () => new Date()
+    },
+    timeZone: {
+        type: String,
+        enum: timeZonesNames,
+        default: 'America/Edmonton'
     },
     isBeta: {
         type: Boolean,

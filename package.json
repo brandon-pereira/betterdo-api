@@ -13,6 +13,7 @@
     "license": "ISC",
     "dependencies": {
         "@types/passport": "^1.0.7",
+        "@vvo/tzdb": "^6.33.0",
         "body-parser": "^1.19.0",
         "connect-mongo": "^4.6.0",
         "cookie-parser": "^1.4.5",

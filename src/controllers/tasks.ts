@@ -21,7 +21,7 @@ export async function createTask(
     if (!listId) throwError('Invalid List ID');
     // If the list is a custom list, modify task with new settings
     if (typeof listId === 'string' && isCustomList(listId)) {
-        taskObj = modifyTaskForCustomList(listId, taskObj);
+        taskObj = modifyTaskForCustomList(listId, taskObj, router);
         listId = 'inbox';
     }
     let list: ListDocument;

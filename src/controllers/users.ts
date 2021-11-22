@@ -47,7 +47,7 @@ export async function updateUser(
     if (dirtyUserProps.customLists && typeof dirtyUserProps.customLists === 'object') {
         Object.assign(user.customLists, dirtyUserProps.customLists);
     }
-    const stringsToCheck = ['firstName', 'lastName', 'email'];
+    const stringsToCheck = ['firstName', 'lastName', 'email', 'timeZone'];
     stringsToCheck.forEach(id => {
         const idx = `${id}` as keyof User;
         if (
@@ -103,6 +103,7 @@ interface CurrentUser extends OtherUser {
     isBeta: User['isBeta'];
     isPushEnabled: User['isPushEnabled'];
     lastLogin: User['lastLogin'];
+    timeZone: User['timeZone'];
     creationDate: User['creationDate'];
     config: { [key: string]: string | undefined };
 }
@@ -118,6 +119,7 @@ function sanitizeCurrentUser(user: UserDocument): CurrentUser {
         lastLogin: user.lastLogin,
         creationDate: user.creationDate,
         lastName: user.lastName,
+        timeZone: user.timeZone,
         config: {
             vapidKey: process.env.VAPID_PUBLIC_KEY
         }
