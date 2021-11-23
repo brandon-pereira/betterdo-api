@@ -5,11 +5,6 @@ import { List, ListDocument } from '../schemas/lists';
 import { isCustomList, fetchCustomList, fetchUserCustomLists } from '../helpers/customLists';
 import { parseObjectID } from '../helpers/objectIds';
 
-interface RawListObject {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
-}
-
 interface GetListOptions {
     includeCompleted?: boolean;
 }
@@ -86,7 +81,7 @@ export async function getLists(
 }
 
 export async function createList(
-    listObj: RawListObject,
+    listObj: Partial<List>,
     { db, user }: RouterOptions
 ): Promise<ListDocument> {
     // Remove potentially harmful properties
@@ -109,7 +104,7 @@ export async function createList(
 
 export async function updateList(
     listId: ObjectId | string,
-    updatedList: RawListObject,
+    updatedList: Partial<List>,
     { db, user }: RouterOptions
 ): Promise<List> {
     // Ensure list id is passed
@@ -150,7 +145,7 @@ export async function updateList(
             (member: string) => !currentMembers.includes(member)
         );
         const removedMembers = currentMembers.filter(
-            member => !updatedList.members.includes(member)
+            member => updatedList.members && !updatedList.members.includes(member)
         );
         const addMembersPromise = Promise.all(
             newMembers.map(async (member: string) => {

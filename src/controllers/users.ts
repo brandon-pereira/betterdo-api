@@ -3,13 +3,8 @@ import { throwError } from '../helpers/errorHandler';
 import { RouterOptions } from '../helpers/routeHandler';
 import { User, UserDocument } from '../schemas/users';
 
-interface RawUserObject {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
-}
-
 export async function updateUser(
-    dirtyUserProps: RawUserObject = {},
+    dirtyUserProps: Partial<User> = {},
     { user, notifier }: RouterOptions
 ): Promise<UserDocument> {
     // Remove potentially harmful stuff

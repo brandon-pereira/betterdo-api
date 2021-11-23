@@ -14,9 +14,9 @@ export interface User {
     pushSubscriptions: Array<string>;
     timeZone: string;
     customLists: {
-        highPriority: boolean;
-        today: boolean;
-        tomorrow: boolean;
+        highPriority?: boolean;
+        today?: boolean;
+        tomorrow?: boolean;
     };
     pushSubscription?: string;
     profilePicture: string;
