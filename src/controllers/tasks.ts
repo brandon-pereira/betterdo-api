@@ -5,15 +5,12 @@ import { isCustomList, modifyTaskForCustomList } from '../helpers/customLists';
 import { notifyAboutSharedList } from '../helpers/notify';
 import { ListDocument } from '../schemas/lists';
 import { RouterOptions } from '../helpers/routeHandler';
-import { TaskDocument } from '../schemas/tasks';
-interface RawTaskObject {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
-}
+import { Task, TaskDocument } from '../schemas/tasks';
+import { timezone } from '../helpers/timezone';
 
 export async function createTask(
     listId: ObjectId | string,
-    taskObj: RawTaskObject = {},
+    taskObj: Partial<Task> = {},
     router: RouterOptions
 ): Promise<TaskDocument> {
     const { db, user } = router;
@@ -31,10 +28,15 @@ export async function createTask(
         // Ensure list exists and user has permissions
         list = await db.Lists.getList(user._id, parseObjectID(listId));
     }
+    // this time should come in as UTC
+    if (taskObj.dueDate && typeof taskObj.dueDate === 'string') {
+        // update it to reflect users timeZone
+        taskObj.dueDate = timezone(new Date(taskObj.dueDate), user.timeZone);
+    }
     // If no results, throw error
     if (!list) throwError('Invalid List ID');
     // Remove potentially harmful properties
-    delete taskObj.listId;
+    delete taskObj.list;
     delete taskObj.createdBy;
     delete taskObj.creationDate;
     // Attempt to create the list
@@ -55,7 +57,7 @@ export async function createTask(
 
 export async function updateTask(
     taskId: ObjectId | string,
-    updatedTask: RawTaskObject = {},
+    updatedTask: Partial<Task> = {},
     { db, user, notifier }: RouterOptions
 ): Promise<TaskDocument> {
     let notificationSent = false;
@@ -105,6 +107,11 @@ export async function updateTask(
         } else {
             await db.Lists.setTaskIncomplete(task._id, list._id);
         }
+    }
+    // this time should come in as UTC
+    if (updatedTask.dueDate && typeof updatedTask.dueDate === 'string') {
+        // update it to reflect users timeZone
+        updatedTask.dueDate = timezone(new Date(updatedTask.dueDate), user.timeZone);
     }
     // Merge the tasks.. validation on the model will handle errors
     Object.assign(task, updatedTask);

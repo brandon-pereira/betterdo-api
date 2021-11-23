@@ -2,6 +2,7 @@ import { ObjectId } from 'mongodb';
 import { List, ListDocument } from '../schemas/lists';
 import { Task } from '../schemas/tasks';
 import { RouterOptions } from './routeHandler';
+import { timezone } from '../helpers/timezone';
 
 const CUSTOM_LISTS = ['highPriority', 'today', 'tomorrow'];
 
@@ -140,9 +141,6 @@ function fetchTodayTasks(router: RouterOptions): Promise<SortedTasks> {
     return fetchTasksWithinDates(start, end, router);
 }
 
-function timezone(date: Date, timeZone: string) {
-    return new Date(date.toLocaleString('en-US', { timeZone }));
-}
 async function fetchTasksWithinDates(
     lowest: Date,
     highest: Date,

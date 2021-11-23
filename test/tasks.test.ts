@@ -102,6 +102,7 @@ describe('Tasks API', () => {
 
     test('Provides clear error messages when invalid data provided', async () => {
         await expect(
+            // @ts-expect-error: we are purposefully passing bad priority
             createTask(validList._id, { title: 'Hello', priority: 'super-high' }, router)
         ).rejects.toThrow(
             'Task validation failed: priority: `super-high` is not a valid enum value for path `priority`.'
@@ -111,6 +112,7 @@ describe('Tasks API', () => {
     test('Protects sensitive fields', async () => {
         const task = await createTask(
             validList._id,
+            // @ts-expect-error: mocking this for test case
             { title: 'Test', createdBy: 'bad-user' },
             router
         );
