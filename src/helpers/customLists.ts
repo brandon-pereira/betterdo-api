@@ -4,7 +4,7 @@ import { Task } from '../schemas/tasks';
 import { RouterOptions } from './routeHandler';
 import { timezone } from '../helpers/timezone';
 
-const CUSTOM_LISTS = ['highPriority', 'today', 'tomorrow'];
+const CUSTOM_LISTS = ['highPriority', 'today', 'tomorrow', 'overdue', 'week'];
 
 function isCustomList(listId: ObjectId | string): boolean {
     if (typeof listId !== 'string') return false;
@@ -32,6 +32,10 @@ async function fetchCustomList(
         list = await fetchToday(opts);
     } else if (listId === 'tomorrow') {
         list = await fetchTomorrow(opts);
+    } else if (listId === 'overdue') {
+        list = await fetchOverdue(opts);
+    } else if (listId === 'week') {
+        list = await fetchWeek(opts);
     }
     // calculate completed tasks visible
     if (list && !includeCompleted) {
@@ -57,6 +61,7 @@ async function fetchHighPriority(router: RouterOptions): Promise<List> {
     list.id = 'highPriority';
     return list;
 }
+
 async function fetchTomorrow(router: RouterOptions): Promise<List> {
     const { db, user } = router;
     const { completedTasks, tasks } = await fetchTomorrowTasks(router);
@@ -72,6 +77,39 @@ async function fetchTomorrow(router: RouterOptions): Promise<List> {
     list.id = 'tomorrow';
     return list;
 }
+
+async function fetchWeek(router: RouterOptions): Promise<List> {
+    const { db, user } = router;
+    const { completedTasks, tasks } = await fetchTomorrowTasks(router);
+    const list = new db.Lists({
+        title: 'Week',
+        type: 'week',
+        completedTasks,
+        tasks,
+        members: [user._id],
+        owner: user._id
+    }).toObject();
+    list._id = 'week';
+    list.id = 'week';
+    return list;
+}
+
+async function fetchOverdue(router: RouterOptions): Promise<List> {
+    const { db, user } = router;
+    const { completedTasks, tasks } = await fetchOverdueTasks(router);
+    const list = new db.Lists({
+        title: 'Overdue',
+        type: 'overdue',
+        completedTasks,
+        tasks,
+        members: [user._id],
+        owner: user._id
+    }).toObject();
+    list._id = 'overdue';
+    list.id = 'overdue';
+    return list;
+}
+
 async function fetchToday(router: RouterOptions): Promise<List> {
     const { db, user } = router;
     const { completedTasks, tasks } = await fetchTodayTasks(router);
@@ -91,6 +129,24 @@ async function fetchToday(router: RouterOptions): Promise<List> {
 async function fetchHighPriorityTasks({ db, user }: RouterOptions): Promise<SortedTasks> {
     const tasks = await db.Tasks.find({
         priority: 'high'
+    })
+        .populate({
+            path: 'list',
+            select: 'members',
+            match: { members: { $in: [user._id] } }
+        })
+        .exec();
+    // Populate all created by
+    await Promise.all(tasks.map(task => db.Tasks.populateTask(task)));
+    return sortTasks(tasks);
+}
+
+async function fetchOverdueTasks({ db, user }: RouterOptions): Promise<SortedTasks> {
+    const startOfToday = timezone(new Date(), user.timeZone);
+    startOfToday.setHours(0, 0, 0, 0);
+    const tasks = await db.Tasks.find({
+        isCompleted: false,
+        dueDate: { $lt: startOfToday }
     })
         .populate({
             path: 'list',
@@ -175,12 +231,5 @@ function sortTasks(unsortedTasks: Task[]): SortedTasks {
             { completedTasks: [], tasks: [] }
         );
 }
-export {
-    isCustomList,
-    fetchCustomList,
-    fetchUserCustomLists,
-    fetchHighPriority,
-    fetchTomorrow,
-    fetchToday,
-    modifyTaskForCustomList
-};
+
+export { isCustomList, fetchCustomList, fetchUserCustomLists, modifyTaskForCustomList };

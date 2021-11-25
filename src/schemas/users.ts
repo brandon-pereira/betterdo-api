@@ -17,6 +17,8 @@ export interface User {
         highPriority?: boolean;
         today?: boolean;
         tomorrow?: boolean;
+        overdue?: boolean;
+        week?: boolean;
     };
     pushSubscription?: string;
     profilePicture: string;
@@ -91,6 +93,14 @@ const UserSchema = new Schema<UserDocument, UserModel>({
             default: true
         },
         tomorrow: {
+            type: Boolean,
+            default: false
+        },
+        overdue: {
+            type: Boolean,
+            default: false
+        },
+        week: {
             type: Boolean,
             default: false
         }

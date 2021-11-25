@@ -11,7 +11,8 @@ export interface List {
     completedTasks: Array<string>;
     members: Array<PopulatedDoc<UserDocument>>;
     owner: PopulatedDoc<UserDocument>;
-    type: 'inbox' | 'today' | 'tomorrow' | 'highPriority' | 'default';
+    // can we deprecate this to 'customList' | 'inbox' | 'default'
+    type: 'inbox' | 'today' | 'tomorrow' | 'highPriority' | 'week' | 'overdue' | 'default';
     additionalTasks?: number;
     color: string;
 }
