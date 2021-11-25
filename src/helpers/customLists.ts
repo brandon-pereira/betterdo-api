@@ -82,7 +82,7 @@ async function fetchWeek(router: RouterOptions): Promise<List> {
     const { db, user } = router;
     const { completedTasks, tasks } = await fetchTomorrowTasks(router);
     const list = new db.Lists({
-        title: 'Week',
+        title: 'This Week',
         type: 'week',
         completedTasks,
         tasks,
