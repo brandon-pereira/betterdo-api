@@ -44,9 +44,9 @@ describe('Notifier', () => {
     });
 
     describe('Shared List', () => {
-        let sharedList: List | null = null;
-        let user1: RouterOptions | null = null;
-        let user2: RouterOptions | null = null;
+        let sharedList: List;
+        let user1: RouterOptions;
+        let user2: RouterOptions;
 
         beforeAll(async () => {
             user1 = await createRouter();
@@ -60,7 +60,6 @@ describe('Notifier', () => {
         });
 
         test('adds task', async () => {
-            if (!user1 || !user2 || !sharedList) return;
             expect(user1?.notifier.send).toBeCalledTimes(0);
             await createTask(sharedList._id, { title: 'just do it' }, user1);
             expect(user1?.notifier.send).toBeCalledTimes(1);
@@ -70,7 +69,6 @@ describe('Notifier', () => {
         });
 
         test('marks task completed', async () => {
-            if (!user1 || !user2 || !sharedList) return;
             expect(user1?.notifier.send).toBeCalledTimes(0);
             const task = await createTask(sharedList._id, { title: 'just do it' }, user1);
             // reset notification from creation
@@ -82,7 +80,6 @@ describe('Notifier', () => {
         });
 
         test('updates task', async () => {
-            if (!user1 || !user2 || !sharedList) return;
             expect(user1?.notifier.send).toBeCalledTimes(0);
             const task = await createTask(sharedList._id, { title: 'old' }, user1);
             // reset notification from creation
@@ -94,7 +91,6 @@ describe('Notifier', () => {
         });
 
         test('deletes task', async () => {
-            if (!user1 || !user2 || !sharedList) return;
             expect(user1?.notifier.send).toBeCalledTimes(0);
             const task = await createTask(sharedList._id, { title: 'just do it' }, user1);
             // reset notification from creation
