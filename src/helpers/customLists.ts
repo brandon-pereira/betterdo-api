@@ -203,6 +203,7 @@ async function fetchTasksWithinDates(
     { user, db }: RouterOptions
 ): Promise<SortedTasks> {
     const tasks = await db.Tasks.find({ dueDate: { $gte: lowest, $lt: highest } })
+        .sort({ dueDate: 1, creationDate: -1 })
         .populate({ path: 'list', select: 'members', match: { members: { $in: [user._id] } } })
         .exec();
     // Populate all created by
