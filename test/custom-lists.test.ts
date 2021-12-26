@@ -47,6 +47,17 @@ describe('Custom Lists API', () => {
         expect(today.tasks[0].title).toBe(title);
     });
 
+    test('Date based list should return newer tasks first', async () => {
+        let today = await getLists('today', {}, router2);
+        expect(today.tasks).toHaveLength(0);
+        await createTask(validList2._id, { title: '1', dueDate: new Date() }, router2);
+        await createTask(validList2._id, { title: '2', dueDate: new Date() }, router2);
+        today = await getLists('today', {}, router2);
+        expect(today.tasks).toHaveLength(2);
+        expect(today.tasks[0].title).toBe('2');
+        expect(today.tasks[1].title).toBe('1');
+    });
+
     test('Tomorrow list should only return valid tasks', async () => {
         let today = await getLists('tomorrow', {}, router1);
         expect(today.tasks).toHaveLength(0);

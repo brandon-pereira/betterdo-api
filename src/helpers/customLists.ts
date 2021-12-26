@@ -3,7 +3,7 @@ import { List, ListDocument } from '../schemas/lists';
 import { Task } from '../schemas/tasks';
 import { RouterOptions } from './routeHandler';
 import { timezone } from '../helpers/timezone';
-
+import { startOfWeek, endOfWeek, startOfDay, endOfDay, addDays } from 'date-fns';
 const CUSTOM_LISTS = ['highPriority', 'today', 'tomorrow', 'overdue', 'week'];
 
 function isCustomList(listId: ObjectId | string): boolean {
@@ -80,7 +80,7 @@ async function fetchTomorrow(router: RouterOptions): Promise<List> {
 
 async function fetchWeek(router: RouterOptions): Promise<List> {
     const { db, user } = router;
-    const { completedTasks, tasks } = await fetchTomorrowTasks(router);
+    const { completedTasks, tasks } = await fetchWeeklyTasks(router);
     const list = new db.Lists({
         title: 'This Week',
         type: 'week',
@@ -180,20 +180,24 @@ function modifyTaskForCustomList(
 }
 
 async function fetchTomorrowTasks(router: RouterOptions): Promise<SortedTasks> {
-    const start = timezone(new Date(), router.user.timeZone);
-    start.setDate(start.getDate() + 1);
-    start.setHours(0, 0, 0, 0);
-    const end = timezone(new Date(), router.user.timeZone);
-    end.setDate(end.getDate() + 1);
-    end.setHours(23, 59, 59, 999);
+    const tz = timezone(new Date(), router.user.timeZone);
+    const tomorrow = addDays(tz, 1);
+    const start = startOfDay(tomorrow);
+    const end = endOfDay(tomorrow);
+    return fetchTasksWithinDates(start, end, router);
+}
+
+async function fetchWeeklyTasks(router: RouterOptions): Promise<SortedTasks> {
+    const tz = timezone(new Date(), router.user.timeZone);
+    const start = startOfWeek(tz);
+    const end = endOfWeek(tz);
     return fetchTasksWithinDates(start, end, router);
 }
 
 function fetchTodayTasks(router: RouterOptions): Promise<SortedTasks> {
-    const start = timezone(new Date(), router.user.timeZone);
-    start.setHours(0, 0, 0, 0);
-    const end = timezone(new Date(), router.user.timeZone);
-    end.setHours(23, 59, 59, 999);
+    const tz = timezone(new Date(), router.user.timeZone);
+    const start = startOfDay(tz);
+    const end = endOfDay(tz);
     return fetchTasksWithinDates(start, end, router);
 }
 
@@ -203,7 +207,7 @@ async function fetchTasksWithinDates(
     { user, db }: RouterOptions
 ): Promise<SortedTasks> {
     const tasks = await db.Tasks.find({ dueDate: { $gte: lowest, $lt: highest } })
-        .sort({ dueDate: 1, creationDate: -1 })
+        .sort({ creationDate: -1 })
         .populate({ path: 'list', select: 'members', match: { members: { $in: [user._id] } } })
         .exec();
     // Populate all created by

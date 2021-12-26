@@ -7,6 +7,7 @@ import { ListDocument } from '../schemas/lists';
 import { RouterOptions } from '../helpers/routeHandler';
 import { Task, TaskDocument } from '../schemas/tasks';
 import { timezone } from '../helpers/timezone';
+import { startOfDay } from 'date-fns';
 
 export async function createTask(
     listId: ObjectId | string,
@@ -30,8 +31,8 @@ export async function createTask(
     }
     // this time should come in as UTC
     if (taskObj.dueDate && typeof taskObj.dueDate === 'string') {
-        // update it to reflect users timeZone
-        taskObj.dueDate = timezone(new Date(taskObj.dueDate), user.timeZone);
+        // update it to reflect users timeZone and start of day since we dont manage times (yet)
+        taskObj.dueDate = startOfDay(timezone(new Date(taskObj.dueDate), user.timeZone));
     }
     // If no results, throw error
     if (!list) throwError('Invalid List ID');
