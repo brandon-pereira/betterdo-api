@@ -1,8 +1,23 @@
-import { WebNotifier, MongoAdapter, Notifier } from 'web-notifier';
+import WebNotifier from 'web-notifier';
+import MongoDbAdapter from 'web-notifier/dist/adapters/MongoDbAdapter';
 import { InternalRouter } from './helpers/routeHandler';
 
-export default ({ db }: InternalRouter): WebNotifier => {
-    const getUserPushSubscription = async (userId: string) => {
+interface DefaultNotificationFormat {
+    title: string;
+    body?: string;
+    icon?: string;
+    url?: string;
+    tag?: string;
+    data?: {
+        listId: string;
+        listTitle: string;
+    };
+}
+type Notifier = WebNotifier<DefaultNotificationFormat>;
+export { Notifier };
+
+export default ({ db }: InternalRouter) => {
+    const getUserPushSubscriptions = async (userId: string) => {
         const user = await db.Users.findById(userId);
         if (user && user.isPushEnabled) {
             return user.pushSubscriptions;
@@ -12,28 +27,28 @@ export default ({ db }: InternalRouter): WebNotifier => {
 
     const removeUserPushSubscription = async (userId: string, subscription: string) => {
         const user = await db.Users.findById(userId);
-        if (!user) return [];
+        if (!user) return;
         const index = user.pushSubscriptions.indexOf(subscription);
         if (index !== -1) {
             user.pushSubscriptions.splice(index, 1);
         }
         await user.save();
-        return user.pushSubscriptions;
+        return;
     };
 
-    const notifier: Notifier = new WebNotifier({
+    const notifier = new WebNotifier<DefaultNotificationFormat>({
         vapidKeys: {
-            publicKey: process.env.VAPID_PUBLIC_KEY,
-            privateKey: process.env.VAPID_PRIVATE_KEY,
-            email: process.env.VAPID_EMAIL
+            publicKey: process.env.VAPID_PUBLIC_KEY || '',
+            privateKey: process.env.VAPID_PRIVATE_KEY || '',
+            email: process.env.VAPID_EMAIL || ''
         },
         notificationDefaults: {
             icon: `${process.env.SERVER_URL}/app/static/android-chrome-192x192.png`,
             url: `${process.env.SERVER_URL}/app`
         },
-        getUserPushSubscription,
+        getUserPushSubscriptions,
         removeUserPushSubscription,
-        adapter: new MongoAdapter(db.connection)
+        adapter: new MongoDbAdapter()
     });
 
     return notifier;

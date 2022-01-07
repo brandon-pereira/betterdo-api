@@ -1,5 +1,5 @@
 import express, { Application } from 'express';
-import { Notifier } from 'web-notifier';
+import { Notifier } from '../notifier';
 import { Database } from '../database';
 import { getLists, createList, updateList, deleteList } from '../controllers/lists';
 import { getTask, createTask, updateTask, deleteTask } from '../controllers/tasks';

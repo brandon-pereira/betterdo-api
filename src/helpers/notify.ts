@@ -14,7 +14,7 @@ function notifyAboutSharedList(title: string, list: List, { notifier, user }: Ro
                     url: `${process.env.SERVER_URL}/#/${listId}`,
                     tag: `shared-list:${listId}`,
                     data: {
-                        listId: listId,
+                        listId: listId.toString(),
                         listTitle: list.title
                     }
                 });

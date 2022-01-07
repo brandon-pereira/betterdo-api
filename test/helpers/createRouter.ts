@@ -1,11 +1,13 @@
 import db from '../../src/database';
 import { UserDocument } from '../../src/schemas/users';
 import { RouterOptions } from '../../src/helpers/routeHandler';
+import { Notifier } from '../../src/notifier';
 
-const createMockedNotifier = () => ({
-    send: jest.fn(),
-    schedule: jest.fn()
-});
+const createMockedNotifier = () =>
+    ({
+        send: jest.fn(),
+        schedule: jest.fn()
+    } as unknown as Notifier);
 
 const createUser = async (): Promise<UserDocument> => {
     const user = new db.Users({

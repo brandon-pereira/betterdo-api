@@ -1,7 +1,7 @@
 import { Application, Request, Response } from 'express';
 import { Database } from '../database';
 import { UserDocument } from '../schemas/users';
-import { Notifier } from 'web-notifier';
+import { Notifier } from '../notifier';
 import { throwError, handleUncaughtError } from './errorHandler';
 
 export interface InternalRouter {

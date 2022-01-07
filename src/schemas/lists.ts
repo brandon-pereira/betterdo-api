@@ -90,13 +90,13 @@ ListSchema.virtual('additionalTasks').get(function (this: ListDocument) {
     return this.completedTasks ? this.completedTasks.length : 0;
 });
 
-ListSchema.pre('save', function () {
+ListSchema.pre<ListDocument>('save', function () {
     if (this.isNew) {
         this.members = [this.owner];
     }
 });
 
-ListSchema.pre('validate', function () {
+ListSchema.pre<ListDocument>('validate', function () {
     const nonEditableFields = ['owner', 'type'];
     nonEditableFields.forEach(field => {
         if (!this.isNew && this.isModified(field)) {
