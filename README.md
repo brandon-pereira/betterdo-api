@@ -20,7 +20,6 @@ It's recommended you run this with the UI. See [betterdo-ui](https://github.com/
 -   `/auth/google` - Authenticate with Google Endpoint
 -   `/auth/google/callback` - Google authentication callback
 -   `/auth/logout` - Logout endpoint
--   `/init` - Initialization payload. Returns user info, inbox info, and list of lists.
 -   `/api/lists` - Methods around updating lists
     -   `GET`: get lists
     -   `PUT` add list
@@ -31,3 +30,6 @@ It's recommended you run this with the UI. See [betterdo-ui](https://github.com/
     -   `PUT` add task
     -   `POST` update task
     -   `DELETE` deleteTask
+-   `/api/users/:email` - GET method for seeing if a user exists with an email
+-   `/api/user` - GET method for current user information
+-   `/api/users` - POST method for modifying current user
