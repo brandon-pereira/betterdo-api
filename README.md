@@ -6,11 +6,12 @@ It's recommended you run this with the UI. See [betterdo-ui](https://github.com/
 
 ## Features
 
--   Simple usable REST API 🤖
--   Elegant application structure for easy adaption 🤓
--   100% end-to-end test coverage ✅
--   Ability to authenticate with Google (and ability to add others) 🛤
--   Built on TypeScript! ⌨️
+-   🤖 Simple usable REST API
+-   🤓 Elegant application structure for easy adaption
+-   ✅ 100% end-to-end test coverage
+-   🛤Ability to authenticate with Google (and ability to add others) 🛤
+-   ⌨️ Built on TypeScript
+-   🎼 Leverages GitHub actions for automated production deploys and testing
 
 ## Endpoints
 
