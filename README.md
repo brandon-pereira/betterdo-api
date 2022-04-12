@@ -13,6 +13,24 @@ It's recommended you run this with the UI. See [betterdo-ui](https://github.com/
 -   ⌨️ Built on TypeScript
 -   🎼 Leverages GitHub actions for automated production deploys and testing
 
+## Setup
+
+1.  Copy `.env.sample` to `.env` and then fill it in.
+
+    ```bash
+    cp .env.sample .env
+    ```
+
+2.  Generate VAPID key details and fill them into `.env`
+
+    ```bash
+    npx web-push generate-vapid-keys
+    ```
+
+3.  Create Google OAuth tokens ([see here](http://www.passportjs.org/packages/passport-google-oauth20/)) and enter details into Google OAUTH `.env` sections.
+4.  Run `npm install`
+5.  Run `npm start`
+
 ## Endpoints
 
 -   `/` - The landing page
