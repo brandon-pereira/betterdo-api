@@ -51,7 +51,7 @@ const TaskSchema = new Schema<TaskDocument, TaskModel>({
         {
             title: {
                 type: String,
-                maxlength: 100,
+                maxlength: 200,
                 minlength: 1
             },
             isComplete: {
