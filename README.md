@@ -28,8 +28,9 @@ It's recommended you run this with the UI. See [betterdo-ui](https://github.com/
     ```
 
 3.  Create Google OAuth tokens ([see here](http://www.passportjs.org/packages/passport-google-oauth20/)) and enter details into Google OAUTH `.env` sections.
-4.  Run `npm install`
-5.  Run `npm start`
+4.  Install MongoDB with `brew tap mongodb/brew && brew install mongodb-community`
+5.  Run `npm install`
+6.  Run `npm start`
 
 ## Endpoints
 
