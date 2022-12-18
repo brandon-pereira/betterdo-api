@@ -57,9 +57,9 @@ async function fetchHighPriority(router: RouterOptions): Promise<List> {
         tasks,
         members: [user._id],
         owner: user._id
-    }).toObject();
+    }).toObject<List>();
     list._id = 'highPriority';
-    list.id = 'highPriority';
+
     return list;
 }
 
@@ -73,9 +73,9 @@ async function fetchTomorrow(router: RouterOptions): Promise<List> {
         tasks,
         members: [user._id],
         owner: user._id
-    }).toObject();
+    }).toObject<List>();
     list._id = 'tomorrow';
-    list.id = 'tomorrow';
+
     return list;
 }
 
@@ -89,9 +89,9 @@ async function fetchWeek(router: RouterOptions): Promise<List> {
         tasks,
         members: [user._id],
         owner: user._id
-    }).toObject();
+    }).toObject<List>();
     list._id = 'week';
-    list.id = 'week';
+
     return list;
 }
 
@@ -105,9 +105,9 @@ async function fetchOverdue(router: RouterOptions): Promise<List> {
         tasks,
         members: [user._id],
         owner: user._id
-    }).toObject();
+    }).toObject<List>();
     list._id = 'overdue';
-    list.id = 'overdue';
+
     return list;
 }
 
@@ -121,9 +121,9 @@ async function fetchToday(router: RouterOptions): Promise<List> {
         completedTasks,
         members: [user._id],
         owner: user._id
-    }).toObject();
+    }).toObject<List>();
     list._id = 'today';
-    list.id = 'today';
+
     return list;
 }
 

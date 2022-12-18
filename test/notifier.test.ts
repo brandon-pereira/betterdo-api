@@ -23,9 +23,9 @@ describe('Notifier', () => {
     describe('User', () => {
         test('tweaks user.isPushEnabled', async () => {
             const router = await createRouter();
-            expect(router.notifier.send).not.toBeCalled();
+            expect(router.notifier.send).not.toHaveBeenCalled();
             await updateUser({ isPushEnabled: false }, router);
-            expect(router.notifier.send).toBeCalledTimes(1);
+            expect(router.notifier.send).toHaveBeenCalledTimes(1);
             const payload = (router.notifier.send as jest.Mock).mock.calls[0];
             expect(payload[0]).toBe(router.user._id);
             expect(payload[1].title).toBe("You're subscribed!");
@@ -33,10 +33,10 @@ describe('Notifier', () => {
 
         test('tweaks user.pushSubscription', async () => {
             const router = await createRouter();
-            expect(router.notifier.send).not.toBeCalled();
+            expect(router.notifier.send).not.toHaveBeenCalled();
             const fakeSubscription = `${Math.random()}`;
             await updateUser({ pushSubscription: fakeSubscription }, router);
-            expect(router.notifier.send).toBeCalledTimes(1);
+            expect(router.notifier.send).toHaveBeenCalledTimes(1);
             const payload = (router.notifier.send as jest.Mock).mock.calls[0];
             expect(payload[0]).toBe(router.user._id);
             expect(payload[1].title).toBe("You're subscribed!");
@@ -60,16 +60,16 @@ describe('Notifier', () => {
         });
 
         test('adds task', async () => {
-            expect(user1?.notifier.send).toBeCalledTimes(0);
+            expect(user1?.notifier.send).toHaveBeenCalledTimes(0);
             await createTask(sharedList._id, { title: 'just do it' }, user1);
-            expect(user1?.notifier.send).toBeCalledTimes(1);
+            expect(user1?.notifier.send).toHaveBeenCalledTimes(1);
             const payload = (user1?.notifier.send as jest.Mock).mock.calls[0];
             expect(payload[0]).toMatchObject(user2?.user._id);
             expect(payload[1].title).toBe('unitTest added just do it to shared list.');
         });
 
         test('marks task completed', async () => {
-            expect(user1?.notifier.send).toBeCalledTimes(0);
+            expect(user1?.notifier.send).toHaveBeenCalledTimes(0);
             const task = await createTask(sharedList._id, { title: 'just do it' }, user1);
             // reset notification from creation
             (user1?.notifier.send as jest.Mock).mockReset();
@@ -80,7 +80,7 @@ describe('Notifier', () => {
         });
 
         test('updates task', async () => {
-            expect(user1?.notifier.send).toBeCalledTimes(0);
+            expect(user1?.notifier.send).toHaveBeenCalledTimes(0);
             const task = await createTask(sharedList._id, { title: 'old' }, user1);
             // reset notification from creation
             (user1?.notifier.send as jest.Mock).mockReset();
@@ -91,7 +91,7 @@ describe('Notifier', () => {
         });
 
         test('deletes task', async () => {
-            expect(user1?.notifier.send).toBeCalledTimes(0);
+            expect(user1?.notifier.send).toHaveBeenCalledTimes(0);
             const task = await createTask(sharedList._id, { title: 'just do it' }, user1);
             // reset notification from creation
             (user1?.notifier.send as jest.Mock).mockReset();

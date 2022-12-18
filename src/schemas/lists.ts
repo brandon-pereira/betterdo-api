@@ -5,7 +5,7 @@ import { Task, TaskDocument } from './tasks';
 import { throwError } from '../helpers/errorHandler';
 
 export interface List {
-    _id: ObjectId;
+    _id: ObjectId | string;
     title: string;
     tasks: Array<PopulatedDoc<TaskDocument>>;
     completedTasks: Array<string>;

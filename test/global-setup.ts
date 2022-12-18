@@ -1,7 +1,9 @@
-// @ts-expect-error: not bothering adding typing for setup file for this package
-import jestMongoSetup from '@shelf/jest-mongodb/setup';
+import jestMongoSetup from '@shelf/jest-mongodb/lib/setup';
 
 export default async (): Promise<void> => {
     process.env.TZ = 'America/Edmonton';
-    await jestMongoSetup();
+    // @ts-expect-error dsas
+    await jestMongoSetup({
+        rootDir: process.cwd()
+    });
 };

@@ -48,7 +48,7 @@ describe('Lists', () => {
 
         test('Provides clear error messages when invalid data provided', async () => {
             const router = await createRouter();
-            await expect(createList({ title: '' }, router)).rejects.toThrowError(
+            await expect(createList({ title: '' }, router)).rejects.toThrow(
                 `List validation failed: title: Path \`title\` is required.`
             );
         });
@@ -66,14 +66,14 @@ describe('Lists', () => {
             const list = await createList({ title: 'Good List' }, userRequest1);
             await expect(
                 updateList(list._id, { title: 'Malicious List' }, userRequest2)
-            ).rejects.toThrowError('Invalid List ID');
+            ).rejects.toThrow('Invalid List ID');
         });
 
         test('Protects against fetching invalid list ID', async () => {
             const router = await createRouter();
-            await expect(
-                createTask('INVALID_ID', { title: 'Good List' }, router)
-            ).rejects.toThrowError('Invalid List ID');
+            await expect(createTask('INVALID_ID', { title: 'Good List' }, router)).rejects.toThrow(
+                'Invalid List ID'
+            );
         });
 
         test('Allows list to be modified', async () => {
@@ -128,18 +128,14 @@ describe('Lists', () => {
             const userRequest1 = await createRouter();
             const userRequest2 = await createRouter();
             const list = await createList({ title: 'Good List' }, userRequest1);
-            await expect(getLists(list._id, {}, userRequest2)).rejects.toThrowError(
-                'Invalid List ID'
-            );
+            await expect(getLists(list._id, {}, userRequest2)).rejects.toThrow('Invalid List ID');
         });
 
         test('Protects against non-member deletion', async () => {
             const userRequest1 = await createRouter();
             const userRequest2 = await createRouter();
             const list = await createList({ title: 'Good List' }, userRequest1);
-            await expect(deleteList(list._id, userRequest2)).rejects.toThrowError(
-                'Invalid List ID'
-            );
+            await expect(deleteList(list._id, userRequest2)).rejects.toThrow('Invalid List ID');
         });
 
         test('Allows members to be added to list', async () => {
@@ -165,9 +161,7 @@ describe('Lists', () => {
             await updateList(list._id, { members: [user1._id, user2._id] }, userRequest1);
             await expect(
                 updateList(list._id, { members: [user2._id] }, userRequest2)
-            ).rejects.toThrowError(
-                'List validation failed: members: Not permitted to remove owner!'
-            );
+            ).rejects.toThrow('List validation failed: members: Not permitted to remove owner!');
         });
 
         test('Allows lists tasks to be reordered', async () => {
@@ -208,7 +202,7 @@ describe('Lists', () => {
                     { tasks: [badTask._id.toString(), task1._id.toString()] },
                     router
                 )
-            ).rejects.toThrowError('Invalid modification of tasks');
+            ).rejects.toThrow('Invalid modification of tasks');
             const list: List = await getLists(newList._id, {}, router);
             expect(list?.tasks).toHaveLength(2);
             expect(list?.tasks[1]._id).toMatchId(task1._id);
@@ -220,7 +214,7 @@ describe('Lists', () => {
             const newList = await createList({ title: 'Test' }, router);
             const task1 = (await createTask(newList._id, { title: 'Good Task' }, router))._id;
             const task2 = (await createTask(newList._id, { title: 'Good Task' }, router))._id;
-            await expect(updateList(newList._id, { tasks: [task2] }, router)).rejects.toThrowError(
+            await expect(updateList(newList._id, { tasks: [task2] }, router)).rejects.toThrow(
                 'Invalid modification of tasks'
             );
             const list = await getLists(newList._id, {}, router);
@@ -240,9 +234,7 @@ describe('Lists', () => {
                 );
             }
             for (const color of badColors) {
-                await expect(createList({ title: 'test', color }, props)).rejects.toThrowError(
-                    /hex/
-                );
+                await expect(createList({ title: 'test', color }, props)).rejects.toThrow(/hex/);
             }
         });
     });
