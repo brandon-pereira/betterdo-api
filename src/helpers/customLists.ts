@@ -4,37 +4,38 @@ import { Task } from '../schemas/tasks';
 import { RouterOptions } from './routeHandler';
 import { timezone } from '../helpers/timezone';
 import { startOfWeek, endOfWeek, startOfDay, endOfDay, addDays } from 'date-fns';
+
 const CUSTOM_LISTS = ['highPriority', 'today', 'tomorrow', 'overdue', 'week'];
 
-function isCustomList(listId: ObjectId | string): boolean {
+export function isCustomList(listId: ObjectId | string): boolean {
     if (typeof listId !== 'string') return false;
     return CUSTOM_LISTS.includes(listId);
 }
 
-async function fetchUserCustomLists(router: RouterOptions): Promise<Array<ListDocument>> {
+export async function getAccountsCustomLists(router: RouterOptions): Promise<Array<ListDocument>> {
     const listsPromise = Object.entries(router.user.customLists).map(([key, value]) =>
-        value ? fetchCustomList(key, false, router) : null
+        value ? getCustomListById(key, false, router) : null
     );
     const lists = await Promise.all(listsPromise);
     return lists.filter((o): o is ListDocument => !!o);
 }
 
-async function fetchCustomList(
-    listId: string,
+export async function getCustomListById(
+    id: string,
     includeCompleted = false,
     opts: RouterOptions
 ): Promise<List | null> {
     // fetch list
     let list = null;
-    if (listId === 'highPriority') {
+    if (id === 'highPriority') {
         list = await fetchHighPriority(opts);
-    } else if (listId === 'today') {
+    } else if (id === 'today') {
         list = await fetchToday(opts);
-    } else if (listId === 'tomorrow') {
+    } else if (id === 'tomorrow') {
         list = await fetchTomorrow(opts);
-    } else if (listId === 'overdue') {
+    } else if (id === 'overdue') {
         list = await fetchOverdue(opts);
-    } else if (listId === 'week') {
+    } else if (id === 'week') {
         list = await fetchWeek(opts);
     }
     // calculate completed tasks visible
@@ -159,7 +160,7 @@ async function fetchOverdueTasks({ db, user }: RouterOptions): Promise<SortedTas
     return sortTasks(tasks);
 }
 
-function modifyTaskForCustomList(
+export function modifyTaskForCustomList(
     listId: string,
     taskObj: Partial<Task>,
     router: RouterOptions
@@ -236,5 +237,3 @@ function sortTasks(unsortedTasks: Task[]): SortedTasks {
             { completedTasks: [], tasks: [] }
         );
 }
-
-export { isCustomList, fetchCustomList, fetchUserCustomLists, modifyTaskForCustomList };

@@ -2,7 +2,7 @@ import { throwError } from '../helpers/errorHandler';
 import { ObjectId } from 'mongodb';
 import { RouterOptions } from '../helpers/routeHandler';
 import { List, ListDocument } from '../schemas/lists';
-import { isCustomList, fetchCustomList, fetchUserCustomLists } from '../helpers/customLists';
+import { isCustomList, getCustomListById, getAccountsCustomLists } from '../helpers/customLists';
 import { parseObjectID } from '../helpers/objectIds';
 
 interface GetListOptions {
@@ -26,7 +26,7 @@ export async function getLists(
 ): Promise<List | Array<List>> {
     // Get lists based on query data
     if (typeof listId === 'string' && isCustomList(listId)) {
-        const customList = await fetchCustomList(listId, includeCompleted, {
+        const customList = await getCustomListById(listId, includeCompleted, {
             db,
             user,
             notifier
@@ -64,7 +64,7 @@ export async function getLists(
     }
     const inbox = db.Lists.getUserInbox(user._id);
     const userLists = db.Users.getLists(user._id);
-    const customLists = fetchUserCustomLists({ db, user, notifier });
+    const customLists = getAccountsCustomLists({ db, user, notifier });
     const [_inbox, _userLists, _customLists] = await Promise.all([inbox, customLists, userLists]);
     const lists: Array<ListDocument> = [_inbox, ..._userLists, ..._customLists];
     return lists.map(list => ({
