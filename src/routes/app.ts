@@ -13,7 +13,7 @@ export default ({ app }: { app: Application }): void => {
     app.use('/app/', (req, res, next) => {
         // We allow the /static/ folder to bypass auth, this is primarily
         // for accessing manifest.json from @bubblewrap/cli
-        if (req.user || req.path.includes('/static/')) {
+        if (req.user || req.path.includes('/manifest.json')) {
             next();
         } else {
             res.redirect(serverUrl);
