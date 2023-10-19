@@ -14,7 +14,7 @@ export interface Database {
 mongoose.set('strictQuery', false);
 
 export const MONGO_CONNECTION_URL =
-    process.env.MONGO_URL || `mongodb://localhost/${process.env.DATABASE_NAME || 'betterdo'}`;
+    process.env.MONGO_URL || `mongodb://127.0.0.1/${process.env.DATABASE_NAME || 'betterdo'}`;
 
 export async function connect(): Promise<void> {
     await mongoose.connect(MONGO_CONNECTION_URL || '');
