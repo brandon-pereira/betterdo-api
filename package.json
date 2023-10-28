@@ -25,7 +25,7 @@
         "mongoose": "^7.6.3",
         "passport": "^0.6.0",
         "passport-google-oauth20": "^2.0.0",
-        "web-notifier": "^2.0.2"
+        "web-notifier": "^2.0.3"
     },
     "devDependencies": {
         "@shelf/jest-mongodb": "^4.1.7",
