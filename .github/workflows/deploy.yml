@@ -17,7 +17,7 @@ jobs:
                   username: ${{ secrets.SSH_USERNAME }}
                   script_stop: true
                   script: |
-                      cd www/betterdo-api
+                      cd /home/www/betterdo-api
                       git checkout .
                       git pull
                       npm install --production=false
