@@ -7,7 +7,7 @@ const createMockedNotifier = () =>
     ({
         send: jest.fn(),
         schedule: jest.fn()
-    } as unknown as Notifier);
+    }) as unknown as Notifier;
 
 const createUser = async (): Promise<UserDocument> => {
     const user = new db.Users({

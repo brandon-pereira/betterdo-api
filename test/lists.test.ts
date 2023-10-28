@@ -190,9 +190,7 @@ describe('Lists', () => {
             const task1 = await createTask(newList._id, { title: 'Good Task' }, router);
             const task2 = await createTask(newList._id, { title: 'Good Task' }, router);
             const badTask = await createTask(
-                (
-                    await createList({ title: 'Test' }, router)
-                )._id,
+                (await createList({ title: 'Test' }, router))._id,
                 { title: 'Bad Task' },
                 router
             );
