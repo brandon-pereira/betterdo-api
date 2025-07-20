@@ -1,3 +1,7 @@
+# ⚠️ Deprecated
+
+This repository is no longer maintained. We have migrated to a monorepo containing all BetterDo projects. Please refer to the new repository at [betterdo](https://github.com/brandon-pereira/betterdo).
+
 # betterdo-api
 
 The API for [BetterDo](https://betterdo.app/). This repository houses the application logic by providing a simple REST API.
